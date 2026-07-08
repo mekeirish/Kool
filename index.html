@@ -38,7 +38,10 @@
     .view-section { display:none; } .view-section.active { display:block; }
     .sub-section { display:none; margin-top:8px; padding:16px; background:rgba(255,255,255,.03); border-radius:12px; border-left:3px solid var(--gold); }
   </style>
-</head>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4b6cb7">
+<link rel="apple-touch-icon" href="icon.png"></head>
 <body class="bg-[#0f0f0f] text-gray-200 font-sans antialiased min-h-screen pb-32">
 
 <!-- LOADING -->
@@ -708,5 +711,7 @@ init();
     });
   }
 </script>
+
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}</script>
 </body>
 </html>
