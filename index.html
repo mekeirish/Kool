@@ -4,9 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kool - Pro & Admin</title>
+
+  <!-- Manifest et icônes PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <meta name="theme-color" content="#fbbf24" />
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+  <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
     :root { --gold: #fbbf24; --glass-bg: rgba(255,255,255,0.05); --glass-border: rgba(255,255,255,0.12); }
     .glass { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); }
@@ -686,6 +696,17 @@ function updatePromoMessage() {
 loadClientOrderTracking();
 bindCloudListeners();
 init();
+</script>
+
+<script>
+  // Enregistrement du service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker enregistré', reg))
+        .catch(err => console.error('Erreur SW', err));
+    });
+  }
 </script>
 </body>
 </html>
