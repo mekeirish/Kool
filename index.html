@@ -24,21 +24,7 @@
     .spinner { width:50px; height:50px; border:5px solid #333; border-top:5px solid var(--gold); border-radius:50%; animation:spin 1s linear infinite; margin-bottom:20px; }
     @keyframes spin { 100% { transform:rotate(360deg); } }
     .img-plat-client { width:60px; height:60px; border-radius:5px; object-fit:cover; transition:all .3s; cursor:pointer; z-index:1; }
-    .img-plat-client.zoom-image {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      max-width: 90vw;
-      max-height: 90vh;
-      width: auto;
-      height: auto;
-      border-radius: 12px;
-      z-index: 5000;
-      box-shadow: 0 0 50px rgba(0,0,0,0.8);
-      object-fit: contain;
-      cursor: zoom-out;
-    }
+    .img-plat-client.zoom-image { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); max-width:90vw; max-height:90vh; width:auto; height:auto; border-radius:12px; z-index:5000; box-shadow:0 0 50px rgba(0,0,0,0.8); object-fit:contain; cursor:zoom-out; }
     .numpad-container { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:3000; width:280px; padding:24px; background:rgba(20,20,20,.9); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.15); border-radius:24px; text-align:center; }
     .pin-display { background:#000; color:var(--gold); font-size:1.8rem; padding:12px; border-radius:12px; margin-bottom:20px; letter-spacing:8px; height:40px; display:flex; align-items:center; justify-content:center; border:1px solid #333; }
     .num-btn { background:#2a2a2a; color:white; border:1px solid #444; width:65px; height:65px; border-radius:50%; font-size:1.4rem; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s; }
@@ -51,12 +37,77 @@
     @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
     .view-section { display:none; } .view-section.active { display:block; }
     .sub-section { display:none; margin-top:8px; padding:16px; background:rgba(255,255,255,.03); border-radius:12px; border-left:3px solid var(--gold); }
+
+    /* Styles pour les étoiles de notation */
+    .star-rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: center;
+      gap: 4px;
+    }
+    .star-rating input { display: none; }
+    .star-rating label {
+      font-size: 2.2rem;
+      color: #444;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+      color: var(--gold);
+    }
   </style>
 </head>
 <body class="bg-[#0f0f0f] text-gray-200 font-sans antialiased min-h-screen pb-32">
 
 <!-- OVERLAY POUR LE ZOOM -->
 <div id="zoom-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:4999; cursor:pointer;" onclick="closeZoom()"></div>
+
+<!-- ===== MODAL DE NOTATION PAR ÉTOILES ===== -->
+<div id="rating-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); z-index:7000; align-items:center; justify-content:center; padding:16px;">
+  <div class="glass rounded-2xl p-6 max-w-md w-full border border-white/10 max-h-[90vh] overflow-y-auto">
+    <h2 class="text-2xl font-bold text-amber-400 text-center mb-2">🎉 Votre commande est livrée !</h2>
+    <p class="text-gray-300 text-center mb-6">Merci de noter votre expérience</p>
+
+    <!-- Notation du restaurant -->
+    <div class="mb-6">
+      <h3 class="text-white font-semibold mb-2">Restaurant : <span id="rating-resto-name" class="text-amber-400"></span></h3>
+      <div class="star-rating" id="resto-stars">
+        <input type="radio" name="resto-star" id="resto-5" value="5" />
+        <label for="resto-5">★</label>
+        <input type="radio" name="resto-star" id="resto-4" value="4" />
+        <label for="resto-4">★</label>
+        <input type="radio" name="resto-star" id="resto-3" value="3" />
+        <label for="resto-3">★</label>
+        <input type="radio" name="resto-star" id="resto-2" value="2" />
+        <label for="resto-2">★</label>
+        <input type="radio" name="resto-star" id="resto-1" value="1" />
+        <label for="resto-1">★</label>
+      </div>
+    </div>
+
+    <!-- Notation du livreur (si présent) -->
+    <div id="livreur-rating-section" style="display:none;" class="mb-6">
+      <h3 class="text-white font-semibold mb-2">Livreur : <span id="rating-liv-name" class="text-amber-400"></span></h3>
+      <div class="star-rating" id="liv-stars">
+        <input type="radio" name="liv-star" id="liv-5" value="5" />
+        <label for="liv-5">★</label>
+        <input type="radio" name="liv-star" id="liv-4" value="4" />
+        <label for="liv-4">★</label>
+        <input type="radio" name="liv-star" id="liv-3" value="3" />
+        <label for="liv-3">★</label>
+        <input type="radio" name="liv-star" id="liv-2" value="2" />
+        <label for="liv-2">★</label>
+        <input type="radio" name="liv-star" id="liv-1" value="1" />
+        <label for="liv-1">★</label>
+      </div>
+    </div>
+
+    <button onclick="submitRatings()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">Envoyer les notes</button>
+    <button onclick="closeRatingModal()" class="w-full mt-2 text-gray-400 hover:text-white text-sm">Passer</button>
+  </div>
+</div>
 
 <!-- LOADING -->
 <div id="loading-screen"><div class="spinner"></div><h2 class="text-4xl font-bold italic text-amber-400">KOOL</h2></div>
@@ -91,8 +142,8 @@
   <input type="text" id="edit-res-code" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Code" />
   <input type="number" id="edit-res-dur" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nouvelle validité (jours)" />
   <div class="flex gap-2 mb-2">
-    <input type="text" id="edit-res-lat" class="flex-1 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400" placeholder="Latitude" />
-    <input type="text" id="edit-res-lng" class="flex-1 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400" placeholder="Longitude" />
+    <input type="text" id="edit-res-lat" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400" placeholder="Latitude" />
+    <input type="text" id="edit-res-lng" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400" placeholder="Longitude" />
   </div>
   <button onclick="getCurrentPositionForEditRes()" class="w-full py-1 mb-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 text-sm hover:bg-blue-500/30">📍 Récupérer ma position</button>
   <input type="file" id="edit-res-img" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" />
@@ -113,7 +164,15 @@
 
 <!-- VIEWS -->
 <div id="view-restaurants" class="view-section active container mx-auto px-4 py-6"><div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4" id="res-grid"></div></div>
-<div id="view-menu-client" class="view-section container mx-auto px-4 py-6"><button onclick="goToHome()" class="mb-4 px-4 py-2 rounded-lg border border-amber-400/50 text-amber-400 hover:bg-amber-400/10 transition">← RETOUR</button><div class="flex justify-between items-center mb-4"><h2 id="client-res-name" class="text-2xl font-bold text-white"></h2><button onclick="rateCurrentRes()" class="px-3 py-1 rounded-lg bg-amber-400/20 text-amber-400 border border-amber-400/30 text-sm font-semibold hover:bg-amber-400/30">NOTER ⭐</button></div><div id="plats-list-client"></div><div class="h-40"></div></div>
+<div id="view-menu-client" class="view-section container mx-auto px-4 py-6">
+  <button onclick="goToHome()" class="mb-4 px-4 py-2 rounded-lg border border-amber-400/50 text-amber-400 hover:bg-amber-400/10 transition">← RETOUR</button>
+  <div class="flex justify-between items-center mb-4">
+    <h2 id="client-res-name" class="text-2xl font-bold text-white"></h2>
+    <!-- Le bouton NOTER a été supprimé -->
+  </div>
+  <div id="plats-list-client"></div>
+  <div class="h-40"></div>
+</div>
 <div id="view-admin-space" class="view-section container mx-auto px-4 py-6"><button onclick="goToHome()" class="mb-4 px-4 py-2 rounded-lg border border-amber-400/50 text-amber-400 hover:bg-amber-400/10 transition">← DÉCONNEXION</button><div class="glass rounded-2xl p-6 border border-white/10"><h2 class="text-2xl font-bold text-amber-400 mb-4">Admin</h2>
   <button onclick="toggleSec('adm-promo')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Message Promo <span class="text-amber-400">📣</span></button><div id="adm-promo" class="sub-section"><input type="text" id="adm-promo-txt" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Votre message promo..." /><button onclick="updatePromoMessage()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">METTRE À JOUR</button></div>
   <button onclick="toggleSec('adm-res')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Restos <span class="text-amber-400">+</span></button><div id="adm-res" class="sub-section">
@@ -121,8 +180,8 @@
     <input type="text" id="adm-res-c" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Code" />
     <input type="number" id="adm-res-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours)" />
     <div class="flex gap-2 mb-2">
-      <input type="text" id="adm-res-lat" class="flex-1 px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" placeholder="Latitude" />
-      <input type="text" id="adm-res-lng" class="flex-1 px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" placeholder="Longitude" />
+      <input type="text" id="adm-res-lat" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" placeholder="Latitude" />
+      <input type="text" id="adm-res-lng" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" placeholder="Longitude" />
     </div>
     <button onclick="getCurrentPositionForRes()" class="w-full py-1 mb-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 text-sm hover:bg-blue-500/30">📍 Récupérer ma position</button>
     <input type="file" id="adm-res-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" />
@@ -140,10 +199,17 @@
 <div id="view-livreur-space" class="view-section container mx-auto px-4 py-6"><button onclick="logoutLivreur()" class="mb-4 px-4 py-2 rounded-lg border border-amber-400/50 text-amber-400 hover:bg-amber-400/10 transition">← DÉCONNEXION</button><div class="glass rounded-2xl p-6 border border-white/10"><h2 id="liv-name" class="text-2xl font-bold text-amber-400 mb-4"></h2><div id="liv-orders"></div><hr class="my-6 border-white/10" /><div id="liv-hist"></div></div></div>
 
 <!-- FOOTER CART -->
-<div id="footer-cart"><div id="cart-items-list" class="max-h-20 overflow-auto text-sm text-gray-300"></div><div class="flex flex-wrap gap-2 mt-2"><input type="text" id="c-name" class="flex-1 min-w-[120px] px-4 py-2 rounded-lg bg-black/60 border border-white/10 text-white placeholder-gray-400" placeholder="Nom" /><input type="tel" id="c-tel" class="flex-1 min-w-[120px] px-4 py-2 rounded-lg bg-black/60 border border-white/10 text-white placeholder-gray-400" placeholder="Tél" /></div><div class="flex justify-between items-center mt-2"><b class="text-white">Total: <span id="cart-total" class="text-amber-400">0</span> DZD</b><button onclick="openClientPin()" class="px-6 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">COMMANDER</button></div></div>
+<div id="footer-cart"><div id="cart-items-list" class="max-h-20 overflow-auto text-sm text-gray-300"></div><div class="flex flex-wrap gap-2 mt-2">
+  <input type="text" id="c-name" class="flex-1 min-w-[120px] px-4 py-2 rounded-lg bg-black/60 border border-white/10 text-white placeholder-gray-400" placeholder="Nom" />
+  <input type="tel" id="c-tel" class="flex-1 min-w-[120px] px-4 py-2 rounded-lg bg-black/60 border border-white/10 text-white placeholder-gray-400" placeholder="Tél" />
+</div>
+<div class="mt-2">
+  <input type="text" id="c-address" class="w-full px-4 py-2 rounded-lg bg-black/60 border border-white/10 text-white placeholder-gray-400" placeholder="Adresse (obligatoire si position non trouvée)" />
+</div>
+<div class="flex justify-between items-center mt-2"><b class="text-white">Total: <span id="cart-total" class="text-amber-400">0</span> DZD</b><button onclick="openClientPin()" class="px-6 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">COMMANDER</button></div></div>
 
 <script>
-// ==================== JAVASCRIPT COMPLET AVEC CLOUDINARY ET ZOOM CORRIGÉ ====================
+// ==================== JAVASCRIPT COMPLET AVEC SYSTÈME D'ÉTOILES ====================
 const firebaseConfig = {
   apiKey: "AIzaSyD4ekJLYuL5QTsroQj_QlOUPohDwhlQ14s",
   authDomain: "koul-ec357.firebaseapp.com",
@@ -171,6 +237,11 @@ let cloudWriteChain = Promise.resolve();
 let stopProOrdersWatch = null;
 let knownProOrderIds = new Set();
 let editingId = null;
+
+// Variables pour la notation
+let pendingRatingResto = null;
+let pendingRatingLiv = null;
+let pendingOrderForRating = null;
 
 // ===== UTILITAIRES =====
 function calcAvg(arr) { if (!arr || arr.length===0) return "N/A"; const s = arr.reduce((a,b)=>a+b,0); return (s/arr.length).toFixed(1); }
@@ -664,9 +735,7 @@ function saveEditLiv() {
 // ===== LIVREUR =====
 function hasActiveOrder(livId) { let active=false; restaurants.forEach(r => { if (r.orders && r.orders.some(o => o.livId===livId && o.status==='shipping')) active=true; }); return active; }
 function mapsBikeDirectionsUrl(origin, dest) { if (!origin || !dest || origin.lat==null || origin.lng==null || dest.lat==null || dest.lng==null) return null; return `https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${dest.lat},${dest.lng}&travelmode=bicycling`; }
-function livNavToResList() { return JSON.parse(localStorage.getItem(`koul_nav_to_res_${currentLivreur.id}`)||'[]'); }
-function livNavToClientList() { return JSON.parse(localStorage.getItem(`koul_nav_to_client_${currentLivreur.id}`)||'[]'); }
-function livPickedList() { return JSON.parse(localStorage.getItem(`koul_picked_orders_${currentLivreur.id}`)||'[]'); }
+
 function openNavToRestaurant(resId, orderId) {
   const r = restaurants.find(x => Number(x.id)===Number(resId));
   const o = r && r.orders ? r.orders.find(x => Number(x.id)===Number(orderId)) : null;
@@ -680,17 +749,39 @@ function openNavToRestaurant(resId, orderId) {
     window.open(url, '_blank'); renderLivreurOrders();
   }, () => setNotif("IMPOSSIBLE D'OBTENIR VOTRE POSITION"), { timeout:10000, enableHighAccuracy:true });
 }
+
 function openNavToClient(resId, orderId) {
   const r = restaurants.find(x => Number(x.id)===Number(resId));
   const o = r && r.orders ? r.orders.find(x => Number(x.id)===Number(orderId)) : null;
-  if (!o || o.publishResLat==null || o.publishResLng==null) return setNotif("POSITION RESTO INDISPONIBLE");
-  if (o.clientLat==null || o.clientLng==null) return setNotif("POSITION CLIENT INDISPONIBLE");
-  const url = mapsBikeDirectionsUrl({ lat: o.publishResLat, lng: o.publishResLng }, { lat: o.clientLat, lng: o.clientLng });
-  if (!url) return setNotif("ITINÉRAIRE IMPOSSIBLE");
-  let list = livNavToClientList();
-  if (!list.includes(orderId)) { list.push(orderId); localStorage.setItem(`koul_nav_to_client_${currentLivreur.id}`, JSON.stringify(list)); }
-  window.open(url, '_blank'); renderLivreurOrders();
+  if (!o) return setNotif("COMMANDE INTROUVABLE");
+
+  if (o.clientLat != null && o.clientLng != null) {
+    if (o.publishResLat == null || o.publishResLng == null) return setNotif("POSITION RESTO INDISPONIBLE");
+    const url = mapsBikeDirectionsUrl({ lat: o.publishResLat, lng: o.publishResLng }, { lat: o.clientLat, lng: o.clientLng });
+    if (!url) return setNotif("ITINÉRAIRE IMPOSSIBLE");
+    let list = livNavToClientList();
+    if (!list.includes(orderId)) { list.push(orderId); localStorage.setItem(`koul_nav_to_client_${currentLivreur.id}`, JSON.stringify(list)); }
+    window.open(url, '_blank');
+    renderLivreurOrders();
+    return;
+  }
+
+  if (o.clientAddress) {
+    const query = encodeURIComponent(o.clientAddress);
+    const url = `https://www.google.com/maps/search/?api=1&query=${query}`;
+    let list = livNavToClientList();
+    if (!list.includes(orderId)) { list.push(orderId); localStorage.setItem(`koul_nav_to_client_${currentLivreur.id}`, JSON.stringify(list)); }
+    window.open(url, '_blank');
+    renderLivreurOrders();
+    return;
+  }
+
+  setNotif("POSITION CLIENT INDISPONIBLE (adresse manquante)");
 }
+
+function livNavToResList() { return JSON.parse(localStorage.getItem(`koul_nav_to_res_${currentLivreur.id}`)||'[]'); }
+function livNavToClientList() { return JSON.parse(localStorage.getItem(`koul_nav_to_client_${currentLivreur.id}`)||'[]'); }
+function livPickedList() { return JSON.parse(localStorage.getItem(`koul_picked_orders_${currentLivreur.id}`)||'[]'); }
 function markPicked(orderId) { let list = livPickedList(); if (!list.includes(orderId)) list.push(orderId); localStorage.setItem(`koul_picked_orders_${currentLivreur.id}`, JSON.stringify(list)); renderLivreurOrders(); }
 
 function renderLivreurOrders() {
@@ -752,11 +843,20 @@ function confirmDelivery() {
       if (!currentLivreur.history) currentLivreur.history = [];
       const now = new Date();
       currentLivreur.history.push({ resName: r.name, date: now.toLocaleDateString(), time: String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0') });
-      const note = prompt(`[NOTATION] Notez le livreur ${currentLivreur.name} (1-5) :`);
-      const v = parseInt(note);
-      if (v>=1 && v<=5) { if (!currentLivreur.ratings) currentLivreur.ratings = []; currentLivreur.ratings.push(v); }
+      // On sauvegarde les infos pour la notation
+      pendingRatingResto = r;
+      pendingRatingLiv = currentLivreur;
+      pendingOrderForRating = final;
+      // On ouvre le modal de notation
+      openRatingModal(r, currentLivreur);
+    } else {
+      // Pas de livreur : on ne note que le restaurant
+      pendingRatingResto = r;
+      pendingRatingLiv = null;
+      pendingOrderForRating = final;
+      openRatingModal(r, null);
     }
-    if (clientOrderTracking && clientOrderTracking.orderId === final.id) { clearClientOrderTracking(); showClientDeliveredFlow(r, final); }
+    if (clientOrderTracking && clientOrderTracking.orderId === final.id) { clearClientOrderTracking(); }
     setNotif("LIVREUR NOTÉ & DOSSIER CLÔTURÉ !");
     saveRestaurant(r); if (currentLivreur) saveLivreur(currentLivreur);
     closeDeliveryPin();
@@ -785,35 +885,24 @@ function init() {
   generatePads();
 }
 function openClientMenu(rid) { currentRes = restaurants.find(x => x.id===rid); showSection('view-menu-client'); document.getElementById('client-res-name').innerText = `${currentRes.name} (⭐ ${calcAvg(currentRes.ratings)})`; renderClientPlats(); }
-function rateCurrentRes() {
-  if (!currentRes) return;
-  const note = prompt("Attribuez une note (1-5) :");
-  const v = parseInt(note);
-  if (v>=1 && v<=5) { if (!currentRes.ratings) currentRes.ratings = []; currentRes.ratings.push(v); logAdminEvent("CLIENT", `Note de ${v}/5 au restaurant ${currentRes.name}`); setNotif("MERCI POUR VOTRE NOTE !"); saveRestaurant(currentRes); document.getElementById('client-res-name').innerText = `${currentRes.name} (⭐ ${calcAvg(currentRes.ratings)})`; }
-}
 
-// ===== ZOOM CORRIGÉ =====
+// ===== ZOOM =====
 function toggleZoom(img) {
   const overlay = document.getElementById('zoom-overlay');
   if (img.classList.contains('zoom-image')) {
-    // Fermer le zoom
     img.classList.remove('zoom-image');
     overlay.style.display = 'none';
   } else {
-    // Fermer tout autre zoom ouvert
     document.querySelectorAll('.img-plat-client.zoom-image').forEach(el => el.classList.remove('zoom-image'));
-    // Appliquer le zoom sur l'image cliquée
     img.classList.add('zoom-image');
     overlay.style.display = 'block';
   }
 }
-
 function closeZoom() {
   document.querySelectorAll('.img-plat-client.zoom-image').forEach(el => el.classList.remove('zoom-image'));
   document.getElementById('zoom-overlay').style.display = 'none';
 }
 
-// ===== RENDU DES PLATS (client) =====
 function renderClientPlats() {
   const l = document.getElementById('plats-list-client'); l.innerHTML = '';
   if (!currentRes.plats) return;
@@ -851,30 +940,39 @@ function updateCartUI() {
   document.getElementById('cart-total').innerText = total;
 }
 function openClientPin() {
-  if (!document.getElementById('c-name').value) return setNotif("NOM REQUIS");
+  const name = document.getElementById('c-name').value.trim();
+  const addr = document.getElementById('c-address').value.trim();
+  if (!name) return setNotif("NOM REQUIS");
   document.getElementById('client-pin-container').style.display = 'block';
   clientTempPin = ''; document.getElementById('client-pin-view').innerText = '';
 }
 function closeClientPin() { document.getElementById('client-pin-container').style.display = 'none'; }
 function confirmClientOrder() {
   if (clientTempPin.length < 4) return;
+
+  const clientName = document.getElementById('c-name').value.trim();
+  const clientTel = document.getElementById('c-tel').value.trim();
+  const clientAddress = document.getElementById('c-address').value.trim();
+
+  if (!clientName) { setNotif("NOM REQUIS"); return; }
+
   const placeOrder = (lat, lng) => {
     const items = Object.values(cart);
     if (!currentRes.orders) currentRes.orders = [];
     items.forEach(item => { const plat = currentRes.plats.find(p => Number(p.id) === Number(item.id)); if (plat) plat.stock -= item.qte; });
     const orderId = Date.now();
-    const clientName = document.getElementById('c-name').value;
     const order = {
       id: orderId,
       client: clientName,
-      tel: document.getElementById('c-tel').value,
+      tel: clientTel,
       rawItems: items,
       itemsText: items.map(i => `${i.qte}x ${i.n}`).join(', '),
       total: document.getElementById('cart-total').innerText,
       pin: clientTempPin,
       status: 'new',
       clientLat: lat,
-      clientLng: lng
+      clientLng: lng,
+      clientAddress: clientAddress
     };
     currentRes.orders.push(order);
     clientOrderTracking = { orderId, resId: currentRes.id, pin: clientTempPin, clientName };
@@ -886,18 +984,30 @@ function confirmClientOrder() {
     goToHome();
     showOrderStatusBar('new');
   };
+
   if (navigator.geolocation) {
     setNotif("📡 Récupération de votre position...");
     navigator.geolocation.getCurrentPosition(
-      pos => placeOrder(pos.coords.latitude, pos.coords.longitude),
+      pos => {
+        placeOrder(pos.coords.latitude, pos.coords.longitude);
+      },
       () => {
-        setNotif("Position non obtenue, commande sans localisation");
-        placeOrder(null, null);
+        if (!clientAddress) {
+          setNotif("⚠️ Adresse requise (géolocalisation indisponible)");
+          document.getElementById('c-address').focus();
+        } else {
+          placeOrder(null, null);
+        }
       },
       { timeout: 8000, enableHighAccuracy: true }
     );
   } else {
-    placeOrder(null, null);
+    if (!clientAddress) {
+      setNotif("⚠️ Adresse requise (géolocalisation non supportée)");
+      document.getElementById('c-address').focus();
+    } else {
+      placeOrder(null, null);
+    }
   }
 }
 function loadClientOrderTracking() {
@@ -932,26 +1042,66 @@ function showOrderStatusBar(status) {
   }
 }
 function hideOrderStatusBar() { document.getElementById('order-status-bar').style.display = 'none'; }
-function showClientDeliveredFlow(res, order) {
-  const bar = document.getElementById('notification-bar');
-  document.getElementById('notif-message').innerText = '🎉 MERCI POUR VOTRE COMMANDE !';
-  bar.style.backgroundColor = '#28a745'; bar.style.color = '#fff';
-  setTimeout(() => { bar.style.backgroundColor = '#000'; bar.style.color = '#ffcc00'; document.getElementById('notif-message').innerText = promoMessage; }, 5000);
-  hideOrderStatusBar();
-  setTimeout(() => {
-    const noteRes = prompt(`Votre commande a été livrée !\nNotez le restaurant "${res.name}" (1-5) :`);
-    const vR = parseInt(noteRes);
-    if (vR>=1 && vR<=5) { if (!res.ratings) res.ratings = []; res.ratings.push(vR); logAdminEvent("CLIENT", `Note de ${vR}/5 au restaurant ${res.name}`); saveRestaurant(res); setNotif("MERCI POUR VOTRE NOTE !"); }
-    if (order.livId) {
-      const liv = livreurs.find(l => l.id === order.livId);
-      if (liv) {
-        const noteLiv = prompt(`Notez le livreur "${liv.name}" (1-5) :`);
-        const vL = parseInt(noteLiv);
-        if (vL>=1 && vL<=5) { if (!liv.ratings) liv.ratings = []; liv.ratings.push(vL); logAdminEvent("CLIENT", `Note de ${vL}/5 au livreur ${liv.name}`); pushLivreurs(); }
-      }
-    }
-  }, 500);
+
+// ===== SYSTÈME DE NOTATION PAR ÉTOILES =====
+function openRatingModal(restaurant, livreur) {
+  const modal = document.getElementById('rating-modal');
+  modal.style.display = 'flex';
+
+  // Nom du restaurant
+  document.getElementById('rating-resto-name').textContent = restaurant.name;
+
+  // Réinitialiser les étoiles (aucune cochée)
+  document.querySelectorAll('#resto-stars input, #liv-stars input').forEach(input => input.checked = false);
+
+  // Gérer la section livreur
+  const livSection = document.getElementById('livreur-rating-section');
+  if (livreur) {
+    livSection.style.display = 'block';
+    document.getElementById('rating-liv-name').textContent = livreur.name;
+  } else {
+    livSection.style.display = 'none';
+  }
 }
+
+function submitRatings() {
+  const restoStar = document.querySelector('#resto-stars input:checked');
+  const livStar = document.querySelector('#liv-stars input:checked');
+
+  if (!restoStar) {
+    setNotif("⚠️ Veuillez noter le restaurant");
+    return;
+  }
+
+  const restoVal = parseInt(restoStar.value);
+  // Enregistrer la note du restaurant
+  if (pendingRatingResto) {
+    if (!pendingRatingResto.ratings) pendingRatingResto.ratings = [];
+    pendingRatingResto.ratings.push(restoVal);
+    logAdminEvent("CLIENT", `Note de ${restoVal}/5 au restaurant ${pendingRatingResto.name}`);
+    saveRestaurant(pendingRatingResto);
+  }
+
+  if (pendingRatingLiv && livStar) {
+    const livVal = parseInt(livStar.value);
+    if (!pendingRatingLiv.ratings) pendingRatingLiv.ratings = [];
+    pendingRatingLiv.ratings.push(livVal);
+    logAdminEvent("CLIENT", `Note de ${livVal}/5 au livreur ${pendingRatingLiv.name}`);
+    saveLivreur(pendingRatingLiv);
+  }
+
+  setNotif("🎉 Merci pour vos notes !");
+  closeRatingModal();
+  // Nettoyer
+  pendingRatingResto = null;
+  pendingRatingLiv = null;
+  pendingOrderForRating = null;
+}
+
+function closeRatingModal() {
+  document.getElementById('rating-modal').style.display = 'none';
+}
+
 function showClearConfirm(show=true) { document.getElementById('clear-confirm-panel').style.display = show ? 'block' : 'none'; }
 function exportHistory() {
   let content = "HISTORIQUE KOOL - "+new Date().toLocaleString()+"\n------------------------------------------------\n";
@@ -977,7 +1127,6 @@ init();
 </script>
 
 <script>
-  // Enregistrement du service worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
