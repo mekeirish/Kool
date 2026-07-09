@@ -64,7 +64,7 @@
 <!-- OVERLAY POUR LE ZOOM -->
 <div id="zoom-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:4999; cursor:pointer;" onclick="closeZoom()"></div>
 
-<!-- ===== MODAL DE NOTATION PAR ÉTOILES ===== -->
+<!-- ===== MODAL DE NOTATION PAR ÉTOILES (CLIENT) ===== -->
 <div id="rating-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); z-index:7000; align-items:center; justify-content:center; padding:16px;">
   <div class="glass rounded-2xl p-6 max-w-md w-full border border-white/10 max-h-[90vh] overflow-y-auto">
     <h2 class="text-2xl font-bold text-amber-400 text-center mb-2">🎉 Votre commande est livrée !</h2>
@@ -209,7 +209,7 @@
 <div class="flex justify-between items-center mt-2"><b class="text-white">Total: <span id="cart-total" class="text-amber-400">0</span> DZD</b><button onclick="openClientPin()" class="px-6 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">COMMANDER</button></div></div>
 
 <script>
-// ==================== JAVASCRIPT COMPLET AVEC SYSTÈME D'ÉTOILES ====================
+// ==================== JAVASCRIPT COMPLET AVEC SYSTÈME D'ÉTOILES ET BARRE DE STATUT CORRIGÉE ====================
 const firebaseConfig = {
   apiKey: "AIzaSyD4ekJLYuL5QTsroQj_QlOUPohDwhlQ14s",
   authDomain: "koul-ec357.firebaseapp.com",
@@ -238,7 +238,7 @@ let stopProOrdersWatch = null;
 let knownProOrderIds = new Set();
 let editingId = null;
 
-// Variables pour la notation
+// Variables pour la notation (client)
 let pendingRatingResto = null;
 let pendingRatingLiv = null;
 let pendingOrderForRating = null;
@@ -832,38 +832,40 @@ function takeOrd(rid, oid) {
 function ignoreOrd(oid) { const key = `koul_hidden_orders_${currentLivreur.id}`; let list = JSON.parse(localStorage.getItem(key)||'[]'); list.push(oid); localStorage.setItem(key, JSON.stringify(list)); logAdminEvent("LIVREUR", `${currentLivreur.name} a masqué une commande.`); renderLivreurOrders(); setNotif("COMMANDE MASQUÉE POUR VOUS"); }
 function openValPin(rid, oid) { pendingResId = rid; pendingOrderId = oid; deliveryTempPin = ''; document.getElementById('delivery-pin-view').innerText = ''; document.getElementById('delivery-validation-container').style.display = 'block'; }
 function closeDeliveryPin() { document.getElementById('delivery-validation-container').style.display = 'none'; }
+
 function confirmDelivery() {
-  const r = restaurants.find(x => x.id===pendingResId);
-  const idx = r.orders.findIndex(x => x.id===pendingOrderId);
+  const r = restaurants.find(x => x.id === pendingResId);
+  const idx = r.orders.findIndex(x => x.id === pendingOrderId);
   const o = r.orders[idx];
   if (deliveryTempPin === o.pin) {
     const final = r.orders.splice(idx, 1)[0];
     logResEvent(r, `LIVRÉE PAR ${currentLivreur ? currentLivreur.name : 'PRO'}`, final);
-    if (currentLivreur) {
-      if (!currentLivreur.history) currentLivreur.history = [];
-      const now = new Date();
-      currentLivreur.history.push({ resName: r.name, date: now.toLocaleDateString(), time: String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0') });
-      // On sauvegarde les infos pour la notation
-      pendingRatingResto = r;
-      pendingRatingLiv = currentLivreur;
-      pendingOrderForRating = final;
-      // On ouvre le modal de notation
-      openRatingModal(r, currentLivreur);
-    } else {
-      // Pas de livreur : on ne note que le restaurant
-      pendingRatingResto = r;
-      pendingRatingLiv = null;
-      pendingOrderForRating = final;
-      openRatingModal(r, null);
+
+    // ==== CORRECTION : Masquer la barre de statut AVANT d'ouvrir le modal ====
+    if (clientOrderTracking && clientOrderTracking.orderId === final.id) {
+      clearClientOrderTracking(); // cette fonction appelle hideOrderStatusBar()
     }
-    if (clientOrderTracking && clientOrderTracking.orderId === final.id) { clearClientOrderTracking(); }
-    setNotif("LIVREUR NOTÉ & DOSSIER CLÔTURÉ !");
-    saveRestaurant(r); if (currentLivreur) saveLivreur(currentLivreur);
+
+    // Enregistrer les infos pour la notation (client)
+    pendingRatingResto = r;
+    pendingRatingLiv = currentLivreur || null;
+    pendingOrderForRating = final;
+
+    // Ouvrir le modal de notation (client)
+    openRatingModal(r, currentLivreur || null);
+
+    setNotif("COMMANDE LIVRÉE !");
+    saveRestaurant(r);
+    if (currentLivreur) saveLivreur(currentLivreur);
     closeDeliveryPin();
     if (currentLivreur) { renderLivreurOrders(); renderLivreurHistory(); }
     if (currentRes) { renderProOrders(); renderResHistory(); }
-  } else { vibrate([50,50]); setNotif("CODE INCORRECT"); }
+  } else {
+    vibrate([50,50]);
+    setNotif("CODE INCORRECT");
+  }
 }
+
 function renderLivreurHistory() {
   const l = document.getElementById('liv-hist'); l.innerHTML = '<h4 class="text-md font-semibold text-white mt-4 mb-2">Historique</h4>';
   if (!currentLivreur.history) return;
@@ -1014,7 +1016,12 @@ function loadClientOrderTracking() {
   const saved = localStorage.getItem('koul_client_tracking');
   if (saved) try { clientOrderTracking = JSON.parse(saved); document.getElementById('client-secret-code-display').innerText = "CODE: " + clientOrderTracking.pin; } catch(e) { clientOrderTracking = null; }
 }
-function clearClientOrderTracking() { clientOrderTracking = null; localStorage.removeItem('koul_client_tracking'); document.getElementById('client-secret-code-display').innerText = ''; hideOrderStatusBar(); }
+function clearClientOrderTracking() {
+  clientOrderTracking = null;
+  localStorage.removeItem('koul_client_tracking');
+  document.getElementById('client-secret-code-display').innerText = '';
+  hideOrderStatusBar(); // on masque la barre
+}
 function updateClientOrderStatus() {
   if (!clientOrderTracking) return;
   const r = restaurants.find(x => x.id === clientOrderTracking.resId);
@@ -1043,18 +1050,16 @@ function showOrderStatusBar(status) {
 }
 function hideOrderStatusBar() { document.getElementById('order-status-bar').style.display = 'none'; }
 
-// ===== SYSTÈME DE NOTATION PAR ÉTOILES =====
+// ===== SYSTÈME DE NOTATION PAR ÉTOILES (CLIENT) =====
 function openRatingModal(restaurant, livreur) {
   const modal = document.getElementById('rating-modal');
   modal.style.display = 'flex';
 
-  // Nom du restaurant
   document.getElementById('rating-resto-name').textContent = restaurant.name;
 
-  // Réinitialiser les étoiles (aucune cochée)
+  // Réinitialiser les étoiles
   document.querySelectorAll('#resto-stars input, #liv-stars input').forEach(input => input.checked = false);
 
-  // Gérer la section livreur
   const livSection = document.getElementById('livreur-rating-section');
   if (livreur) {
     livSection.style.display = 'block';
@@ -1074,7 +1079,6 @@ function submitRatings() {
   }
 
   const restoVal = parseInt(restoStar.value);
-  // Enregistrer la note du restaurant
   if (pendingRatingResto) {
     if (!pendingRatingResto.ratings) pendingRatingResto.ratings = [];
     pendingRatingResto.ratings.push(restoVal);
@@ -1092,7 +1096,6 @@ function submitRatings() {
 
   setNotif("🎉 Merci pour vos notes !");
   closeRatingModal();
-  // Nettoyer
   pendingRatingResto = null;
   pendingRatingLiv = null;
   pendingOrderForRating = null;
