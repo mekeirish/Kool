@@ -57,7 +57,7 @@
       color: var(--gold);
     }
 
-    /* ===== STYLES DU PANIER (inchangés) ===== */
+    /* ===== STYLES DU PANIER ===== */
     #cart-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20,20,20,.92); backdrop-filter: blur(16px); border-top: 1px solid rgba(255,255,255,.1); z-index: 2000; padding: 12px 16px; box-sizing: border-box; display: none; cursor: pointer; color: white; justify-content: space-between; align-items: center; }
     #cart-bar .cart-summary { display: flex; gap: 16px; align-items: baseline; }
     #cart-bar .cart-summary .count { font-weight: 600; color: var(--gold); }
@@ -499,6 +499,8 @@ function renderProOrders() {
   l.innerHTML = '<h3 class="text-lg font-semibold text-white mb-3">Commandes Actives</h3>';
   if (!currentRes.orders) return;
   currentRes.orders.forEach(o => {
+    // Ignorer les commandes livrées
+    if (o.status === 'delivered') return;
     let color = o.status==='new' ? 'white' : (o.status==='waiting' ? 'orange' : 'cyan');
     let txt = o.status==='new' ? 'REÇUE' : (o.status==='waiting' ? 'PUBLIÉE' : (o.livName ? `Prise par ${o.livName}` : 'EN COURS'));
     let badge = o.mode === 'retrait' ? '🏠 À emporter' : '🚚 Livraison';
@@ -806,13 +808,11 @@ function openNavToRestaurant(resId, orderId) {
   }, () => setNotif("IMPOSSIBLE D'OBTENIR VOTRE POSITION"), { timeout:10000, enableHighAccuracy:true });
 }
 
-// ===== CORRECTION : openNavToClient avec position actuelle du livreur =====
 function openNavToClient(resId, orderId) {
   const r = restaurants.find(x => Number(x.id)===Number(resId));
   const o = r && r.orders ? r.orders.find(x => Number(x.id)===Number(orderId)) : null;
   if (!o) return setNotif("COMMANDE INTROUVABLE");
 
-  // Vérifier que le client a une position ou une adresse
   if (o.clientLat == null || o.clientLng == null) {
     if (!o.clientAddress) {
       return setNotif("POSITION CLIENT INDISPONIBLE (adresse manquante)");
@@ -820,11 +820,10 @@ function openNavToClient(resId, orderId) {
   }
 
   if (!navigator.geolocation) {
-    // Fallback : on utilise le restaurant comme origine si géoloc indisponible
+    // Fallback
     if (o.publishResLat == null || o.publishResLng == null) {
       return setNotif("POSITION RESTO INDISPONIBLE");
     }
-    // On utilise l'origine restaurant et on ouvre l'itinéraire
     let url;
     if (o.clientLat != null && o.clientLng != null) {
       url = mapsBikeDirectionsUrl({ lat: o.publishResLat, lng: o.publishResLng }, { lat: o.clientLat, lng: o.clientLng });
@@ -839,7 +838,6 @@ function openNavToClient(resId, orderId) {
     return;
   }
 
-  // On récupère la position actuelle du livreur
   setNotif("📡 Récupération de votre position...");
   navigator.geolocation.getCurrentPosition(
     pos => {
@@ -848,7 +846,6 @@ function openNavToClient(resId, orderId) {
       if (o.clientLat != null && o.clientLng != null) {
         url = mapsBikeDirectionsUrl(origin, { lat: o.clientLat, lng: o.clientLng });
       } else {
-        // destination via adresse
         url = `https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${encodeURIComponent(o.clientAddress)}&travelmode=bicycling`;
       }
       if (!url) { setNotif("ITINÉRAIRE IMPOSSIBLE"); return; }
@@ -858,7 +855,6 @@ function openNavToClient(resId, orderId) {
       renderLivreurOrders();
     },
     () => {
-      // En cas d'échec de géolocalisation du livreur, on utilise le restaurant comme origine
       if (o.publishResLat == null || o.publishResLng == null) {
         setNotif("POSITION RESTO INDISPONIBLE");
         return;
@@ -892,7 +888,8 @@ function renderLivreurOrders() {
   restaurants.forEach(r => {
     if (!r.orders) return;
     r.orders.forEach(o => {
-      if (o.mode === 'retrait') return;
+      // Ignorer les commandes retrait ou livrées
+      if (o.mode === 'retrait' || o.status === 'delivered') return;
       if (myHiddenOrders.includes(o.id)) return;
       if (o.status !== 'waiting' && !(o.status==='shipping' && o.livId===currentLivreur.id)) return;
       const canTake = !isBusy && o.status==='waiting';
@@ -937,6 +934,7 @@ function ignoreOrd(oid) { const key = `koul_hidden_orders_${currentLivreur.id}`;
 function openValPin(rid, oid) { pendingResId = rid; pendingOrderId = oid; deliveryTempPin = ''; document.getElementById('delivery-pin-view').innerText = ''; document.getElementById('delivery-validation-container').style.display = 'block'; }
 function closeDeliveryPin() { document.getElementById('delivery-validation-container').style.display = 'none'; }
 
+// ===== CORRECTION : confirmDelivery =====
 function confirmDelivery() {
   const r = restaurants.find(x => x.id === pendingResId);
   if (!r) { setNotif("RESTAURANT INTROUVABLE"); closeDeliveryPin(); return; }
@@ -944,19 +942,32 @@ function confirmDelivery() {
   if (idx === -1) { setNotif("COMMANDE INTROUVABLE"); closeDeliveryPin(); return; }
   const o = r.orders[idx];
   if (deliveryTempPin === o.pin) {
-    const final = r.orders.splice(idx, 1)[0];
-    logResEvent(r, `LIVRÉE PAR ${currentLivreur ? currentLivreur.name : 'PRO'}`, final);
-    if (final.livId) cleanOrderFromLocalStorage(final.id, final.livId);
-    if (clientOrderTracking && clientOrderTracking.orderId === final.id) { clearClientOrderTracking(); }
-    pendingRatingResto = r; pendingRatingLiv = currentLivreur || null; pendingOrderForRating = final;
-    openRatingModal(r, currentLivreur || null);
+    // Marquer comme livrée sans supprimer
+    o.status = 'delivered';
+    logResEvent(r, `LIVRÉE PAR ${currentLivreur ? currentLivreur.name : 'PRO'}`, o);
+    // Ne pas supprimer la commande, elle reste pour que le client puisse voir le statut
+    // et déclencher la notation.
+    // On ne supprime pas le tracking client.
+    // On n'ouvre pas le modal ici (c'est côté client).
     setNotif("COMMANDE LIVRÉE !");
     saveRestaurant(r);
-    if (currentLivreur) saveLivreur(currentLivreur);
+    if (currentLivreur) {
+      // Ajouter dans l'historique du livreur
+      if (!currentLivreur.history) currentLivreur.history = [];
+      currentLivreur.history.push({
+        resName: r.name,
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+      });
+      saveLivreur(currentLivreur);
+    }
     closeDeliveryPin();
     if (currentLivreur) { renderLivreurOrders(); renderLivreurHistory(); }
     if (currentRes) { renderProOrders(); renderResHistory(); }
-  } else { vibrate([50,50]); setNotif("CODE INCORRECT"); }
+  } else {
+    vibrate([50,50]);
+    setNotif("CODE INCORRECT");
+  }
 }
 
 function renderLivreurHistory() {
@@ -1171,6 +1182,25 @@ function updateClientOrderStatus() {
   if (!r) return;
   const o = r.orders ? r.orders.find(x => x.id === clientOrderTracking.orderId) : null;
   if (!o) return;
+
+  // Si la commande est livrée, on affiche le modal de notation et on nettoie
+  if (o.status === 'delivered') {
+    // Ouvrir le modal pour le client
+    const liv = o.livId ? livreurs.find(l => Number(l.id) === Number(o.livId)) : null;
+    pendingRatingResto = r;
+    pendingRatingLiv = liv || null;
+    pendingOrderForRating = o;
+    openRatingModal(r, liv || null);
+    // Après avoir ouvert le modal, on supprime le tracking pour ne pas le réafficher
+    clearClientOrderTracking();
+    // On peut aussi supprimer la commande du restaurant pour la nettoyer, mais on peut la garder
+    // pour l'historique. On choisit de la supprimer après la notation (ou maintenant ?)
+    // Ici on la supprime après ouverture pour éviter qu'elle reste.
+    // On va la supprimer après que le client ait noté, ou immédiatement ?
+    // Pour l'instant, on la garde, le pro ne la voit plus car on filtre delivered.
+    return;
+  }
+
   if (o.status === 'new') showOrderStatusBar('new', o.mode);
   else if (o.status === 'waiting') showOrderStatusBar('waiting', o.mode);
   else if (o.status === 'shipping') showOrderStatusBar('shipping', o.mode);
@@ -1220,9 +1250,34 @@ function submitRatings() {
   }
   setNotif("🎉 Merci pour vos notes !");
   closeRatingModal();
+  // Après soumission, on peut supprimer la commande du restaurant pour la nettoyer définitivement
+  // On va retirer la commande du tableau orders du restaurant.
+  if (pendingRatingResto && pendingOrderForRating) {
+    const r = pendingRatingResto;
+    const idx = r.orders.findIndex(o => o.id === pendingOrderForRating.id);
+    if (idx !== -1) {
+      r.orders.splice(idx, 1);
+      saveRestaurant(r);
+    }
+  }
   pendingRatingResto = null; pendingRatingLiv = null; pendingOrderForRating = null;
+  // Nettoyer le tracking s'il reste
+  clearClientOrderTracking();
 }
-function closeRatingModal() { document.getElementById('rating-modal').style.display = 'none'; }
+function closeRatingModal() {
+  document.getElementById('rating-modal').style.display = 'none';
+  // Si l'utilisateur ferme sans noter, on peut supprimer la commande pour la nettoyer
+  if (pendingRatingResto && pendingOrderForRating) {
+    const r = pendingRatingResto;
+    const idx = r.orders.findIndex(o => o.id === pendingOrderForRating.id);
+    if (idx !== -1) {
+      r.orders.splice(idx, 1);
+      saveRestaurant(r);
+    }
+    pendingRatingResto = null; pendingRatingLiv = null; pendingOrderForRating = null;
+    clearClientOrderTracking();
+  }
+}
 
 function showClearConfirm(show=true) { document.getElementById('clear-confirm-panel').style.display = show ? 'block' : 'none'; }
 function exportHistory() {
