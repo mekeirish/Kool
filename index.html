@@ -104,7 +104,6 @@
       background: #e0a800;
     }
 
-    /* === Correction 1 : style des boutons retour === */
     .btn-retour {
       background: var(--gold);
       color: black;
@@ -309,7 +308,6 @@
       cursor: default;
     }
 
-    /* === Correction 4 : LED jaune clignotant === */
     #order-led {
       display: inline-block;
       width: 12px;
@@ -331,10 +329,33 @@
       100% { opacity: 1; transform: scale(1.1); }
     }
 
-    /* Correction 3 : champ adresse désactivé en mode retrait */
     #c-address:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+
+    /* ===== NOUVEAUX STYLES POUR LA GALERIE LOGO ===== */
+    .logo-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .logo-thumb {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .logo-thumb:hover {
+      transform: scale(1.02);
+    }
+    .logo-thumb.selected {
+      border-color: var(--gold);
+      box-shadow: 0 0 8px var(--gold);
     }
   </style>
 </head>
@@ -396,7 +417,6 @@
   <span id="notif-message">BIENVENUE</span>
   <span style="display:flex; align-items:center; position:absolute; right:4px;">
     <span id="client-secret-code-display" class="text-xs text-white/50"></span>
-    <!-- LED jaune -->
     <span id="order-led"></span>
   </span>
 </div>
@@ -409,7 +429,11 @@
 
 <!-- HEADER (sans bouton Pro) -->
 <header class="flex justify-between items-center px-4 py-4">
-  <h1 onclick="goToHome()" class="text-2xl font-bold text-amber-400 cursor-pointer">Kool</h1>
+  <!-- Logo / titre modifié dynamiquement -->
+  <div id="app-logo-header" onclick="goToHome()" style="cursor:pointer;">
+    <span id="app-title" class="text-2xl font-bold text-amber-400">Kool</span>
+    <img id="app-logo-image" style="height:50px; width:auto; display:none;" alt="Kool" />
+  </div>
 </header>
 
 <!-- NUMPADS -->
@@ -447,7 +471,6 @@
 <!-- VIEWS -->
 <div id="view-restaurants" class="view-section active container mx-auto px-4 py-6"><div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4" id="res-grid"></div></div>
 <div id="view-menu-client" class="view-section container mx-auto px-4 py-6">
-  <!-- Correction 1 : bouton retour stylisé -->
   <button onclick="goToHome()" class="btn-retour mb-4">← RETOUR</button>
   <div class="flex justify-between items-center mb-4">
     <h2 id="client-res-name" class="text-2xl font-bold text-white"></h2>
@@ -474,6 +497,23 @@
   </div>
   <button onclick="toggleSec('adm-liv')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Livreurs <span class="text-amber-400">+</span></button><div id="adm-liv" class="sub-section"><input type="text" id="adm-liv-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" /><input type="text" id="adm-liv-c" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Code" /><input type="number" id="adm-liv-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours)" min="0" /><input type="file" id="adm-liv-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" /><button id="btn-admin-add-liv" onclick="adminCreateLiv()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">AJOUTER</button><div id="list-liv-to-manage" class="mt-3 space-y-1"></div></div>
   <button onclick="toggleSec('adm-hist-section')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Journal Global <span class="text-amber-400">📜</span></button><div id="adm-hist-section" class="sub-section"><div class="flex justify-between items-center mb-3"><h3 class="text-lg font-semibold text-white">Historique</h3><div class="flex gap-2"><button onclick="exportHistory()" class="px-3 py-1 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition">💾 TXT</button><button onclick="showClearConfirm()" class="px-3 py-1 rounded-lg bg-red-500/20 text-red-400 text-sm hover:bg-red-500/30 transition">🗑️</button></div></div><div id="clear-confirm-panel" class="confirm-panel"><p class="mb-2">Vider l'historique définitivement ?</p><button onclick="clearHistory()" class="px-4 py-1 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-500">OUI</button><button onclick="showClearConfirm(false)" class="px-4 py-1 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-500 ml-2">NON</button></div><div id="admin-hist-list" class="space-y-2 max-h-96 overflow-y-auto"></div></div>
+
+  <!-- ===== NOUVEAU : Logo de l'App ===== -->
+  <button onclick="toggleSec('adm-logo')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Logo de l'App <span class="text-amber-400">🖼️</span></button>
+  <div id="adm-logo" class="sub-section">
+    <!-- Upload -->
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <input type="file" id="adm-logo-file" accept="image/png" style="flex:1; min-width:150px; padding:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:white;" />
+      <button id="btn-upload-logo" onclick="uploadAppLogo()" class="px-4 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">UPLOADER</button>
+    </div>
+    <!-- Galerie -->
+    <div id="logo-gallery" class="logo-gallery" style="margin-top:12px;"></div>
+    <!-- Validation -->
+    <div style="margin-top:12px;">
+      <button id="btn-validate-logo" onclick="validateLogo()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">VALIDER</button>
+    </div>
+  </div>
+
 </div></div>
 <div id="view-pro-space" class="view-section container mx-auto px-4 py-6">
   <button onclick="goToHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
@@ -511,7 +551,6 @@
       <input type="text" id="c-name" placeholder="Nom" />
       <input type="tel" id="c-tel" placeholder="Tél" />
     </div>
-    <!-- Correction 3 : le champ reste visible mais sera désactivé en mode retrait -->
     <input type="text" id="c-address" placeholder="Adresse (obligatoire si position non trouvée)" />
   </div>
   <div class="cart-total-row">
@@ -563,6 +602,11 @@ let ratingQueue = [];
 
 let pendingRatingResto = null, pendingRatingLiv = null, pendingOrderForRating = null;
 let orderMode = 'livraison';
+
+// === NOUVEAU : Gestion du logo ===
+let appLogos = [];
+let activeLogo = null;
+let selectedLogoId = null;
 
 function calcAvg(arr) { if (!arr || arr.length===0) return "N/A"; const s = arr.reduce((a,b)=>a+b,0); return (s/arr.length).toFixed(1); }
 function resIndex(resId) { return restaurants.findIndex(r => Number(r.id)===Number(resId)); }
@@ -638,6 +682,9 @@ function pushLivreurs() { return enqueueCloudWrite(() => db.ref('cloud_koul/livr
 function saveLivreur(liv) { const i = livreurs.findIndex(l => Number(l.id)===Number(liv.id)); if (i<0) return cloudWriteChain; livreurs[i]=liv; return enqueueCloudWrite(() => db.ref(`cloud_koul/livreurs/${i}`).set(liv)); }
 function pushHistory() { return enqueueCloudWrite(() => db.ref('cloud_koul/adminHistory').set(adminHistory)); }
 function pushPromo() { return enqueueCloudWrite(() => db.ref('cloud_koul/promoMessage').set(promoMessage)); }
+// === NOUVELLES FONCTIONS POUR LOGOS ===
+function pushAppLogos() { return enqueueCloudWrite(() => db.ref('cloud_koul/appLogos').set(appLogos)); }
+function pushActiveLogo(url) { return enqueueCloudWrite(() => db.ref('cloud_koul/activeLogo').set(url)); }
 
 function logAdminEvent(type, details) {
   const now = new Date();
@@ -673,6 +720,19 @@ function bindCloudListeners() {
     promoMessage = snap.val() || 'BIENVENUE';
     document.getElementById('notif-message').innerText = promoMessage;
   });
+
+  // === NOUVEAU : écoute des logos ===
+  db.ref('cloud_koul/appLogos').on('value', snap => {
+    const data = snap.val();
+    appLogos = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
+    if (document.getElementById('view-admin-space').classList.contains('active')) renderLogoGallery();
+  });
+  db.ref('cloud_koul/activeLogo').on('value', snap => {
+    const data = snap.val();
+    activeLogo = data || null;
+    updateHeaderLogo();
+    if (document.getElementById('view-admin-space').classList.contains('active')) renderLogoGallery();
+  });
 }
 
 function onRestaurantsUpdated() {
@@ -694,7 +754,7 @@ function onLivreursUpdated() {
 }
 
 function refreshCurrentView() {
-  if (document.getElementById('view-admin-space').classList.contains('active')) { renderAdminResList(); renderAdminLivList(); renderAdminHistory(); }
+  if (document.getElementById('view-admin-space').classList.contains('active')) { renderAdminResList(); renderAdminLivList(); renderAdminHistory(); renderLogoGallery(); }
   if (document.getElementById('view-pro-space').classList.contains('active') && currentRes) { renderProOrders(); renderProPlats(); renderResHistory(); }
   if (document.getElementById('view-livreur-space').classList.contains('active') && currentLivreur) { renderLivreurOrders(); renderLivreurHistory(); }
 }
@@ -721,7 +781,7 @@ function toggleLoginArea() { const a = document.getElementById('login-container'
 
 function processLogin() {
   const pin = currentPin; toggleLoginArea();
-  if (pin === "1747") { showSection('view-admin-space'); renderAdminResList(); renderAdminLivList(); renderAdminHistory(); }
+  if (pin === "1747") { showSection('view-admin-space'); renderAdminResList(); renderAdminLivList(); renderAdminHistory(); renderLogoGallery(); }
   else {
     const r = restaurants.find(x => x.code === pin), l = livreurs.find(x => x.code === pin);
     if (r) {
@@ -971,7 +1031,7 @@ function loadClientOrderTracking() {
   } else {
     clientOrderTracking = [];
   }
-  updateOrderLed(); // correction 4
+  updateOrderLed();
 }
 
 function clearClientOrderTracking(orderId) {
@@ -983,7 +1043,7 @@ function clearClientOrderTracking(orderId) {
   } else {
     document.getElementById('client-secret-code-display').innerText = "CODE: " + clientOrderTracking[0].pin;
   }
-  updateOrderLed(); // correction 4
+  updateOrderLed();
 }
 
 function processRatingQueue() {
@@ -1044,7 +1104,7 @@ function updateClientOrderStatus() {
   }
 
   processRatingQueue();
-  updateOrderLed(); // correction 4
+  updateOrderLed();
 }
 
 function showOrderStatusBar(status, mode) {
@@ -1135,7 +1195,6 @@ function updatePromoMessage() {
   pushPromo();
 }
 
-// === Correction 3 : setOrderMode modifié ===
 function setOrderMode(mode) {
   orderMode = mode;
   const addrField = document.getElementById('c-address');
@@ -1783,14 +1842,12 @@ function changeQty(pid, d) {
   updateCartUI();
 }
 
-// === Correction 2 : focus sur le champ Nom à l'ouverture du panier ===
 function openCartModal() {
   document.getElementById('cart-modal-overlay').style.display = 'block';
   const modal = document.getElementById('cart-modal');
   modal.style.display = 'block';
   requestAnimationFrame(() => {
     modal.classList.add('open');
-    // Focus sur le champ Nom après l'animation
     setTimeout(() => {
       const nameField = document.getElementById('c-name');
       if (nameField) nameField.focus();
@@ -1858,11 +1915,9 @@ function closeClientPin() {
   if (okBtn) okBtn.disabled = false;
 }
 
-// === Correction 4 : LED jaune ===
 function updateOrderLed() {
   const led = document.getElementById('order-led');
   if (!led) return;
-  // Vérifier s'il y a des commandes actives (new, waiting, shipping)
   let hasActive = false;
   for (let entry of clientOrderTracking) {
     const r = restaurants.find(res => Number(res.id) === Number(entry.resId));
@@ -1881,13 +1936,117 @@ function updateOrderLed() {
   }
 }
 
+// ===== FONCTIONS POUR LA GESTION DU LOGO =====
+
+function uploadAppLogo() {
+  const fileInput = document.getElementById('adm-logo-file');
+  const file = fileInput.files[0];
+  if (!file) { setNotif("SÉLECTIONNEZ UN FICHIER PNG"); return; }
+  if (file.type !== 'image/png') { setNotif("SEUL LE FORMAT PNG EST AUTORISÉ"); return; }
+
+  const btn = document.getElementById('btn-upload-logo');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  uploadToCloudinary(file, (url) => {
+    if (url) {
+      const newLogo = { id: Date.now(), url: url };
+      appLogos.push(newLogo);
+      pushAppLogos().then(() => {
+        renderLogoGallery();
+        setNotif("LOGO AJOUTÉ À LA GALERIE");
+      });
+    } else {
+      setNotif("ÉCHEC DE L'UPLOAD");
+    }
+    btn.disabled = false;
+    btn.textContent = 'UPLOADER';
+    fileInput.value = ''; // Réinitialiser l'input
+  });
+}
+
+function renderLogoGallery() {
+  const gallery = document.getElementById('logo-gallery');
+  if (!gallery) return;
+  gallery.innerHTML = '';
+  if (appLogos.length === 0) {
+    gallery.innerHTML = '<p style="color:#888; font-size:0.9rem; grid-column:1/-1; text-align:center;">Aucun logo téléchargé.</p>';
+    return;
+  }
+  // Trier par id décroissant pour avoir les plus récents en premier
+  const sorted = [...appLogos].sort((a,b) => b.id - a.id);
+  sorted.forEach(logo => {
+    const img = document.createElement('img');
+    img.src = getOptimizedCloudinaryUrl(logo.url, 150);
+    img.alt = "Logo";
+    img.className = 'logo-thumb';
+    // Bordure dorée si c'est le logo actif OU si c'est le logo sélectionné
+    if (logo.url === activeLogo) {
+      img.classList.add('selected');
+    } else if (selectedLogoId === logo.id) {
+      img.classList.add('selected');
+    }
+    img.dataset.id = logo.id;
+    img.dataset.url = logo.url;
+    img.addEventListener('click', () => {
+      // Retirer la sélection des autres
+      document.querySelectorAll('.logo-thumb').forEach(el => el.classList.remove('selected'));
+      // Ajouter la sélection sur celui-ci
+      img.classList.add('selected');
+      selectedLogoId = logo.id;
+      // Si ce logo est déjà actif, on le garde mais on peut aussi permettre de le sélectionner à nouveau
+      // On ne modifie pas activeLogo ici, seul le bouton VALIDER le fera.
+    });
+    gallery.appendChild(img);
+  });
+}
+
+function validateLogo() {
+  if (!selectedLogoId) {
+    setNotif("SÉLECTIONNEZ UN LOGO D'ABORD");
+    return;
+  }
+  const selected = appLogos.find(l => l.id === selectedLogoId);
+  if (!selected) {
+    setNotif("LOGO INTROUVABLE");
+    return;
+  }
+  const url = selected.url;
+  pushActiveLogo(url).then(() => {
+    activeLogo = url;
+    updateHeaderLogo();
+    renderLogoGallery();
+    setNotif("LOGO MIS À JOUR");
+  }).catch(err => {
+    console.error(err);
+    setNotif("ERREUR LORS DE LA MISE À JOUR");
+  });
+}
+
+function updateHeaderLogo() {
+  const titleSpan = document.getElementById('app-title');
+  const img = document.getElementById('app-logo-image');
+  if (activeLogo) {
+    titleSpan.style.display = 'none';
+    img.style.display = 'inline-block';
+    img.src = getOptimizedCloudinaryUrl(activeLogo, 150);
+    // on s'assure que l'image est bien redimensionnée en hauteur
+    img.style.height = '50px';
+    img.style.width = 'auto';
+  } else {
+    titleSpan.style.display = 'inline-block';
+    img.style.display = 'none';
+  }
+}
+
 // ===== DÉMARRAGE =====
 loadClientOrderTracking();
 bindCloudListeners();
 init();
 setOrderMode('livraison');
 updateCartUI();
-updateOrderLed(); // initialisation
+updateOrderLed();
+updateHeaderLogo(); // initialisation du logo
 
 // === Long press sur la barre de notification ===
 (function setupLongPress() {
