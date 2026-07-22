@@ -104,6 +104,25 @@
       background: #e0a800;
     }
 
+    /* === Correction 1 : style des boutons retour === */
+    .btn-retour {
+      background: var(--gold);
+      color: black;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-retour:hover {
+      background: #e0a800;
+    }
+
     #cart-modal-overlay {
       display: none;
       position: fixed;
@@ -289,6 +308,34 @@
       -ms-user-select: none;
       cursor: default;
     }
+
+    /* === Correction 4 : LED jaune clignotant === */
+    #order-led {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #555;
+      margin-left: 8px;
+      transition: background 0.3s;
+      vertical-align: middle;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+    #order-led.active {
+      background: #ffcc00;
+      box-shadow: 0 0 12px #ffcc00;
+      animation: blink-led 0.8s infinite alternate;
+    }
+    @keyframes blink-led {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1.1); }
+    }
+
+    /* Correction 3 : champ adresse désactivé en mode retrait */
+    #c-address:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body class="bg-[#0f0f0f] text-gray-200 font-sans antialiased min-h-screen pb-32">
@@ -347,7 +394,11 @@
 <!-- NOTIFICATION (barre avec long-press) -->
 <div id="notification-bar" class="sticky top-0 z-40 w-full min-h-[55px] bg-black/80 backdrop-blur-md border-b border-amber-400/30 flex items-center justify-center px-4 text-amber-400 font-bold text-sm uppercase tracking-wider relative">
   <span id="notif-message">BIENVENUE</span>
-  <span id="client-secret-code-display" class="absolute right-4 text-xs text-white/50"></span>
+  <span style="display:flex; align-items:center; position:absolute; right:4px;">
+    <span id="client-secret-code-display" class="text-xs text-white/50"></span>
+    <!-- LED jaune -->
+    <span id="order-led"></span>
+  </span>
 </div>
 
 <!-- ORDER STATUS -->
@@ -396,14 +447,17 @@
 <!-- VIEWS -->
 <div id="view-restaurants" class="view-section active container mx-auto px-4 py-6"><div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4" id="res-grid"></div></div>
 <div id="view-menu-client" class="view-section container mx-auto px-4 py-6">
-  <button onclick="goToHome()" class="mb-4 px-4 py-2 rounded-lg border border-amber-400/50 text-amber-400 hover:bg-amber-400/10 transition">← RETOUR</button>
+  <!-- Correction 1 : bouton retour stylisé -->
+  <button onclick="goToHome()" class="btn-retour mb-4">← RETOUR</button>
   <div class="flex justify-between items-center mb-4">
     <h2 id="client-res-name" class="text-2xl font-bold text-white"></h2>
   </div>
   <div id="plats-list-client"></div>
   <div class="h-40"></div>
 </div>
-<div id="view-admin-space" class="view-section container mx-auto px-4 py-6"><button onclick="goToHome()" class="mb-4 px-4 py-2 rounded-lg border border-amber-400/50 text-amber-400 hover:bg-amber-400/10 transition">← DÉCONNEXION</button><div class="glass rounded-2xl p-6 border border-white/10"><h2 class="text-2xl font-bold text-amber-400 mb-4">Admin</h2>
+<div id="view-admin-space" class="view-section container mx-auto px-4 py-6">
+  <button onclick="goToHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
+  <div class="glass rounded-2xl p-6 border border-white/10"><h2 class="text-2xl font-bold text-amber-400 mb-4">Admin</h2>
   <button onclick="toggleSec('adm-promo')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Message Promo <span class="text-amber-400">📣</span></button><div id="adm-promo" class="sub-section"><input type="text" id="adm-promo-txt" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Votre message promo..." /><button onclick="updatePromoMessage()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">METTRE À JOUR</button></div>
   <button onclick="toggleSec('adm-res')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Restos <span class="text-amber-400">+</span></button><div id="adm-res" class="sub-section">
     <input type="text" id="adm-res-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" />
@@ -421,12 +475,16 @@
   <button onclick="toggleSec('adm-liv')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Livreurs <span class="text-amber-400">+</span></button><div id="adm-liv" class="sub-section"><input type="text" id="adm-liv-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" /><input type="text" id="adm-liv-c" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Code" /><input type="number" id="adm-liv-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours)" min="0" /><input type="file" id="adm-liv-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" /><button id="btn-admin-add-liv" onclick="adminCreateLiv()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">AJOUTER</button><div id="list-liv-to-manage" class="mt-3 space-y-1"></div></div>
   <button onclick="toggleSec('adm-hist-section')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Journal Global <span class="text-amber-400">📜</span></button><div id="adm-hist-section" class="sub-section"><div class="flex justify-between items-center mb-3"><h3 class="text-lg font-semibold text-white">Historique</h3><div class="flex gap-2"><button onclick="exportHistory()" class="px-3 py-1 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition">💾 TXT</button><button onclick="showClearConfirm()" class="px-3 py-1 rounded-lg bg-red-500/20 text-red-400 text-sm hover:bg-red-500/30 transition">🗑️</button></div></div><div id="clear-confirm-panel" class="confirm-panel"><p class="mb-2">Vider l'historique définitivement ?</p><button onclick="clearHistory()" class="px-4 py-1 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-500">OUI</button><button onclick="showClearConfirm(false)" class="px-4 py-1 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-500 ml-2">NON</button></div><div id="admin-hist-list" class="space-y-2 max-h-96 overflow-y-auto"></div></div>
 </div></div>
-<div id="view-pro-space" class="view-section container mx-auto px-4 py-6"><button onclick="goToHome()" class="mb-4 px-4 py-2 rounded-lg border border-amber-400/50 text-amber-400 hover:bg-amber-400/10 transition">← DÉCONNEXION</button><div class="glass rounded-2xl p-6 border border-white/10"><h2 id="pro-res-title" class="text-2xl font-bold text-amber-400 mb-4"></h2><div id="orders-list-pro"></div>
+<div id="view-pro-space" class="view-section container mx-auto px-4 py-6">
+  <button onclick="goToHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
+  <div class="glass rounded-2xl p-6 border border-white/10"><h2 id="pro-res-title" class="text-2xl font-bold text-amber-400 mb-4"></h2><div id="orders-list-pro"></div>
   <button onclick="toggleSec('add-plat')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Nouveau Plat <span class="text-amber-400">+</span></button><div id="add-plat" class="sub-section"><input type="text" id="new-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" /><input type="number" id="new-p" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Prix DZD" min="0" /><input type="number" id="new-s" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Stock initial" min="0" /><input type="file" id="new-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" /><button id="btn-add-plat" onclick="addNewPlat()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">ENREGISTRER</button></div>
   <button onclick="toggleSec('manage-plats')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Stocks & Plats <span class="text-amber-400">⚙</span></button><div id="manage-plats" class="sub-section"></div>
   <hr class="my-6 border-white/10" /><h3 class="text-lg font-semibold text-white mb-3">Historique Restaurant</h3><div id="res-event-log" class="max-h-72 overflow-y-auto space-y-2"></div>
 </div></div>
-<div id="view-livreur-space" class="view-section container mx-auto px-4 py-6"><button onclick="logoutLivreur()" class="mb-4 px-4 py-2 rounded-lg border border-amber-400/50 text-amber-400 hover:bg-amber-400/10 transition">← DÉCONNEXION</button><div class="glass rounded-2xl p-6 border border-white/10"><h2 id="liv-name" class="text-2xl font-bold text-amber-400 mb-4"></h2><div id="liv-orders"></div><hr class="my-6 border-white/10" /><div id="liv-hist"></div></div></div>
+<div id="view-livreur-space" class="view-section container mx-auto px-4 py-6">
+  <button onclick="logoutLivreur()" class="btn-retour mb-4">← DÉCONNEXION</button>
+  <div class="glass rounded-2xl p-6 border border-white/10"><h2 id="liv-name" class="text-2xl font-bold text-amber-400 mb-4"></h2><div id="liv-orders"></div><hr class="my-6 border-white/10" /><div id="liv-hist"></div></div></div>
 
 <!-- ===== PANIER ===== -->
 <div id="cart-bar" onclick="openCartModal()">
@@ -453,6 +511,7 @@
       <input type="text" id="c-name" placeholder="Nom" />
       <input type="tel" id="c-tel" placeholder="Tél" />
     </div>
+    <!-- Correction 3 : le champ reste visible mais sera désactivé en mode retrait -->
     <input type="text" id="c-address" placeholder="Adresse (obligatoire si position non trouvée)" />
   </div>
   <div class="cart-total-row">
@@ -912,6 +971,7 @@ function loadClientOrderTracking() {
   } else {
     clientOrderTracking = [];
   }
+  updateOrderLed(); // correction 4
 }
 
 function clearClientOrderTracking(orderId) {
@@ -923,6 +983,7 @@ function clearClientOrderTracking(orderId) {
   } else {
     document.getElementById('client-secret-code-display').innerText = "CODE: " + clientOrderTracking[0].pin;
   }
+  updateOrderLed(); // correction 4
 }
 
 function processRatingQueue() {
@@ -983,6 +1044,7 @@ function updateClientOrderStatus() {
   }
 
   processRatingQueue();
+  updateOrderLed(); // correction 4
 }
 
 function showOrderStatusBar(status, mode) {
@@ -1073,11 +1135,17 @@ function updatePromoMessage() {
   pushPromo();
 }
 
+// === Correction 3 : setOrderMode modifié ===
 function setOrderMode(mode) {
   orderMode = mode;
   const addrField = document.getElementById('c-address');
-  if (mode === 'livraison') { addrField.style.display = 'block'; addrField.required = true; }
-  else { addrField.style.display = 'none'; addrField.required = false; }
+  if (mode === 'livraison') {
+    addrField.disabled = false;
+    addrField.placeholder = 'Adresse (obligatoire si position non trouvée)';
+  } else {
+    addrField.disabled = true;
+    addrField.placeholder = 'Adresse (désactivée en mode retrait)';
+  }
   updateModeButtons();
 }
 function updateModeButtons() {
@@ -1715,11 +1783,19 @@ function changeQty(pid, d) {
   updateCartUI();
 }
 
+// === Correction 2 : focus sur le champ Nom à l'ouverture du panier ===
 function openCartModal() {
   document.getElementById('cart-modal-overlay').style.display = 'block';
   const modal = document.getElementById('cart-modal');
   modal.style.display = 'block';
-  requestAnimationFrame(() => { modal.classList.add('open'); });
+  requestAnimationFrame(() => {
+    modal.classList.add('open');
+    // Focus sur le champ Nom après l'animation
+    setTimeout(() => {
+      const nameField = document.getElementById('c-name');
+      if (nameField) nameField.focus();
+    }, 350);
+  });
 }
 function closeCartModal() {
   const modal = document.getElementById('cart-modal');
@@ -1782,12 +1858,36 @@ function closeClientPin() {
   if (okBtn) okBtn.disabled = false;
 }
 
+// === Correction 4 : LED jaune ===
+function updateOrderLed() {
+  const led = document.getElementById('order-led');
+  if (!led) return;
+  // Vérifier s'il y a des commandes actives (new, waiting, shipping)
+  let hasActive = false;
+  for (let entry of clientOrderTracking) {
+    const r = restaurants.find(res => Number(res.id) === Number(entry.resId));
+    if (!r) continue;
+    const o = r.orders ? r.orders.find(ord => Number(ord.id) === Number(entry.orderId)) : null;
+    if (!o) continue;
+    if (o.status === 'new' || o.status === 'waiting' || o.status === 'shipping') {
+      hasActive = true;
+      break;
+    }
+  }
+  if (hasActive) {
+    led.classList.add('active');
+  } else {
+    led.classList.remove('active');
+  }
+}
+
 // ===== DÉMARRAGE =====
 loadClientOrderTracking();
 bindCloudListeners();
 init();
 setOrderMode('livraison');
 updateCartUI();
+updateOrderLed(); // initialisation
 
 // === Long press sur la barre de notification ===
 (function setupLongPress() {
@@ -1797,19 +1897,16 @@ updateCartUI();
 
   function startLongPress(e) {
     longPressTriggered = false;
-    // Empêcher le comportement par défaut (sélection, etc.)
     e.preventDefault();
     longPressTimer = setTimeout(() => {
       longPressTriggered = true;
       toggleLoginArea();
-      // Petit retour haptique
       if (navigator.vibrate) navigator.vibrate(50);
     }, 4000);
   }
 
   function cancelLongPress(e) {
     clearTimeout(longPressTimer);
-    // Si le long press a été déclenché, on ne fait rien de plus
   }
 
   notifBar.addEventListener('mousedown', startLongPress);
