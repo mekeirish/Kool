@@ -334,12 +334,16 @@
       cursor: not-allowed;
     }
 
-    /* ===== NOUVEAUX STYLES POUR LA GALERIE LOGO ===== */
+    /* ===== STYLES POUR LA GALERIE LOGO ===== */
     .logo-gallery {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 8px;
       margin-top: 8px;
+    }
+    .logo-thumb-wrapper {
+      position: relative;
+      display: inline-block;
     }
     .logo-thumb {
       width: 100%;
@@ -356,6 +360,31 @@
     .logo-thumb.selected {
       border-color: var(--gold);
       box-shadow: 0 0 8px var(--gold);
+    }
+    .logo-delete-btn {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #cc0000;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      line-height: 1;
+      transition: background 0.2s, transform 0.2s;
+      z-index: 5;
+    }
+    .logo-delete-btn:hover {
+      background: #ff0000;
+      transform: scale(1.1);
     }
   </style>
 </head>
@@ -427,13 +456,15 @@
   <span id="status-label" class="font-semibold text-white"></span>
 </div>
 
-<!-- HEADER (sans bouton Pro) -->
-<header class="flex justify-between items-center px-4 py-4">
-  <!-- Logo / titre modifié dynamiquement -->
-  <div id="app-logo-header" onclick="goToHome()" style="cursor:pointer;">
+<!-- HEADER (avec logo centré et bouton Pro absent) -->
+<header class="flex justify-between items-center px-4 py-4 relative" style="min-height:70px;">
+  <!-- Logo centré absolument -->
+  <div id="app-logo-header" onclick="goToHome()" style="position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); cursor:pointer; z-index:10;">
     <span id="app-title" class="text-2xl font-bold text-amber-400">Kool</span>
     <img id="app-logo-image" style="height:50px; width:auto; display:none;" alt="Kool" />
   </div>
+  <!-- Espace réservé pour un éventuel bouton à droite (invisible) -->
+  <div style="width:40px; visibility:hidden;"></div>
 </header>
 
 <!-- NUMPADS -->
@@ -498,7 +529,7 @@
   <button onclick="toggleSec('adm-liv')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Livreurs <span class="text-amber-400">+</span></button><div id="adm-liv" class="sub-section"><input type="text" id="adm-liv-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" /><input type="text" id="adm-liv-c" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Code" /><input type="number" id="adm-liv-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours)" min="0" /><input type="file" id="adm-liv-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" /><button id="btn-admin-add-liv" onclick="adminCreateLiv()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">AJOUTER</button><div id="list-liv-to-manage" class="mt-3 space-y-1"></div></div>
   <button onclick="toggleSec('adm-hist-section')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Journal Global <span class="text-amber-400">📜</span></button><div id="adm-hist-section" class="sub-section"><div class="flex justify-between items-center mb-3"><h3 class="text-lg font-semibold text-white">Historique</h3><div class="flex gap-2"><button onclick="exportHistory()" class="px-3 py-1 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition">💾 TXT</button><button onclick="showClearConfirm()" class="px-3 py-1 rounded-lg bg-red-500/20 text-red-400 text-sm hover:bg-red-500/30 transition">🗑️</button></div></div><div id="clear-confirm-panel" class="confirm-panel"><p class="mb-2">Vider l'historique définitivement ?</p><button onclick="clearHistory()" class="px-4 py-1 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-500">OUI</button><button onclick="showClearConfirm(false)" class="px-4 py-1 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-500 ml-2">NON</button></div><div id="admin-hist-list" class="space-y-2 max-h-96 overflow-y-auto"></div></div>
 
-  <!-- ===== NOUVEAU : Logo de l'App ===== -->
+  <!-- ===== Logo de l'App ===== -->
   <button onclick="toggleSec('adm-logo')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Logo de l'App <span class="text-amber-400">🖼️</span></button>
   <div id="adm-logo" class="sub-section">
     <!-- Upload -->
@@ -603,7 +634,7 @@ let ratingQueue = [];
 let pendingRatingResto = null, pendingRatingLiv = null, pendingOrderForRating = null;
 let orderMode = 'livraison';
 
-// === NOUVEAU : Gestion du logo ===
+// === Gestion du logo ===
 let appLogos = [];
 let activeLogo = null;
 let selectedLogoId = null;
@@ -682,7 +713,7 @@ function pushLivreurs() { return enqueueCloudWrite(() => db.ref('cloud_koul/livr
 function saveLivreur(liv) { const i = livreurs.findIndex(l => Number(l.id)===Number(liv.id)); if (i<0) return cloudWriteChain; livreurs[i]=liv; return enqueueCloudWrite(() => db.ref(`cloud_koul/livreurs/${i}`).set(liv)); }
 function pushHistory() { return enqueueCloudWrite(() => db.ref('cloud_koul/adminHistory').set(adminHistory)); }
 function pushPromo() { return enqueueCloudWrite(() => db.ref('cloud_koul/promoMessage').set(promoMessage)); }
-// === NOUVELLES FONCTIONS POUR LOGOS ===
+// === FONCTIONS LOGO ===
 function pushAppLogos() { return enqueueCloudWrite(() => db.ref('cloud_koul/appLogos').set(appLogos)); }
 function pushActiveLogo(url) { return enqueueCloudWrite(() => db.ref('cloud_koul/activeLogo').set(url)); }
 
@@ -721,7 +752,7 @@ function bindCloudListeners() {
     document.getElementById('notif-message').innerText = promoMessage;
   });
 
-  // === NOUVEAU : écoute des logos ===
+  // === LOGOS ===
   db.ref('cloud_koul/appLogos').on('value', snap => {
     const data = snap.val();
     appLogos = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
@@ -1936,7 +1967,7 @@ function updateOrderLed() {
   }
 }
 
-// ===== FONCTIONS POUR LA GESTION DU LOGO =====
+// ===== FONCTIONS LOGO =====
 
 function uploadAppLogo() {
   const fileInput = document.getElementById('adm-logo-file');
@@ -1961,7 +1992,7 @@ function uploadAppLogo() {
     }
     btn.disabled = false;
     btn.textContent = 'UPLOADER';
-    fileInput.value = ''; // Réinitialiser l'input
+    fileInput.value = '';
   });
 }
 
@@ -1973,14 +2004,15 @@ function renderLogoGallery() {
     gallery.innerHTML = '<p style="color:#888; font-size:0.9rem; grid-column:1/-1; text-align:center;">Aucun logo téléchargé.</p>';
     return;
   }
-  // Trier par id décroissant pour avoir les plus récents en premier
   const sorted = [...appLogos].sort((a,b) => b.id - a.id);
   sorted.forEach(logo => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'logo-thumb-wrapper';
+
     const img = document.createElement('img');
     img.src = getOptimizedCloudinaryUrl(logo.url, 150);
     img.alt = "Logo";
     img.className = 'logo-thumb';
-    // Bordure dorée si c'est le logo actif OU si c'est le logo sélectionné
     if (logo.url === activeLogo) {
       img.classList.add('selected');
     } else if (selectedLogoId === logo.id) {
@@ -1989,15 +2021,62 @@ function renderLogoGallery() {
     img.dataset.id = logo.id;
     img.dataset.url = logo.url;
     img.addEventListener('click', () => {
-      // Retirer la sélection des autres
       document.querySelectorAll('.logo-thumb').forEach(el => el.classList.remove('selected'));
-      // Ajouter la sélection sur celui-ci
       img.classList.add('selected');
       selectedLogoId = logo.id;
-      // Si ce logo est déjà actif, on le garde mais on peut aussi permettre de le sélectionner à nouveau
-      // On ne modifie pas activeLogo ici, seul le bouton VALIDER le fera.
     });
-    gallery.appendChild(img);
+
+    // Bouton de suppression
+    const delBtn = document.createElement('button');
+    delBtn.className = 'logo-delete-btn';
+    delBtn.textContent = '✕';
+    delBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Empêche la sélection
+      if (confirm("Supprimer ce logo ?")) {
+        deleteLogo(logo.id);
+      }
+    });
+
+    wrapper.appendChild(img);
+    wrapper.appendChild(delBtn);
+    gallery.appendChild(wrapper);
+  });
+}
+
+function deleteLogo(logoId) {
+  const index = appLogos.findIndex(l => l.id === logoId);
+  if (index === -1) { setNotif("LOGO INTROUVABLE"); return; }
+  const removed = appLogos[index];
+  appLogos.splice(index, 1);
+
+  // Si le logo supprimé était actif, on réinitialise activeLogo
+  let resetActive = false;
+  if (removed.url === activeLogo) {
+    resetActive = true;
+  }
+
+  // Mise à jour Firebase
+  pushAppLogos().then(() => {
+    if (resetActive) {
+      // Réinitialiser activeLogo à null
+      pushActiveLogo(null).then(() => {
+        activeLogo = null;
+        selectedLogoId = null;
+        updateHeaderLogo();
+        renderLogoGallery();
+        setNotif("LOGO SUPPRIMÉ (logo actif réinitialisé)");
+      }).catch(err => {
+        console.error(err);
+        setNotif("ERREUR LORS DE LA RÉINITIALISATION DU LOGO ACTIF");
+      });
+    } else {
+      if (selectedLogoId === logoId) selectedLogoId = null;
+      renderLogoGallery();
+      setNotif("LOGO SUPPRIMÉ");
+    }
+  }).catch(err => {
+    console.error(err);
+    setNotif("ERREUR LORS DE LA SUPPRESSION");
   });
 }
 
@@ -2030,7 +2109,6 @@ function updateHeaderLogo() {
     titleSpan.style.display = 'none';
     img.style.display = 'inline-block';
     img.src = getOptimizedCloudinaryUrl(activeLogo, 150);
-    // on s'assure que l'image est bien redimensionnée en hauteur
     img.style.height = '50px';
     img.style.width = 'auto';
   } else {
@@ -2046,7 +2124,7 @@ init();
 setOrderMode('livraison');
 updateCartUI();
 updateOrderLed();
-updateHeaderLogo(); // initialisation du logo
+updateHeaderLogo();
 
 // === Long press sur la barre de notification ===
 (function setupLongPress() {
