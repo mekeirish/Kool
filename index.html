@@ -18,7 +18,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    /* === STYLES (inchangés) === */
     :root { --gold: #fbbf24; --glass-bg: rgba(255,255,255,0.05); --glass-border: rgba(255,255,255,0.12); }
     .glass { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); }
     #loading-screen { position:fixed; inset:0; background:#0f0f0f; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; }
@@ -37,94 +36,80 @@
     @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
     .view-section { display:none; } .view-section.active { display:block; }
     .sub-section { display:none; margin-top:8px; padding:16px; background:rgba(255,255,255,.03); border-radius:12px; border-left:3px solid var(--gold); }
-    .star-rating {
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: center;
-      gap: 4px;
-    }
-    .star-rating input { display: none; }
-    .star-rating label {
-      font-size: 2.2rem;
-      color: #444;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    .star-rating label:hover,
-    .star-rating label:hover ~ label,
-    .star-rating input:checked ~ label {
-      color: var(--gold);
-    }
+    .star-rating { display:flex; flex-direction:row-reverse; justify-content:center; gap:4px; }
+    .star-rating input { display:none; }
+    .star-rating label { font-size:2.2rem; color:#444; cursor:pointer; transition:color 0.2s; }
+    .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color:var(--gold); }
 
-    #cart-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20,20,20,.92); backdrop-filter: blur(16px); border-top: 1px solid rgba(255,255,255,.1); z-index: 2000; padding: 12px 16px; box-sizing: border-box; display: none; cursor: pointer; color: white; justify-content: space-between; align-items: center; }
-    #cart-bar .cart-summary { display: flex; gap: 16px; align-items: baseline; }
-    #cart-bar .cart-summary .count { font-weight: 600; color: var(--gold); }
-    #cart-bar .cart-summary .total { font-weight: 700; color: var(--gold); }
-    .btn-cart-open { background: var(--gold); color: black; border: none; padding: 8px 18px; border-radius: 10px; font-weight: bold; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
-    .btn-cart-open:hover { background: #e0a800; }
-    .btn-retour { background: var(--gold); color: black; border: none; padding: 8px 18px; border-radius: 10px; font-weight: bold; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; white-space: nowrap; text-decoration: none; display: inline-block; }
-    .btn-retour:hover { background: #e0a800; }
-    #cart-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 2500; }
-    #cart-modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; max-height: 85vh; background: rgba(20,20,20,.96); backdrop-filter: blur(16px); border-top: 1px solid rgba(255,255,255,.1); border-radius: 24px 24px 0 0; padding: 20px 16px 24px; box-sizing: border-box; z-index: 2600; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s ease-out; }
-    #cart-modal.open { transform: translateY(0); }
-    #cart-modal .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    #cart-modal .modal-header h2 { font-size: 1.4rem; font-weight: bold; color: var(--gold); }
-    #cart-modal .modal-header .close-btn { cursor: pointer; color: #aaa; font-size: 1.2rem; display: flex; align-items: center; gap: 4px; }
-    #cart-modal .modal-header .close-btn::after { content: "▼"; }
-    #cart-modal .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    #cart-modal .cart-item .item-info { display: flex; flex-direction: column; }
-    #cart-modal .cart-item .item-name { font-weight: 500; }
-    #cart-modal .cart-item .item-price { font-size: 0.85rem; color: #aaa; }
-    #cart-modal .cart-item .item-actions { display: flex; align-items: center; gap: 10px; }
-    #cart-modal .cart-item .item-actions button { background: rgba(255,255,255,0.1); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
-    #cart-modal .cart-item .item-actions button:hover { background: var(--gold); color: black; }
-    #cart-modal .cart-item .item-actions .qty { font-weight: 600; min-width: 20px; text-align: center; }
-    #cart-modal .cart-fields { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
-    #cart-modal .cart-fields .mode-toggle { display: flex; gap: 8px; margin-bottom: 4px; }
-    #cart-modal .cart-fields .mode-toggle button { flex: 1; padding: 8px; border-radius: 10px; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s, color 0.2s; }
-    #cart-modal .cart-fields .mode-toggle .active-liv { background: var(--gold); color: black; }
-    #cart-modal .cart-fields .mode-toggle .active-retrait { background: var(--gold); color: black; }
-    #cart-modal .cart-fields .mode-toggle .inactive { background: rgba(255,255,255,0.08); color: #888; }
-    #cart-modal .cart-fields .field-row { display: flex; gap: 8px; flex-wrap: wrap; }
-    #cart-modal .cart-fields input { flex: 1; min-width: 120px; padding: 10px 14px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: white; placeholder-color: #888; }
-    #cart-modal .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); }
-    #cart-modal .cart-total-row .total-label { font-weight: 600; color: #ccc; }
-    #cart-modal .cart-total-row .total-value { font-weight: 700; color: var(--gold); font-size: 1.2rem; }
-    #cart-modal .btn-commander { width: 100%; margin-top: 12px; padding: 14px; border-radius: 12px; background: var(--gold); color: black; font-weight: bold; border: none; cursor: pointer; transition: background 0.2s; }
-    #cart-modal .btn-commander:hover { background: #e0a800; }
+    #cart-bar { position:fixed; bottom:0; left:0; width:100%; background:rgba(20,20,20,.92); backdrop-filter:blur(16px); border-top:1px solid rgba(255,255,255,.1); z-index:2000; padding:12px 16px; box-sizing:border-box; display:none; cursor:pointer; color:white; justify-content:space-between; align-items:center; }
+    #cart-bar .cart-summary { display:flex; gap:16px; align-items:baseline; }
+    #cart-bar .cart-summary .count { font-weight:600; color:var(--gold); }
+    #cart-bar .cart-summary .total { font-weight:700; color:var(--gold); }
+    .btn-cart-open { background:var(--gold); color:black; border:none; padding:8px 18px; border-radius:10px; font-weight:bold; font-size:0.95rem; cursor:pointer; transition:background 0.2s; white-space:nowrap; }
+    .btn-cart-open:hover { background:#e0a800; }
+    .btn-retour { background:var(--gold); color:black; border:none; padding:8px 18px; border-radius:10px; font-weight:bold; font-size:0.95rem; cursor:pointer; transition:background 0.2s; white-space:nowrap; text-decoration:none; display:inline-block; }
+    .btn-retour:hover { background:#e0a800; }
+    #cart-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:2500; }
+    #cart-modal { display:none; position:fixed; bottom:0; left:0; width:100%; max-height:85vh; background:rgba(20,20,20,.96); backdrop-filter:blur(16px); border-top:1px solid rgba(255,255,255,.1); border-radius:24px 24px 0 0; padding:20px 16px 24px; box-sizing:border-box; z-index:2600; overflow-y:auto; transform:translateY(100%); transition:transform 0.3s ease-out; }
+    #cart-modal.open { transform:translateY(0); }
+    #cart-modal .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    #cart-modal .modal-header h2 { font-size:1.4rem; font-weight:bold; color:var(--gold); }
+    #cart-modal .modal-header .close-btn { cursor:pointer; color:#aaa; font-size:1.2rem; display:flex; align-items:center; gap:4px; }
+    #cart-modal .modal-header .close-btn::after { content:"▼"; }
+    #cart-modal .cart-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+    #cart-modal .cart-item .item-info { display:flex; flex-direction:column; }
+    #cart-modal .cart-item .item-name { font-weight:500; }
+    #cart-modal .cart-item .item-price { font-size:0.85rem; color:#aaa; }
+    #cart-modal .cart-item .item-actions { display:flex; align-items:center; gap:10px; }
+    #cart-modal .cart-item .item-actions button { background:rgba(255,255,255,0.1); border:none; color:white; width:28px; height:28px; border-radius:50%; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; }
+    #cart-modal .cart-item .item-actions button:hover { background:var(--gold); color:black; }
+    #cart-modal .cart-item .item-actions .qty { font-weight:600; min-width:20px; text-align:center; }
+    #cart-modal .cart-fields { margin-top:16px; display:flex; flex-direction:column; gap:8px; }
+    #cart-modal .cart-fields .mode-toggle { display:flex; gap:8px; margin-bottom:4px; }
+    #cart-modal .cart-fields .mode-toggle button { flex:1; padding:8px; border-radius:10px; font-weight:600; border:none; cursor:pointer; transition:background 0.2s, color 0.2s; }
+    #cart-modal .cart-fields .mode-toggle .active-liv { background:var(--gold); color:black; }
+    #cart-modal .cart-fields .mode-toggle .active-retrait { background:var(--gold); color:black; }
+    #cart-modal .cart-fields .mode-toggle .inactive { background:rgba(255,255,255,0.08); color:#888; }
+    #cart-modal .cart-fields .field-row { display:flex; gap:8px; flex-wrap:wrap; }
+    #cart-modal .cart-fields input { flex:1; min-width:120px; padding:10px 14px; border-radius:12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:white; }
+    #cart-modal .cart-total-row { display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1); }
+    #cart-modal .cart-total-row .total-label { font-weight:600; color:#ccc; }
+    #cart-modal .cart-total-row .total-value { font-weight:700; color:var(--gold); font-size:1.2rem; }
+    #cart-modal .btn-commander { width:100%; margin-top:12px; padding:14px; border-radius:12px; background:var(--gold); color:black; font-weight:bold; border:none; cursor:pointer; transition:background 0.2s; }
+    #cart-modal .btn-commander:hover { background:#e0a800; }
 
-    #notification-bar { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; cursor: default; }
-    #order-led { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #555; margin-left: 8px; transition: background 0.3s; vertical-align: middle; box-shadow: 0 0 4px rgba(0,0,0,0.5); }
-    #order-led.active { background: #ffcc00; box-shadow: 0 0 12px #ffcc00; animation: blink-led 0.8s infinite alternate; }
-    @keyframes blink-led { 0% { opacity: 0.4; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.1); } }
-    #c-address:disabled { opacity: 0.5; cursor: not-allowed; }
+    #notification-bar { user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; cursor:default; }
+    #order-led { display:inline-block; width:12px; height:12px; border-radius:50%; background:#555; margin-left:8px; transition:background 0.3s; vertical-align:middle; box-shadow:0 0 4px rgba(0,0,0,0.5); }
+    #order-led.active { background:#ffcc00; box-shadow:0 0 12px #ffcc00; animation:blink-led 0.8s infinite alternate; }
+    @keyframes blink-led { 0%{opacity:0.4; transform:scale(0.9);} 100%{opacity:1; transform:scale(1.1);} }
+    #c-address:disabled { opacity:0.5; cursor:not-allowed; }
 
-    .logo-gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
-    .logo-thumb-wrapper { position: relative; display: inline-block; }
-    .logo-thumb { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s, transform 0.2s; }
-    .logo-thumb:hover { transform: scale(1.02); }
-    .logo-thumb.selected { border-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
-    .logo-delete-btn { position: absolute; top: -6px; right: -6px; background: #cc0000; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; transition: background 0.2s, transform 0.2s; z-index: 5; }
-    .logo-delete-btn:hover { background: #ff0000; transform: scale(1.1); }
+    .logo-gallery { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:8px; }
+    .logo-thumb-wrapper { position:relative; display:inline-block; }
+    .logo-thumb { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; transition:border-color 0.2s, transform 0.2s; }
+    .logo-thumb:hover { transform:scale(1.02); }
+    .logo-thumb.selected { border-color:var(--gold); box-shadow:0 0 8px var(--gold); }
+    .logo-delete-btn { position:absolute; top:-6px; right:-6px; background:#cc0000; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; line-height:1; transition:background 0.2s, transform 0.2s; z-index:5; }
+    .logo-delete-btn:hover { background:#ff0000; transform:scale(1.1); }
 
-    .order-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 8000; }
-    .order-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,20,20,.96); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.15); border-radius: 24px; padding: 28px; z-index: 8100; width: 360px; max-width: 90vw; max-height: 80vh; overflow-y: auto; box-sizing: border-box; color: #eee; }
-    .order-modal .modal-title { font-size: 1.3rem; font-weight: bold; color: var(--gold); margin-bottom: 12px; text-align: center; }
-    .order-modal .order-line { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; }
-    .order-modal .order-line .label { color: #aaa; }
-    .order-modal .order-line .value { font-weight: 500; }
-    .order-modal .btn-close-modal { width: 100%; margin-top: 16px; padding: 12px; border-radius: 12px; background: var(--gold); color: black; font-weight: bold; border: none; cursor: pointer; transition: background 0.2s; }
-    .order-modal .btn-close-modal:hover { background: #e0a800; }
-    .order-modal .btn-danger { background: #cc0000; color: white; }
-    .order-modal .btn-danger:hover { background: #ff0000; }
+    .order-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); z-index:8000; }
+    .order-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(20,20,20,.96); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.15); border-radius:24px; padding:28px; z-index:8100; width:360px; max-width:90vw; max-height:80vh; overflow-y:auto; box-sizing:border-box; color:#eee; }
+    .order-modal .modal-title { font-size:1.3rem; font-weight:bold; color:var(--gold); margin-bottom:12px; text-align:center; }
+    .order-modal .order-line { padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; }
+    .order-modal .order-line .label { color:#aaa; }
+    .order-modal .order-line .value { font-weight:500; }
+    .order-modal .btn-close-modal { width:100%; margin-top:16px; padding:12px; border-radius:12px; background:var(--gold); color:black; font-weight:bold; border:none; cursor:pointer; transition:background 0.2s; }
+    .order-modal .btn-close-modal:hover { background:#e0a800; }
+    .order-modal .btn-danger { background:#cc0000; color:white; }
+    .order-modal .btn-danger:hover { background:#ff0000; }
 
-    .res-card-unavailable { position: relative; opacity: 0.6; pointer-events: none; filter: grayscale(0.4); }
-    .res-card-unavailable .res-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; font-weight: bold; font-size: 1.1rem; border-radius: 12px; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+    .res-card-unavailable { position:relative; opacity:0.6; pointer-events:none; filter:grayscale(0.4); }
+    .res-card-unavailable .res-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); color:white; font-weight:bold; font-size:1.1rem; border-radius:12px; text-shadow:0 0 10px rgba(0,0,0,0.8); }
   </style>
 </head>
 <body class="bg-[#0f0f0f] text-gray-200 font-sans antialiased min-h-screen pb-32">
 
-<!-- OVERLAY POUR LE ZOOM -->
+<!-- OVERLAY ZOOM -->
 <div id="zoom-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:4999; cursor:pointer;" onclick="closeZoom()"></div>
 
 <!-- MODAL DE NOTATION -->
@@ -163,7 +148,7 @@
 <div class="order-modal" id="order-confirm-modal">
   <div class="modal-title">✅ Commande enregistrée !</div>
   <div id="confirm-order-content"></div>
-  <button class="btn-close-modal" onclick="closeOrderConfirmModal()">OK</button>
+  <button class="btn-close-modal" onclick="closeOrderConfirmModalAndGoHome()">OK</button>
 </div>
 
 <div class="order-modal-overlay" id="order-detail-overlay" onclick="closeOrderDetailModal()"></div>
@@ -208,36 +193,96 @@
 
 <!-- MODALS EDIT -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeEditModal()"></div>
-<div id="modal-edit-res" class="modal-edit"><!-- ... (inchangé) --></div>
-<div id="modal-edit-liv" class="modal-edit"><!-- ... (inchangé) --></div>
+<div id="modal-edit-res" class="modal-edit">
+  <h3 class="text-amber-400 text-xl font-bold mb-4">✏️ Modifier le Restaurant</h3>
+  <input type="text" id="edit-res-name" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" />
+  <input type="text" id="edit-res-code" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Code" />
+  <input type="number" id="edit-res-dur" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nouvelle validité (jours)" min="0" />
+  <div class="flex gap-2 mb-2">
+    <input type="text" id="edit-res-lat" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400" placeholder="Latitude" />
+    <input type="text" id="edit-res-lng" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400" placeholder="Longitude" />
+  </div>
+  <button onclick="getCurrentPosition('edit-res-lat', 'edit-res-lng')" class="w-full py-1 mb-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 text-sm hover:bg-blue-500/30">📍 Récupérer ma position</button>
+  <input type="file" id="edit-res-img" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" />
+  <p class="text-xs text-gray-400 mb-4">Laisser vide pour conserver l'image actuelle</p>
+  <button id="btn-edit-res" onclick="saveEditRes()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">ENREGISTRER</button>
+  <button onclick="closeEditModal()" class="w-full mt-2 text-gray-400 hover:text-white text-sm">ANNULER</button>
+</div>
+<div id="modal-edit-liv" class="modal-edit">
+  <h3 class="text-amber-400 text-xl font-bold mb-4">✏️ Modifier le Livreur</h3>
+  <img id="edit-liv-img-preview" class="max-w-[200px] max-h-[200px] mx-auto mb-3 rounded-lg hidden" alt="Photo du livreur" />
+  <input type="text" id="edit-liv-name" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" />
+  <input type="text" id="edit-liv-code" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Code" />
+  <input type="number" id="edit-liv-dur" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nouvelle validité (jours)" min="0" />
+  <input type="file" id="edit-liv-img" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" />
+  <p class="text-xs text-gray-400 mb-4">Laisser vide pour conserver l'image actuelle</p>
+  <button id="btn-edit-liv" onclick="saveEditLiv()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">ENREGISTRER</button>
+  <button onclick="closeEditModal()" class="w-full mt-2 text-gray-400 hover:text-white text-sm">ANNULER</button>
+</div>
 
 <!-- VIEWS -->
 <div id="view-restaurants" class="view-section active container mx-auto px-4 py-6"><div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4" id="res-grid"></div></div>
 <div id="view-menu-client" class="view-section container mx-auto px-4 py-6">
   <button onclick="goToHome()" class="btn-retour mb-4">← RETOUR</button>
-  <div class="flex justify-between items-center mb-4">
-    <h2 id="client-res-name" class="text-2xl font-bold text-white"></h2>
-  </div>
+  <div class="flex justify-between items-center mb-4"><h2 id="client-res-name" class="text-2xl font-bold text-white"></h2></div>
   <div id="plats-list-client"></div>
   <div class="h-40"></div>
 </div>
 <div id="view-admin-space" class="view-section container mx-auto px-4 py-6">
   <button onclick="goToHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
   <div class="glass rounded-2xl p-6 border border-white/10"><h2 class="text-2xl font-bold text-amber-400 mb-4">Admin</h2>
-    <!-- ... (toutes les sections admin) ... -->
+    <button onclick="toggleSec('adm-promo')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Message Promo <span class="text-amber-400">📣</span></button>
+    <div id="adm-promo" class="sub-section"><input type="text" id="adm-promo-txt" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Votre message promo..." /><button onclick="updatePromoMessage()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">METTRE À JOUR</button></div>
+    <button onclick="toggleSec('adm-res')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Restos <span class="text-amber-400">+</span></button>
+    <div id="adm-res" class="sub-section">
+      <input type="text" id="adm-res-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" />
+      <input type="text" id="adm-res-c" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Code" />
+      <input type="number" id="adm-res-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours)" min="0" />
+      <div class="flex gap-2 mb-2"><input type="text" id="adm-res-lat" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" placeholder="Latitude" /><input type="text" id="adm-res-lng" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" placeholder="Longitude" /></div>
+      <button onclick="getCurrentPosition('adm-res-lat', 'adm-res-lng')" class="w-full py-1 mb-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 text-sm hover:bg-blue-500/30">📍 Récupérer ma position</button>
+      <input type="file" id="adm-res-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" />
+      <button id="btn-admin-add-res" onclick="adminCreateRes()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">AJOUTER</button>
+      <div id="list-res-to-manage" class="mt-3 space-y-1"></div>
+    </div>
+    <button onclick="toggleSec('adm-liv')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Livreurs <span class="text-amber-400">+</span></button>
+    <div id="adm-liv" class="sub-section">
+      <input type="text" id="adm-liv-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" />
+      <input type="text" id="adm-liv-c" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Code" />
+      <input type="number" id="adm-liv-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours)" min="0" />
+      <input type="file" id="adm-liv-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" />
+      <button id="btn-admin-add-liv" onclick="adminCreateLiv()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">AJOUTER</button>
+      <div id="list-liv-to-manage" class="mt-3 space-y-1"></div>
+    </div>
+    <button onclick="toggleSec('adm-hist-section')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Journal Global <span class="text-amber-400">📜</span></button>
+    <div id="adm-hist-section" class="sub-section">
+      <div class="flex justify-between items-center mb-3"><h3 class="text-lg font-semibold text-white">Historique</h3><div class="flex gap-2"><button onclick="exportHistory()" class="px-3 py-1 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition">💾 TXT</button><button onclick="showClearConfirm()" class="px-3 py-1 rounded-lg bg-red-500/20 text-red-400 text-sm hover:bg-red-500/30 transition">🗑️</button></div></div>
+      <div id="clear-confirm-panel" class="confirm-panel"><p class="mb-2">Vider l'historique définitivement ?</p><button onclick="clearHistory()" class="px-4 py-1 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-500">OUI</button><button onclick="showClearConfirm(false)" class="px-4 py-1 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-500 ml-2">NON</button></div>
+      <div id="admin-hist-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
+    </div>
+    <button onclick="toggleSec('adm-logo')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Logo de l'App <span class="text-amber-400">🖼️</span></button>
+    <div id="adm-logo" class="sub-section">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input type="file" id="adm-logo-file" accept="image/png" style="flex:1; min-width:150px; padding:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:white;" />
+        <button id="btn-upload-logo" onclick="uploadAppLogo()" class="px-4 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">UPLOADER</button>
+      </div>
+      <div id="logo-gallery" class="logo-gallery" style="margin-top:12px;"></div>
+      <div style="margin-top:12px;"><button id="btn-validate-logo" onclick="validateLogo()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">VALIDER</button></div>
+    </div>
   </div>
 </div>
 <div id="view-pro-space" class="view-section container mx-auto px-4 py-6">
   <button onclick="goToHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
-  <div class="glass rounded-2xl p-6 border border-white/10"><h2 id="pro-res-title" class="text-2xl font-bold text-amber-400 mb-4"></h2>
-    <!-- ... -->
+  <div class="glass rounded-2xl p-6 border border-white/10"><h2 id="pro-res-title" class="text-2xl font-bold text-amber-400 mb-4"></h2><div id="orders-list-pro"></div>
+    <button onclick="toggleSec('add-plat')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Nouveau Plat <span class="text-amber-400">+</span></button>
+    <div id="add-plat" class="sub-section"><input type="text" id="new-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" /><input type="number" id="new-p" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Prix DZD" min="0" /><input type="number" id="new-s" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Stock initial" min="0" /><input type="file" id="new-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" /><button id="btn-add-plat" onclick="addNewPlat()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">ENREGISTRER</button></div>
+    <button onclick="toggleSec('manage-plats')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Stocks & Plats <span class="text-amber-400">⚙</span></button>
+    <div id="manage-plats" class="sub-section"></div>
+    <hr class="my-6 border-white/10" /><h3 class="text-lg font-semibold text-white mb-3">Historique Restaurant</h3><div id="res-event-log" class="max-h-72 overflow-y-auto space-y-2"></div>
   </div>
 </div>
 <div id="view-livreur-space" class="view-section container mx-auto px-4 py-6">
   <button onclick="logoutLivreur()" class="btn-retour mb-4">← DÉCONNEXION</button>
-  <div class="glass rounded-2xl p-6 border border-white/10"><h2 id="liv-name" class="text-2xl font-bold text-amber-400 mb-4"></h2>
-    <!-- ... -->
-  </div>
+  <div class="glass rounded-2xl p-6 border border-white/10"><h2 id="liv-name" class="text-2xl font-bold text-amber-400 mb-4"></h2><div id="liv-orders"></div><hr class="my-6 border-white/10" /><div id="liv-hist"></div></div>
 </div>
 
 <!-- PANIER -->
@@ -262,7 +307,7 @@
 </div>
 
 <script>
-// ==================== JAVASCRIPT COMPLET AVEC CORRECTION DES BOUTONS ====================
+// ==================== JAVASCRIPT COMPLET ====================
 
 const firebaseConfig = {
   apiKey: "AIzaSyD4ekJLYuL5QTsroQj_QlOUPohDwhlQ14s",
@@ -276,7 +321,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// === CONFIGURATION CLOUDINARY ===
 const CLOUDINARY_CLOUD_NAME = 'y6u9peta';
 const CLOUDINARY_UPLOAD_PRESET = 'Kool_uploadsibra';
 const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
@@ -289,11 +333,18 @@ function getOptimizedCloudinaryUrl(url, width = 300) {
   return `${parts[0]}/upload/f_auto/q_auto/w_${width}/${parts[1]}`;
 }
 
-// === VARIABLES GLOBALES ===
-let restaurants = [], livreurs = [], adminHistory = [], cart = {};
-let currentRes = null, currentLivreur = null;
-let currentPin = "", clientTempPin = "", deliveryTempPin = "";
-let pendingResId = null, pendingOrderId = null;
+// ========== VARIABLES GLOBALES ==========
+let restaurants = [];
+let livreurs = [];
+let adminHistory = [];
+let cart = {};
+let currentRes = null;
+let currentLivreur = null;
+let currentPin = "";
+let clientTempPin = "";
+let deliveryTempPin = "";
+let pendingResId = null;
+let pendingOrderId = null;
 let promoMessage = "BIENVENUE";
 let cloudWriteChain = Promise.resolve();
 let stopProOrdersWatch = null;
@@ -302,29 +353,73 @@ let editingId = null;
 
 let clientOrderTracking = [];
 let ratingQueue = [];
-
-let pendingRatingResto = null, pendingRatingLiv = null, pendingOrderForRating = null;
+let pendingRatingResto = null;
+let pendingRatingLiv = null;
+let pendingOrderForRating = null;
 let orderMode = 'livraison';
 
 let appLogos = [];
 let activeLogo = null;
 let selectedLogoId = null;
-
 let currentBestOrder = null;
 let currentBestStatus = null;
 let currentBestMode = null;
 let restoredFromDraft = false;
 
-// === SAUVEGARDE PANIER ===
+// ========== FONCTIONS UTILITAIRES ==========
+function calcAvg(arr) { if (!arr || arr.length===0) return "N/A"; const s = arr.reduce((a,b)=>a+b,0); return (s/arr.length).toFixed(1); }
+function resIndex(resId) { return restaurants.findIndex(r => Number(r.id)===Number(resId)); }
+function vibrate(ms=50) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+function setNotif(msg) {
+  vibrate(100);
+  const bar = document.getElementById('notification-bar');
+  document.getElementById('notif-message').innerText = msg;
+  bar.style.backgroundColor = "#ffcc00"; bar.style.color = "#000";
+  setTimeout(() => { bar.style.backgroundColor = "#000"; bar.style.color = "#ffcc00"; document.getElementById('notif-message').innerText = promoMessage; }, 3000);
+}
+
+function showSection(id) {
+  document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ========== DÉCONNEXION ==========
+function goToHome() {
+  cart = {};
+  clearCartDraft();
+  if (stopProOrdersWatch) {
+    stopProOrdersWatch();
+    stopProOrdersWatch = null;
+  }
+  currentRes = null;
+  currentLivreur = null;
+  closeOrderConfirmModal();
+  closeOrderDetailModal();
+  closeCartModal();
+  showSection('view-restaurants');
+  updateCartUI();
+  init();
+}
+
+function logoutLivreur() {
+  currentLivreur = null;
+  goToHome();
+}
+
+function closeOrderConfirmModalAndGoHome() {
+  closeOrderConfirmModal();
+  goToHome();
+}
+
+function toggleSec(id) { const el = document.getElementById(id); el.style.display = el.style.display === 'block' ? 'none' : 'block'; }
+
+// ========== SAUVEGARDE PANIER ==========
 function saveCartDraft() {
   if (!currentRes) return;
-  try {
-    localStorage.setItem('koul_cart_draft', JSON.stringify({ cart, resId: currentRes.id }));
-  } catch(e) {}
+  try { localStorage.setItem('koul_cart_draft', JSON.stringify({ cart, resId: currentRes.id })); } catch(e) {}
 }
-function clearCartDraft() {
-  localStorage.removeItem('koul_cart_draft');
-}
+function clearCartDraft() { localStorage.removeItem('koul_cart_draft'); }
 function restoreCartDraft() {
   if (restoredFromDraft) return;
   try {
@@ -357,70 +452,7 @@ function isRestaurantAvailable(r) {
   return true;
 }
 
-// === FONCTIONS UTILITAIRES ===
-function calcAvg(arr) { if (!arr || arr.length===0) return "N/A"; const s = arr.reduce((a,b)=>a+b,0); return (s/arr.length).toFixed(1); }
-function resIndex(resId) { return restaurants.findIndex(r => Number(r.id)===Number(resId)); }
-function vibrate(ms=50) { if (navigator.vibrate) navigator.vibrate(ms); }
-
-function setNotif(msg) {
-  vibrate(100);
-  const bar = document.getElementById('notification-bar');
-  document.getElementById('notif-message').innerText = msg;
-  bar.style.backgroundColor = "#ffcc00"; bar.style.color = "#000";
-  setTimeout(() => { bar.style.backgroundColor = "#000"; bar.style.color = "#ffcc00"; document.getElementById('notif-message').innerText = promoMessage; }, 3000);
-}
-
-function showSection(id) {
-  document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-// === CORRECTION DE goToHome ===
-function goToHome() {
-  console.log("goToHome() appelé - déconnexion / retour");
-  // Réinitialisation complète
-  cart = {};
-  clearCartDraft();
-  if (stopProOrdersWatch) {
-    stopProOrdersWatch();
-    stopProOrdersWatch = null;
-  }
-  currentRes = null;
-  currentLivreur = null;
-  // Fermer toutes les modales
-  closeOrderConfirmModal();
-  closeOrderDetailModal();
-  // Revenir à la vue restaurants
-  showSection('view-restaurants');
-  updateCartUI();
-  init();
-  // Fermer le panier si ouvert
-  closeCartModal();
-}
-
-function logoutLivreur() {
-  console.log("logoutLivreur() appelé");
-  currentLivreur = null;
-  goToHome();
-}
-
-function toggleSec(id) { const el = document.getElementById(id); el.style.display = el.style.display === 'block' ? 'none' : 'block'; }
-
-// === AUTRES FONCTIONS (inchangées) ===
-function getCurrentPosition(latInputId, lngInputId) {
-  if (!navigator.geolocation) { setNotif("Géolocalisation non supportée"); return; }
-  setNotif("📡 Récupération de la position...");
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      document.getElementById(latInputId).value = pos.coords.latitude.toFixed(6);
-      document.getElementById(lngInputId).value = pos.coords.longitude.toFixed(6);
-      setNotif("✅ Position récupérée");
-    },
-    () => setNotif("❌ Échec de la géolocalisation"),
-    { timeout: 10000, enableHighAccuracy: true }
-  );
-}
-
+// ========== CLOUDINARY UPLOAD ==========
 function uploadToCloudinary(file, callback) {
   if (!file) { callback(null); return; }
   const formData = new FormData();
@@ -446,6 +478,7 @@ function uploadToCloudinary(file, callback) {
   });
 }
 
+// ========== FIREBASE ÉCRITURE ==========
 function enqueueCloudWrite(task) { cloudWriteChain = cloudWriteChain.then(task).catch(console.error); return cloudWriteChain; }
 function pushRestaurants() { return enqueueCloudWrite(() => db.ref('cloud_koul/restaurants').set(restaurants)); }
 function saveRestaurant(res) { const i = resIndex(res.id); if (i<0) return cloudWriteChain; restaurants[i]=res; return enqueueCloudWrite(() => db.ref(`cloud_koul/restaurants/${i}`).set(res)); }
@@ -470,7 +503,22 @@ function logResEvent(res, status, order) {
   saveRestaurant(res);
 }
 
-// === LISTENERS FIREBASE ===
+// ========== GÉOLOCALISATION ==========
+function getCurrentPosition(latInputId, lngInputId) {
+  if (!navigator.geolocation) { setNotif("Géolocalisation non supportée"); return; }
+  setNotif("📡 Récupération de la position...");
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      document.getElementById(latInputId).value = pos.coords.latitude.toFixed(6);
+      document.getElementById(lngInputId).value = pos.coords.longitude.toFixed(6);
+      setNotif("✅ Position récupérée");
+    },
+    () => setNotif("❌ Échec de la géolocalisation"),
+    { timeout: 10000, enableHighAccuracy: true }
+  );
+}
+
+// ========== LISTENERS FIREBASE ==========
 function bindCloudListeners() {
   db.ref('cloud_koul/restaurants').on('value', snap => {
     const data = snap.val();
@@ -535,6 +583,7 @@ function onRestaurantsUpdated() {
   refreshCurrentView();
   if (document.getElementById('view-restaurants').classList.contains('active')) init();
 }
+
 function onLivreursUpdated() {
   if (currentLivreur) {
     const updated = livreurs.find(l => Number(l.id) === Number(currentLivreur.id));
@@ -549,7 +598,7 @@ function refreshCurrentView() {
   if (document.getElementById('view-livreur-space').classList.contains('active') && currentLivreur) { renderLivreurOrders(); renderLivreurHistory(); }
 }
 
-// === NUMPAD ===
+// ========== NUMPAD ==========
 function generatePads() {
   ['pad-main','numpad-client','numpad-delivery'].forEach(id => {
     const el = document.getElementById(id); el.innerHTML = '';
@@ -587,7 +636,7 @@ function processLogin() {
   }
 }
 
-// === PRO ===
+// ========== PRO (RESTAURANT) ==========
 function startProOrdersWatch(resId) {
   if (stopProOrdersWatch) stopProOrdersWatch();
   const idx = resIndex(resId);
@@ -644,7 +693,371 @@ function updateRestaurantOrders(resId, mutatorFn) {
   });
 }
 
-// === CLIENT ===
+function updateOrderStatus(orderId, status) {
+  const o = currentRes.orders.find(x => Number(x.id) === Number(orderId));
+  if (!o) { setNotif("COMMANDE INTROUVABLE"); return; }
+  const statusMessages = {
+    'waiting': o.mode === 'retrait' ? 'COMMANDE PRÊTE POUR RETRAIT' : 'COMMANDE PUBLIÉE',
+    'shipping': 'COMMANDE EN COURS DE LIVRAISON',
+    'delivered': 'COMMANDE LIVRÉE'
+  };
+  const msg = statusMessages[status] || 'COMMANDE MISE À JOUR';
+
+  const updateData = (orders) => {
+    return orders.map(order => {
+      if (Number(order.id) !== Number(orderId)) return order;
+      const updated = { ...order, status };
+      if (status === 'waiting') {
+        if (!updated.displayNumber) updated.displayNumber = Math.floor(1000 + Math.random() * 9000);
+        if (o.mode === 'livraison') {
+          if (currentRes.lat != null && currentRes.lng != null) {
+            updated.publishResLat = currentRes.lat;
+            updated.publishResLng = currentRes.lng;
+          } else {
+            return undefined;
+          }
+        }
+      }
+      return updated;
+    });
+  };
+
+  updateRestaurantOrders(currentRes.id, updateData)
+    .then(result => {
+      if (result.committed) {
+        logResEvent(currentRes, msg, o);
+        setNotif(msg);
+        renderProOrders();
+      } else {
+        setNotif("ÉCHEC MISE À JOUR DE LA COMMANDE");
+      }
+    })
+    .catch(err => {
+      console.error("Erreur updateOrderStatus:", err);
+      setNotif("ERREUR LORS DE LA MISE À JOUR");
+    });
+}
+
+function cancelOrder(oid) {
+  const idx = currentRes.orders.findIndex(o => o.id === oid);
+  if (idx === -1) { setNotif("COMMANDE INTROUVABLE"); return; }
+  const o = currentRes.orders[idx];
+
+  const stockRestores = o.rawItems.map(item => {
+    const platIdx = currentRes.plats.findIndex(p => Number(p.id) === Number(item.id));
+    if (platIdx === -1) return null;
+    return {
+      ref: db.ref(`cloud_koul/restaurants/${resIndex(currentRes.id)}/plats/${platIdx}/stock`),
+      qty: item.qte
+    };
+  }).filter(x => x !== null);
+
+  if (stockRestores.length > 0) {
+    Promise.all(stockRestores.map(restore => {
+      return new Promise((resolve, reject) => {
+        restore.ref.transaction((current) => {
+          if (current === null) return undefined;
+          return current + restore.qty;
+        }, (error, committed, snapshot) => {
+          if (error || !committed) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        }, false);
+      });
+    }))
+    .then(() => {
+      updateRestaurantOrders(currentRes.id, orders => orders.filter(o => o.id !== oid))
+        .then(result => {
+          if (result.committed) {
+            logResEvent(currentRes, "COMMANDE REJETÉE", o);
+            setNotif("COMMANDE ANNULÉE (STOCK RENDU)");
+            renderProOrders();
+          } else {
+            setNotif("ERREUR LORS DE L'ANNULATION");
+          }
+        })
+        .catch(err => {
+          console.error("Erreur cancelOrder:", err);
+          setNotif("ERREUR LORS DE L'ANNULATION");
+        });
+    })
+    .catch(err => {
+      console.error("Erreur restauration stock:", err);
+      setNotif("ERREUR RESTAURATION STOCK");
+    });
+  } else {
+    updateRestaurantOrders(currentRes.id, orders => orders.filter(o => o.id !== oid))
+      .then(result => {
+        if (result.committed) {
+          logResEvent(currentRes, "COMMANDE REJETÉE", o);
+          setNotif("COMMANDE ANNULÉE");
+          renderProOrders();
+        } else {
+          setNotif("ERREUR LORS DE L'ANNULATION");
+        }
+      })
+      .catch(err => {
+        console.error("Erreur cancelOrder:", err);
+        setNotif("ERREUR LORS DE L'ANNULATION");
+      });
+  }
+}
+
+function renderProPlats() {
+  const l = document.getElementById('manage-plats');
+  const focusedInput = document.activeElement;
+  let focusedId = null, focusedValue = null;
+  if (focusedInput && focusedInput.id && focusedInput.id.startsWith('stk-')) {
+    focusedId = focusedInput.id;
+    focusedValue = focusedInput.value;
+  }
+  l.innerHTML = '';
+  if (!currentRes.plats) return;
+  currentRes.plats.forEach((p, i) => {
+    const imgSrc = getOptimizedCloudinaryUrl(p.img, 80);
+    l.innerHTML += `
+      <div class="plat-manage-card" style="display:flex;align-items:center;gap:10px;background:#333;padding:10px;border-radius:8px;margin-bottom:8px;">
+        <img src="${imgSrc}" alt="${p.n}" class="mini-img" style="width:50px;height:50px;border-radius:5px;object-fit:cover;" onerror="this.onerror=null; this.src='https://via.placeholder.com/150';" />
+        <div style="flex:1"><b>${p.n}</b><br><small>${p.p.toLocaleString('fr-FR')} DZD</small></div>
+        <div style="display:flex;align-items:center">
+          <input type="number" value="${p.stock}" id="stk-${i}" style="width:50px;background:#222;border:1px solid #555;color:white;padding:5px;border-radius:4px;">
+          <button class="btn-icon" onclick="updateStock(${i})" style="background:#333;border:1px solid #555;color:white;padding:5px 10px;border-radius:5px;cursor:pointer;margin-left:5px;">OK</button>
+          <button class="btn-icon" onclick="deletePlat(${p.id})" style="color:red;border:none;background:none;font-size:1.2rem;cursor:pointer;margin-left:5px;">X</button>
+        </div>
+      </div>
+    `;
+  });
+  if (focusedId) { const el = document.getElementById(focusedId); if (el) el.value = focusedValue; }
+}
+
+function addNewPlat() {
+  const n = document.getElementById('new-n').value;
+  const p = document.getElementById('new-p').value;
+  const s = document.getElementById('new-s').value;
+  const file = document.getElementById('new-img').files[0];
+  if (!n || !p) return;
+  const btn = document.getElementById('btn-add-plat');
+  btn.disabled = true; btn.textContent = '...';
+  uploadToCloudinary(file, (imgUrl) => {
+    if (!currentRes.plats) currentRes.plats = [];
+    currentRes.plats.push({
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      n: n,
+      p: parseInt(p),
+      stock: parseInt(s) || 0,
+      img: imgUrl || ''
+    });
+    logAdminEvent(currentRes.name, `Plat ajouté: ${n}`);
+    setNotif("PLAT AJOUTÉ");
+    renderProPlats();
+    document.getElementById('new-n').value = '';
+    document.getElementById('new-p').value = '';
+    document.getElementById('new-s').value = '';
+    document.getElementById('new-img').value = '';
+    saveRestaurant(currentRes);
+    btn.disabled = false; btn.textContent = 'ENREGISTRER';
+  });
+}
+
+function deletePlat(id) { id = Number(id); const p = currentRes.plats.find(x => Number(x.id)===id); if (!p) return; logAdminEvent(currentRes.name, `Plat supprimé: ${p.n}`); currentRes.plats = currentRes.plats.filter(x => Number(x.id)!==id); saveRestaurant(currentRes); renderProPlats(); }
+function updateStock(i) { const p = currentRes.plats[i]; const newStk = parseInt(document.getElementById(`stk-${i}`).value); logAdminEvent(currentRes.name, `Stock ${p.n} : ${p.stock} -> ${newStk}`); p.stock = newStk; setNotif("STOCK MIS À JOUR"); saveRestaurant(currentRes); }
+function renderResHistory() { const l = document.getElementById('res-event-log'); l.innerHTML = ''; if (!currentRes.eventHistory || currentRes.eventHistory.length===0) { l.innerHTML = '<p style="color:#888;font-size:0.8rem">Aucun événement.</p>'; return; } currentRes.eventHistory.forEach(ev => { l.innerHTML += `<div class="hist-card" style="background:#1a1a1a;border-radius:8px;padding:12px;margin-bottom:10px;font-size:0.75rem;border-left:4px solid var(--gold);"><small>${ev.date} ${ev.time}</small><br><b>${ev.status}</b> - ${ev.client}</div>`; }); }
+
+// ========== ADMIN ==========
+function adminCreateRes() {
+  const n = document.getElementById('adm-res-n').value;
+  const c = document.getElementById('adm-res-c').value;
+  const dur = document.getElementById('adm-res-dur').value;
+  const lat = parseFloat(document.getElementById('adm-res-lat').value);
+  const lng = parseFloat(document.getElementById('adm-res-lng').value);
+  const file = document.getElementById('adm-res-img').files[0];
+  if (!n || !c) return;
+  const btn = document.getElementById('btn-admin-add-res');
+  btn.disabled = true; btn.textContent = '...';
+  uploadToCloudinary(file, (imgUrl) => {
+    const expiry = dur ? Date.now() + (parseInt(dur) * 24 * 60 * 60 * 1000) : null;
+    restaurants.push({
+      id: Date.now(),
+      name: n,
+      code: c,
+      expiry,
+      lat: isNaN(lat) ? null : lat,
+      lng: isNaN(lng) ? null : lng,
+      img: imgUrl || '',
+      plats: [],
+      orders: [],
+      eventHistory: [],
+      ratings: []
+    });
+    logAdminEvent("SYSTEM", `Resto créé: ${n}`);
+    renderAdminResList();
+    setNotif("RESTO AJOUTÉ");
+    pushRestaurants();
+    btn.disabled = false; btn.textContent = 'AJOUTER';
+  });
+}
+function adminCreateLiv() {
+  const n = document.getElementById('adm-liv-n').value;
+  const c = document.getElementById('adm-liv-c').value;
+  const dur = document.getElementById('adm-liv-dur').value;
+  const file = document.getElementById('adm-liv-img').files[0];
+  if (!n || !c) return;
+  const btn = document.getElementById('btn-admin-add-liv');
+  btn.disabled = true; btn.textContent = '...';
+  uploadToCloudinary(file, (imgUrl) => {
+    const expiry = dur ? Date.now() + (parseInt(dur) * 24 * 60 * 60 * 1000) : null;
+    livreurs.push({
+      id: Date.now(),
+      name: n,
+      code: c,
+      expiry,
+      img: imgUrl || '',
+      history: [],
+      ratings: []
+    });
+    logAdminEvent("SYSTEM", `Livreur créé: ${n}`);
+    renderAdminLivList();
+    setNotif("LIVREUR AJOUTÉ");
+    pushLivreurs();
+    btn.disabled = false; btn.textContent = 'AJOUTER';
+  });
+}
+function renderAdminResList() {
+  const l = document.getElementById('list-res-to-manage'); l.innerHTML = '';
+  restaurants.forEach(r => {
+    const exp = r.expiry ? ` (Exp: ${new Date(r.expiry).toLocaleDateString()} ${new Date(r.expiry).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})})` : ' (Permanent)';
+    const pos = (r.lat && r.lng) ? `📍 ${r.lat}, ${r.lng}` : '';
+    l.innerHTML += `<div style="display:flex;justify-content:space-between;align-items:center;background:#222;padding:5px;margin-bottom:2px;font-size:0.85rem">
+      <span style="flex:1;cursor:pointer;text-decoration:underline;color:var(--gold)" onclick="openEditResModal(${r.id})">${r.name} <b>(Code: ${r.code})</b>${exp} - ⭐ ${calcAvg(r.ratings)} ${pos}</span>
+      <button onclick="openEditResModal(${r.id})" style="color:var(--gold);border:none;background:none;font-size:1rem;cursor:pointer;margin-right:4px">✏️</button>
+      <button onclick="deleteRes(${r.id})" style="color:red;border:none;background:none">X</button>
+    </div>`;
+  });
+}
+function deleteRes(id) { id=Number(id); const r = restaurants.find(x => Number(x.id)===id); if (confirm("Supprimer ce restaurant ?")) { logAdminEvent("SYSTEM", `Resto supprimé: ${r.name}`); restaurants = restaurants.filter(x => Number(x.id)!==id); pushRestaurants(); renderAdminResList(); } }
+function renderAdminLivList() {
+  const l = document.getElementById('list-liv-to-manage'); l.innerHTML = '';
+  livreurs.forEach(liv => {
+    const exp = liv.expiry ? ` (Exp: ${new Date(liv.expiry).toLocaleDateString()} ${new Date(liv.expiry).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})})` : ' (Permanent)';
+    l.innerHTML += `<div style="display:flex;justify-content:space-between;align-items:center;background:#222;padding:5px;margin-bottom:2px;font-size:0.85rem">
+      <span style="flex:1;cursor:pointer;text-decoration:underline;color:var(--gold)" onclick="openEditLivModal(${liv.id})">${liv.name} <b>(Code: ${liv.code})</b>${exp} - ⭐ ${calcAvg(liv.ratings)}</span>
+      <button onclick="openEditLivModal(${liv.id})" style="color:var(--gold);border:none;background:none;font-size:1rem;cursor:pointer;margin-right:4px">✏️</button>
+      <button onclick="deleteLiv(${liv.id})" style="color:red;border:none;background:none">X</button>
+    </div>`;
+  });
+}
+function deleteLiv(id) { id=Number(id); const l = livreurs.find(x => Number(x.id)===id); if (confirm("Supprimer ce livreur ?")) { logAdminEvent("SYSTEM", `Livreur supprimé: ${l.name}`); livreurs = livreurs.filter(x => Number(x.id)!==id); pushLivreurs(); renderAdminLivList(); } }
+function renderAdminHistory() { const l = document.getElementById('admin-hist-list'); l.innerHTML = ''; adminHistory.forEach(h => { l.innerHTML += `<div class="hist-card" style="background:#1a1a1a;border-radius:8px;padding:12px;margin-bottom:10px;font-size:0.8rem;border-left:4px solid var(--gold);"><span class="type-tag" style="font-size:0.65rem;padding:2px 5px;border-radius:3px;background:#333;display:inline-block;margin-bottom:5px;">${h.type}</span><br><b>${h.details}</b><br><small>${h.date} ${h.time}</small></div>`; }); }
+function clearHistory() { adminHistory = []; pushHistory(); showClearConfirm(false); setNotif("HISTORIQUE VIDÉ"); }
+function closeEditModal() { document.getElementById('modal-edit-res').style.display='none'; document.getElementById('modal-edit-liv').style.display='none'; document.getElementById('modal-overlay').style.display='none'; editingId=null; }
+function openEditResModal(resId) {
+  const r = restaurants.find(x => x.id===resId);
+  if (!r) return;
+  editingId=resId;
+  document.getElementById('edit-res-name').value = r.name||'';
+  document.getElementById('edit-res-code').value = r.code||'';
+  document.getElementById('edit-res-dur').value = '';
+  document.getElementById('edit-res-lat').value = r.lat || '';
+  document.getElementById('edit-res-lng').value = r.lng || '';
+  document.getElementById('modal-edit-res').style.display='block';
+  document.getElementById('modal-overlay').style.display='block';
+}
+function saveEditRes() {
+  const r = restaurants.find(x => x.id===editingId);
+  if (!r) return;
+  const newName = document.getElementById('edit-res-name').value.trim();
+  const newCode = document.getElementById('edit-res-code').value.trim();
+  const newDur = document.getElementById('edit-res-dur').value;
+  const lat = parseFloat(document.getElementById('edit-res-lat').value);
+  const lng = parseFloat(document.getElementById('edit-res-lng').value);
+  const file = document.getElementById('edit-res-img').files[0];
+  const btn = document.getElementById('btn-edit-res');
+  btn.disabled = true; btn.textContent = '...';
+  const applyChanges = (imgUrl) => {
+    const old = r.name;
+    if (newName) r.name = newName;
+    if (newCode) r.code = newCode;
+    if (newDur) r.expiry = Date.now() + (parseInt(newDur) * 24 * 60 * 60 * 1000);
+    if (!isNaN(lat)) r.lat = lat;
+    if (!isNaN(lng)) r.lng = lng;
+    if (imgUrl !== undefined) r.img = imgUrl;
+    logAdminEvent("ADMIN", `Resto modifié: ${old} → ${r.name}`);
+    saveRestaurant(r);
+    renderAdminResList();
+    setNotif("RESTO MIS À JOUR");
+    closeEditModal();
+    btn.disabled = false; btn.textContent = 'ENREGISTRER';
+  };
+  if (file) { uploadToCloudinary(file, (imgUrl) => { applyChanges(imgUrl || ''); }); } else { applyChanges(undefined); }
+}
+function openEditLivModal(livId) { const l = livreurs.find(x => x.id===livId); if (!l) return; editingId=livId; document.getElementById('edit-liv-name').value = l.name||''; document.getElementById('edit-liv-code').value = l.code||''; document.getElementById('edit-liv-dur').value = ''; const preview = document.getElementById('edit-liv-img-preview'); if (l.img) { preview.src = getOptimizedCloudinaryUrl(l.img, 200); preview.style.display='block'; } else preview.style.display='none'; document.getElementById('modal-edit-liv').style.display='block'; document.getElementById('modal-overlay').style.display='block'; }
+function saveEditLiv() {
+  const l = livreurs.find(x => x.id===editingId);
+  if (!l) return;
+  const newName = document.getElementById('edit-liv-name').value.trim();
+  const newCode = document.getElementById('edit-liv-code').value.trim();
+  const newDur = document.getElementById('edit-liv-dur').value;
+  const file = document.getElementById('edit-liv-img').files[0];
+  const btn = document.getElementById('btn-edit-liv');
+  btn.disabled = true; btn.textContent = '...';
+  const applyChanges = (imgUrl) => {
+    const old = l.name;
+    if (newName) l.name = newName;
+    if (newCode) l.code = newCode;
+    if (newDur) l.expiry = Date.now() + (parseInt(newDur) * 24 * 60 * 60 * 1000);
+    if (imgUrl !== undefined) l.img = imgUrl;
+    logAdminEvent("ADMIN", `Livreur modifié: ${old} → ${l.name}`);
+    saveLivreur(l);
+    renderAdminLivList();
+    setNotif("LIVREUR MIS À JOUR");
+    closeEditModal();
+    btn.disabled = false; btn.textContent = 'ENREGISTRER';
+  };
+  if (file) { uploadToCloudinary(file, (imgUrl) => { applyChanges(imgUrl || ''); }); } else { applyChanges(undefined); }
+}
+
+function showClearConfirm(show=true) { document.getElementById('clear-confirm-panel').style.display = show ? 'block' : 'none'; }
+function exportHistory() {
+  let content = "HISTORIQUE KOOL - "+new Date().toLocaleString()+"\n------------------------------------------------\n";
+  adminHistory.forEach(h => { content += `[${h.date} ${h.time}] ${h.type}: ${h.details}\n`; });
+  const blob = new Blob([content], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `kool_log_${Date.now()}.txt`; a.click();
+  setNotif("LOGS EXPORTÉS");
+}
+function updatePromoMessage() {
+  const txt = document.getElementById('adm-promo-txt').value;
+  if (!txt) return;
+  promoMessage = txt;
+  logAdminEvent("ADMIN", `Promo modifiée: ${txt}`);
+  setNotif("MESSAGE PROMO MIS À JOUR");
+  pushPromo();
+}
+
+// ========== MODE (livraison/retrait) ==========
+function setOrderMode(mode) {
+  orderMode = mode;
+  const addrField = document.getElementById('c-address');
+  if (mode === 'livraison') {
+    addrField.disabled = false;
+    addrField.placeholder = 'Adresse (obligatoire si position non trouvée)';
+  } else {
+    addrField.disabled = true;
+    addrField.placeholder = 'Adresse (désactivée en mode retrait)';
+  }
+  updateModeButtons();
+}
+function updateModeButtons() {
+  const livBtn = document.getElementById('mode-livraison');
+  const retBtn = document.getElementById('mode-retrait');
+  if (!livBtn || !retBtn) return;
+  if (orderMode === 'livraison') { livBtn.className = 'active-liv'; retBtn.className = 'inactive'; }
+  else { livBtn.className = 'inactive'; retBtn.className = 'active-retrait'; }
+}
+
+// ========== CLIENT ==========
 function confirmClientOrder() {
   if (clientTempPin.length < 4) return;
   const okBtn = document.getElementById('client-ok-btn');
@@ -801,7 +1214,6 @@ function showOrderConfirmModal(order) {
   `;
   overlay.style.display = 'block';
   modal.style.display = 'block';
-  modal.style.transform = 'translate(-50%, -50%)';
 }
 
 function closeOrderConfirmModal() {
@@ -809,27 +1221,114 @@ function closeOrderConfirmModal() {
   const overlay = document.getElementById('order-confirm-overlay');
   modal.style.display = 'none';
   overlay.style.display = 'none';
-  // Ne pas appeler goToHome ici car c'est le bouton OK qui le fait
-  // Le bouton OK appelle closeOrderConfirmModal() puis goToHome() est appelé dans son onclick
 }
 
-// Le bouton OK de la modale de confirmation appelle maintenant une fonction intermédiaire
-// pour éviter de fermer puis de revenir à l'accueil dans le même appel.
-// Dans le HTML, le bouton a onclick="closeOrderConfirmModalAndGoHome()"
-// On ajoute cette fonction :
-function closeOrderConfirmModalAndGoHome() {
-  closeOrderConfirmModal();
-  goToHome();
+function openOrderDetailModal() {
+  if (!currentBestOrder) { setNotif("Aucune commande active"); return; }
+  const modal = document.getElementById('order-detail-modal');
+  const overlay = document.getElementById('order-detail-overlay');
+  const content = document.getElementById('detail-order-content');
+  const cancelBtn = document.getElementById('detail-cancel-btn');
+  const order = currentBestOrder;
+  const resto = restaurants.find(r => Number(r.id) === Number(order.resId || currentBestOrder.resId));
+  const modeLabel = order.mode === 'retrait' ? '🏠 À emporter' : '🚚 Livraison';
+  const statusLabels = {
+    'new': '🔄 En attente de confirmation',
+    'waiting': order.mode === 'retrait' ? '✅ Prête, venez récupérer' : '⏳ En préparation',
+    'shipping': '🚚 En livraison',
+    'delivered': '✅ Livrée'
+  };
+  const statusText = statusLabels[order.status] || order.status;
+
+  content.innerHTML = `
+    <div class="order-line"><span class="label">Restaurant</span><span class="value">${resto ? resto.name : '?'}</span></div>
+    <div class="order-line"><span class="label">Articles</span><span class="value">${order.itemsText}</span></div>
+    <div class="order-line"><span class="label">Total</span><span class="value">${Number(order.total).toLocaleString('fr-FR')} DZD</span></div>
+    <div class="order-line"><span class="label">Code secret</span><span class="value" style="color:var(--gold);">${order.pin}</span></div>
+    <div class="order-line"><span class="label">Mode</span><span class="value">${modeLabel}</span></div>
+    <div class="order-line"><span class="label">Statut</span><span class="value">${statusText}</span></div>
+  `;
+
+  if (order.status === 'new') {
+    cancelBtn.style.display = 'block';
+    cancelBtn.dataset.orderId = order.id;
+    cancelBtn.dataset.restoId = resto ? resto.id : null;
+  } else {
+    cancelBtn.style.display = 'none';
+  }
+  overlay.style.display = 'block';
+  modal.style.display = 'block';
 }
 
-// On adapte aussi le bouton OK de la modale :
-// Dans le HTML, remplacer onclick="closeOrderConfirmModal()" par onclick="closeOrderConfirmModalAndGoHome()"
-// Pour que ce soit cohérent, on modifie directement le HTML dans cette version finale.
+function closeOrderDetailModal() {
+  const modal = document.getElementById('order-detail-modal');
+  const overlay = document.getElementById('order-detail-overlay');
+  modal.style.display = 'none';
+  overlay.style.display = 'none';
+}
 
-// Je vais donc corriger le HTML de la modale de confirmation plus haut dans le code.
-// Comme je recrée tout le fichier, je vais l'intégrer directement.
+function cancelClientOrder() {
+  const cancelBtn = document.getElementById('detail-cancel-btn');
+  const orderId = parseInt(cancelBtn.dataset.orderId);
+  const restoId = parseInt(cancelBtn.dataset.restoId);
+  if (!orderId || !restoId) { setNotif("Erreur: commande introuvable"); return; }
+  if (!confirm("Annuler cette commande ?")) return;
 
-// === SUIVI CLIENTS ===
+  const r = restaurants.find(x => Number(x.id) === Number(restoId));
+  if (!r) { setNotif("Restaurant introuvable"); return; }
+  const o = r.orders.find(x => Number(x.id) === Number(orderId));
+  if (!o) { setNotif("Commande introuvable"); return; }
+
+  const stockRestores = o.rawItems.map(item => {
+    const platIdx = r.plats.findIndex(p => Number(p.id) === Number(item.id));
+    if (platIdx === -1) return null;
+    return {
+      ref: db.ref(`cloud_koul/restaurants/${resIndex(r.id)}/plats/${platIdx}/stock`),
+      qty: item.qte
+    };
+  }).filter(x => x !== null);
+
+  if (stockRestores.length > 0) {
+    Promise.all(stockRestores.map(restore => {
+      return new Promise((resolve, reject) => {
+        restore.ref.transaction((current) => {
+          if (current === null) return undefined;
+          return current + restore.qty;
+        }, (error, committed, snapshot) => {
+          if (error || !committed) { reject(error); } else { resolve(); }
+        }, false);
+      });
+    }))
+    .then(() => {
+      updateRestaurantOrders(r.id, orders => orders.filter(order => order.id !== orderId))
+        .then(result => {
+          if (result.committed) {
+            logResEvent(r, "COMMANDE ANNULÉE PAR LE CLIENT", o);
+            clearClientOrderTracking(orderId);
+            closeOrderDetailModal();
+            setNotif("COMMANDE ANNULÉE");
+            updateClientOrderStatus();
+          } else { setNotif("ERREUR LORS DE L'ANNULATION"); }
+        })
+        .catch(err => { console.error(err); setNotif("ERREUR LORS DE L'ANNULATION"); });
+    })
+    .catch(err => { console.error(err); setNotif("ERREUR RESTAURATION STOCK"); });
+  } else {
+    updateRestaurantOrders(r.id, orders => orders.filter(order => order.id !== orderId))
+      .then(result => {
+        if (result.committed) {
+          logResEvent(r, "COMMANDE ANNULÉE PAR LE CLIENT", o);
+          clearClientOrderTracking(orderId);
+          closeOrderDetailModal();
+          setNotif("COMMANDE ANNULÉE");
+          updateClientOrderStatus();
+        } else { setNotif("ERREUR LORS DE L'ANNULATION"); }
+      })
+      .catch(err => { console.error(err); setNotif("ERREUR LORS DE L'ANNULATION"); });
+  }
+}
+
+// ========== SUIVI CLIENTS ==========
 function loadClientOrderTracking() {
   const saved = localStorage.getItem('koul_client_tracking');
   if (saved) {
@@ -856,15 +1355,12 @@ function clearClientOrderTracking(orderId) {
   updateOrderLed();
 }
 
-function saveRatingQueue() {
-  localStorage.setItem('koul_rating_queue', JSON.stringify(ratingQueue));
-}
+function saveRatingQueue() { localStorage.setItem('koul_rating_queue', JSON.stringify(ratingQueue)); }
 
 function processRatingQueue() {
   const modal = document.getElementById('rating-modal');
   if (modal.style.display === 'flex') return;
   if (ratingQueue.length === 0) return;
-
   const entry = ratingQueue.shift();
   const { resto, order, liv } = entry;
   pendingRatingResto = resto;
@@ -918,7 +1414,6 @@ function updateClientOrderStatus() {
     currentBestMode = null;
     hideOrderStatusBar();
   }
-
   processRatingQueue();
   updateOrderLed();
 }
@@ -939,7 +1434,21 @@ function showOrderStatusBar(status, mode) {
 }
 function hideOrderStatusBar() { document.getElementById('order-status-bar').style.display = 'none'; }
 
-// === NOTATION ===
+function updateOrderLed() {
+  const led = document.getElementById('order-led');
+  if (!led) return;
+  let hasActive = false;
+  for (let entry of clientOrderTracking) {
+    const r = restaurants.find(res => Number(res.id) === Number(entry.resId));
+    if (!r) continue;
+    const o = r.orders ? r.orders.find(ord => Number(ord.id) === Number(entry.orderId)) : null;
+    if (!o) continue;
+    if (o.status === 'new' || o.status === 'waiting' || o.status === 'shipping') { hasActive = true; break; }
+  }
+  if (hasActive) { led.classList.add('active'); } else { led.classList.remove('active'); }
+}
+
+// ========== NOTATION ==========
 function openRatingModal(restaurant, livreur) {
   const modal = document.getElementById('rating-modal');
   modal.style.display = 'flex';
@@ -989,23 +1498,575 @@ function closeRatingModal() {
   processRatingQueue();
 }
 
-// === ADMIN, PRO, LIVREUR (restants) ===
-// Ces fonctions sont nombreuses et inchangées, je les inclus en version abrégée pour la lisibilité.
-// Dans la version finale, elles seront toutes présentes.
+// ========== LIVREUR ==========
+function cleanOrderFromLocalStorage(orderId, livId) {
+  if (!livId) return;
+  const keys = [`koul_nav_to_res_${livId}`, `koul_nav_to_client_${livId}`, `koul_picked_orders_${livId}`, `koul_hidden_orders_${livId}`];
+  keys.forEach(key => {
+    try {
+      let list = JSON.parse(localStorage.getItem(key) || '[]');
+      list = list.filter(id => id !== orderId);
+      localStorage.setItem(key, JSON.stringify(list));
+    } catch(e) {}
+  });
+}
 
-// Pour économiser de la place, je vais indiquer que toutes les fonctions admin, pro, livreur sont conservées telles quelles,
-// et je les ajoute dans le code complet final.
+function hasActiveOrder(livId) { let active=false; restaurants.forEach(r => { if (r.orders && r.orders.some(o => o.livId===livId && o.status==='shipping')) active=true; }); return active; }
+function mapsBikeDirectionsUrl(origin, dest) { if (!origin || !dest || origin.lat==null || origin.lng==null || dest.lat==null || dest.lng==null) return null; return `https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${dest.lat},${dest.lng}&travelmode=bicycling`; }
 
-// En résumé, la correction porte sur :
-// - goToHome() renforcée avec console.log et fermeture de toutes les modales.
-// - logoutLivreur() qui appelle goToHome().
-// - Les boutons dans le HTML utilisent bien onclick="goToHome()" ou onclick="logoutLivreur()".
-// - Le bouton OK de la modale de confirmation utilise closeOrderConfirmModalAndGoHome() pour éviter un conflit.
+function openNavToRestaurant(resId, orderId) {
+  const r = restaurants.find(x => Number(x.id)===Number(resId));
+  const o = r && r.orders ? r.orders.find(x => Number(x.id)===Number(orderId)) : null;
+  if (!o || o.publishResLat==null || o.publishResLng==null) return setNotif("POSITION RESTO INDISPONIBLE");
+  if (!navigator.geolocation) return setNotif("GÉOLOCALISATION INDISPONIBLE");
+  navigator.geolocation.getCurrentPosition(pos => {
+    const url = mapsBikeDirectionsUrl({ lat: pos.coords.latitude, lng: pos.coords.longitude }, { lat: o.publishResLat, lng: o.publishResLng });
+    if (!url) return setNotif("ITINÉRAIRE IMPOSSIBLE");
+    let list = livNavToResList();
+    if (!list.includes(orderId)) { list.push(orderId); localStorage.setItem(`koul_nav_to_res_${currentLivreur.id}`, JSON.stringify(list)); }
+    window.open(url, '_blank'); renderLivreurOrders();
+  }, () => setNotif("IMPOSSIBLE D'OBTENIR VOTRE POSITION"), { timeout:10000, enableHighAccuracy:true });
+}
 
-// Je vais maintenant recréer le fichier complet en incluant toutes ces corrections.
+function openNavToClient(resId, orderId) {
+  const r = restaurants.find(x => Number(x.id)===Number(resId));
+  const o = r && r.orders ? r.orders.find(x => Number(x.id)===Number(orderId)) : null;
+  if (!o) return setNotif("COMMANDE INTROUVABLE");
 
-// (Le code complet est trop long pour être affiché ici dans son intégralité, mais je vous assure que les corrections sont appliquées.)
+  if (o.clientLat == null || o.clientLng == null) {
+    if (!o.clientAddress) return setNotif("POSITION CLIENT INDISPONIBLE (adresse manquante)");
+  }
 
+  if (!navigator.geolocation) {
+    if (o.publishResLat == null || o.publishResLng == null) return setNotif("POSITION RESTO INDISPONIBLE");
+    let url;
+    if (o.clientLat != null && o.clientLng != null) {
+      url = mapsBikeDirectionsUrl({ lat: o.publishResLat, lng: o.publishResLng }, { lat: o.clientLat, lng: o.clientLng });
+    } else {
+      url = `https://www.google.com/maps/dir/?api=1&origin=${o.publishResLat},${o.publishResLng}&destination=${encodeURIComponent(o.clientAddress)}&travelmode=bicycling`;
+    }
+    if (!url) return setNotif("ITINÉRAIRE IMPOSSIBLE");
+    let list = livNavToClientList();
+    if (!list.includes(orderId)) { list.push(orderId); localStorage.setItem(`koul_nav_to_client_${currentLivreur.id}`, JSON.stringify(list)); }
+    window.open(url, '_blank');
+    renderLivreurOrders();
+    return;
+  }
+
+  setNotif("📡 Récupération de votre position...");
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      let url;
+      if (o.clientLat != null && o.clientLng != null) {
+        url = mapsBikeDirectionsUrl(origin, { lat: o.clientLat, lng: o.clientLng });
+      } else {
+        url = `https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${encodeURIComponent(o.clientAddress)}&travelmode=bicycling`;
+      }
+      if (!url) { setNotif("ITINÉRAIRE IMPOSSIBLE"); return; }
+      let list = livNavToClientList();
+      if (!list.includes(orderId)) { list.push(orderId); localStorage.setItem(`koul_nav_to_client_${currentLivreur.id}`, JSON.stringify(list)); }
+      window.open(url, '_blank');
+      renderLivreurOrders();
+    },
+    () => {
+      if (o.publishResLat == null || o.publishResLng == null) {
+        setNotif("POSITION RESTO INDISPONIBLE");
+        return;
+      }
+      let url;
+      if (o.clientLat != null && o.clientLng != null) {
+        url = mapsBikeDirectionsUrl({ lat: o.publishResLat, lng: o.publishResLng }, { lat: o.clientLat, lng: o.clientLng });
+      } else {
+        url = `https://www.google.com/maps/dir/?api=1&origin=${o.publishResLat},${o.publishResLng}&destination=${encodeURIComponent(o.clientAddress)}&travelmode=bicycling`;
+      }
+      if (!url) { setNotif("ITINÉRAIRE IMPOSSIBLE"); return; }
+      let list = livNavToClientList();
+      if (!list.includes(orderId)) { list.push(orderId); localStorage.setItem(`koul_nav_to_client_${currentLivreur.id}`, JSON.stringify(list)); }
+      window.open(url, '_blank');
+      renderLivreurOrders();
+    },
+    { timeout: 10000, enableHighAccuracy: true }
+  );
+}
+
+function livNavToResList() { return JSON.parse(localStorage.getItem(`koul_nav_to_res_${currentLivreur.id}`)||'[]'); }
+function livNavToClientList() { return JSON.parse(localStorage.getItem(`koul_nav_to_client_${currentLivreur.id}`)||'[]'); }
+function livPickedList() { return JSON.parse(localStorage.getItem(`koul_picked_orders_${currentLivreur.id}`)||'[]'); }
+function markPicked(orderId) { let list = livPickedList(); if (!list.includes(orderId)) list.push(orderId); localStorage.setItem(`koul_picked_orders_${currentLivreur.id}`, JSON.stringify(list)); renderLivreurOrders(); }
+
+function renderLivreurOrders() {
+  const l = document.getElementById('liv-orders'); l.innerHTML = '<h3 class="text-lg font-semibold text-white mb-3">Missions</h3>';
+  const isBusy = hasActiveOrder(currentLivreur.id);
+  const myHiddenOrders = JSON.parse(localStorage.getItem(`koul_hidden_orders_${currentLivreur.id}`)||'[]');
+  const navToRes = livNavToResList(), navToClient = livNavToClientList(), picked = livPickedList();
+  restaurants.forEach(r => {
+    if (!r.orders) return;
+    r.orders.forEach(o => {
+      if (o.mode === 'retrait' || o.status === 'delivered') return;
+      if (myHiddenOrders.includes(o.id)) return;
+      if (o.status !== 'waiting' && !(o.status==='shipping' && o.livId===currentLivreur.id)) return;
+      const canTake = !isBusy && o.status==='waiting';
+      const isMine = o.status==='shipping' && o.livId===currentLivreur.id;
+      const hasNavToRes = navToRes.includes(o.id), hasNavToClient = navToClient.includes(o.id), hasPicked = picked.includes(o.id);
+      let navBtn = '';
+      if (isMine) {
+        if (!hasPicked) navBtn = `<button class="btn-finish" style="flex:1;background:#1a2a3a;border:1px solid #2196F3;color:#2196F3;padding:10px;border-radius:5px;font-weight:bold;cursor:pointer;" onclick="openNavToRestaurant(${r.id},${o.id})">🏠 Vers le restaurant</button>`;
+        else navBtn = `<button class="btn-finish" style="flex:1;background:#1a3a1a;border:1px solid #28a745;color:#28a745;padding:10px;border-radius:5px;font-weight:bold;cursor:pointer;" onclick="openNavToClient(${r.id},${o.id})">📍 Vers le client</button>`;
+      }
+      const recupDisabled = !hasNavToRes;
+      const recupBtn = isMine && !hasPicked ? `<button class="btn-finish" style="background:#FF9800;padding:10px;border-radius:5px;font-weight:bold;cursor:pointer;border:none;color:black;${recupDisabled?'opacity:0.45;cursor:not-allowed;':''}" ${recupDisabled?'disabled':''} onclick="${recupDisabled?'':`markPicked(${o.id})`}">RÉCUPÉRER</button>` : '';
+      const validateDisabled = !hasNavToClient;
+      const validateBtn = isMine ? `<button class="btn-finish" style="background:#28a745;color:white;border:none;padding:10px;border-radius:5px;font-weight:bold;cursor:pointer;${validateDisabled?'opacity:0.45;cursor:not-allowed;':''}" ${validateDisabled?'disabled':''} onclick="openValPin(${r.id},${o.id})">VALIDER LIVRAISON</button>` : '';
+      l.innerHTML += `<div class="order-card-pro" style="background:#2a2a2a;padding:15px;border-radius:8px;margin-bottom:10px;border:1px solid #444;">
+        <b style="color:var(--gold)">${r.name}</b><br>
+        <b>Client: ${isMine ? o.client : '---'} ${o.displayNumber ? '<span style="color:var(--gold)">#'+o.displayNumber+'</span>' : ''}</b><br>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          ${canTake ? `<button class="btn-finish" onclick="takeOrd(${r.id},${o.id})" style="background:#28a745;color:white;border:none;padding:10px;border-radius:5px;flex:1;font-weight:bold;cursor:pointer;">PRENDRE</button>` : ''}
+          ${o.status === 'waiting' ? `<button class="btn-reject" onclick="ignoreOrd(${o.id})" style="background:#cc0000;color:white;border:none;padding:10px;border-radius:5px;flex:1;font-weight:bold;cursor:pointer;">MASQUER</button>` : ''}
+          ${(isMine && hasPicked) ? `<a href="tel:${o.tel}" class="btn-call" style="background:#007bff;color:white;border:none;padding:10px;border-radius:5px;flex:1;font-weight:bold;cursor:pointer;text-decoration:none;text-align:center;">APPELER</a>` : ''}
+          ${recupBtn} ${validateBtn}
+        </div>
+        ${isMine ? `<div style="display:flex;gap:8px;margin-top:8px">${navBtn}</div>` : ''}
+        ${isBusy && o.status==='waiting' ? '<small style="color:orange">Terminez votre livraison actuelle pour en prendre une autre.</small>' : ''}
+      </div>`;
+    });
+  });
+}
+
+function takeOrd(rid, oid) {
+  if (hasActiveOrder(currentLivreur.id)) return setNotif("VOUS AVEZ DÉJÀ UNE LIVRAISON");
+
+  const restIdx = resIndex(rid);
+  if (restIdx === -1) { setNotif("RESTAURANT INTROUVABLE"); return; }
+
+  const r = restaurants[restIdx];
+  const orderIdx = r.orders.findIndex(o => Number(o.id) === Number(oid));
+  if (orderIdx === -1) { setNotif("COMMANDE INTROUVABLE"); return; }
+
+  const orderRef = db.ref(`cloud_koul/restaurants/${restIdx}/orders/${orderIdx}`);
+
+  orderRef.transaction((currentData) => {
+    if (currentData === null) return undefined;
+    if (currentData.status !== 'waiting' || currentData.livId) return undefined;
+    currentData.status = 'shipping';
+    currentData.livId = currentLivreur.id;
+    currentData.livName = currentLivreur.name;
+    return currentData;
+  }, (error, committed, snapshot) => {
+    if (error) {
+      console.error("Transaction takeOrd échouée:", error);
+      setNotif("ERREUR LORS DE LA PRISE DE COMMANDE");
+      return;
+    }
+    if (!committed) {
+      setNotif("COMMANDE DÉJÀ PRISE PAR UN AUTRE LIVREUR");
+      renderLivreurOrders();
+      return;
+    }
+    const updatedOrder = snapshot.val();
+    const localOrder = r.orders.find(o => Number(o.id) === Number(oid));
+    if (localOrder) {
+      localOrder.status = 'shipping';
+      localOrder.livId = currentLivreur.id;
+      localOrder.livName = currentLivreur.name;
+    }
+    logResEvent(r, `PRISE PAR LIVREUR (${currentLivreur.name})`, updatedOrder || localOrder);
+    setNotif("COMMANDE RÉCUPÉRÉE");
+    renderLivreurOrders();
+  });
+}
+
+function ignoreOrd(oid) { const key = `koul_hidden_orders_${currentLivreur.id}`; let list = JSON.parse(localStorage.getItem(key)||'[]'); list.push(oid); localStorage.setItem(key, JSON.stringify(list)); logAdminEvent("LIVREUR", `${currentLivreur.name} a masqué une commande.`); renderLivreurOrders(); setNotif("COMMANDE MASQUÉE POUR VOUS"); }
+function openValPin(rid, oid) { pendingResId = rid; pendingOrderId = oid; deliveryTempPin = ''; document.getElementById('delivery-pin-view').innerText = ''; document.getElementById('delivery-validation-container').style.display = 'block'; }
+function closeDeliveryPin() { document.getElementById('delivery-validation-container').style.display = 'none'; }
+
+function confirmDelivery() {
+  const r = restaurants.find(x => x.id === pendingResId);
+  if (!r) { setNotif("RESTAURANT INTROUVABLE"); closeDeliveryPin(); return; }
+  const idx = r.orders.findIndex(x => x.id === pendingOrderId);
+  if (idx === -1) { setNotif("COMMANDE INTROUVABLE"); closeDeliveryPin(); return; }
+  const o = r.orders[idx];
+  if (deliveryTempPin !== o.pin) {
+    vibrate([50,50]);
+    setNotif("CODE INCORRECT");
+    return;
+  }
+
+  updateRestaurantOrders(r.id, orders => orders.map(order => {
+    if (Number(order.id) !== Number(pendingOrderId)) return order;
+    return { ...order, status: 'delivered' };
+  }))
+  .then(result => {
+    if (result.committed) {
+      logResEvent(r, `LIVRÉE PAR ${currentLivreur ? currentLivreur.name : 'PRO'}`, o);
+      setNotif("COMMANDE LIVRÉE !");
+      if (currentLivreur) {
+        if (!currentLivreur.history) currentLivreur.history = [];
+        currentLivreur.history.push({
+          resName: r.name,
+          date: new Date().toLocaleDateString(),
+          time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        });
+        saveLivreur(currentLivreur);
+      }
+      closeDeliveryPin();
+      if (currentLivreur) { renderLivreurOrders(); renderLivreurHistory(); }
+      if (currentRes) { renderProOrders(); renderResHistory(); }
+    } else { setNotif("ERREUR LORS DE LA LIVRAISON"); }
+  })
+  .catch(err => {
+    console.error("Erreur confirmDelivery:", err);
+    setNotif("ERREUR LORS DE LA LIVRAISON");
+  });
+}
+
+function renderLivreurHistory() {
+  const l = document.getElementById('liv-hist'); l.innerHTML = '<h4 class="text-md font-semibold text-white mt-4 mb-2">Historique</h4>';
+  if (!currentLivreur.history) return;
+  [...currentLivreur.history].reverse().forEach(h => {
+    l.innerHTML += `<div style="font-size:0.75rem;background:#1a1a1a;padding:8px;margin-bottom:5px;border-left:3px solid #28a745;border-radius:4px;"><b>${h.resName}</b><br><small>${h.date} - ${h.time}</small> ✅</div>`;
+  });
+}
+
+// ========== PANIER ==========
+function openCartModal() {
+  document.getElementById('cart-modal-overlay').style.display = 'block';
+  const modal = document.getElementById('cart-modal');
+  modal.style.display = 'block';
+  requestAnimationFrame(() => {
+    modal.classList.add('open');
+    setTimeout(() => {
+      const nameField = document.getElementById('c-name');
+      if (nameField) nameField.focus();
+    }, 350);
+  });
+}
+function closeCartModal() {
+  const modal = document.getElementById('cart-modal');
+  modal.classList.remove('open');
+  setTimeout(() => {
+    modal.style.display = 'none';
+    document.getElementById('cart-modal-overlay').style.display = 'none';
+  }, 300);
+}
+
+function updateCartUI() {
+  const keys = Object.keys(cart);
+  const hasItems = keys.length > 0;
+  const isClientView = document.getElementById('view-menu-client').classList.contains('active');
+  const bar = document.getElementById('cart-bar');
+  if (hasItems && isClientView) {
+    bar.style.display = 'flex';
+    let total = 0, count = 0;
+    keys.forEach(k => { total += cart[k].p * cart[k].qte; count += cart[k].qte; });
+    document.getElementById('cart-item-count').innerText = count;
+    document.getElementById('cart-total-bar').innerText = total.toLocaleString('fr-FR');
+  } else {
+    bar.style.display = 'none';
+    if (!isClientView || !hasItems) { closeCartModal(); }
+  }
+  const listContainer = document.getElementById('cart-items-list');
+  listContainer.innerHTML = '';
+  let totalModal = 0;
+  keys.forEach(k => {
+    const item = cart[k];
+    totalModal += item.p * item.qte;
+    listContainer.innerHTML += `
+      <div class="cart-item">
+        <div class="item-info">
+          <span class="item-name">${item.n}</span>
+          <span class="item-price">${item.p.toLocaleString('fr-FR')} DZD</span>
+        </div>
+        <div class="item-actions">
+          <button onclick="changeQty(${item.id}, -1)">−</button>
+          <span class="qty">${item.qte}</span>
+          <button onclick="changeQty(${item.id}, 1)">+</button>
+        </div>
+      </div>
+    `;
+  });
+  document.getElementById('cart-total').innerText = totalModal.toLocaleString('fr-FR');
+  updateModeButtons();
+}
+
+function changeQty(pid, d) {
+  pid = Number(pid);
+  const p = currentRes.plats.find(x => Number(x.id) === pid);
+  if (!p) return;
+  if (d > 0 && p.stock <= (cart[pid]?.qte || 0)) return setNotif("STOCK ÉPUISÉ");
+  if (!cart[pid]) cart[pid] = { n: p.n, p: p.p, qte: 0, id: p.id };
+  cart[pid].qte += d;
+  if (cart[pid].qte <= 0) delete cart[pid];
+  renderClientPlats();
+  updateCartUI();
+  saveCartDraft();
+}
+
+function renderClientPlats() {
+  const l = document.getElementById('plats-list-client');
+  l.innerHTML = '';
+  if (!currentRes.plats) return;
+  let needUpdate = false;
+  for (let pid in cart) {
+    const plat = currentRes.plats.find(p => Number(p.id) === Number(pid));
+    if (!plat) { delete cart[pid]; needUpdate = true; continue; }
+    if (plat.stock < cart[pid].qte) {
+      cart[pid].qte = Math.max(0, plat.stock);
+      if (cart[pid].qte === 0) delete cart[pid];
+      needUpdate = true;
+      setNotif(`⚠️ Stock ajusté pour ${plat.n}`);
+    }
+  }
+  if (needUpdate) { saveCartDraft(); updateCartUI(); }
+
+  currentRes.plats.forEach(p => {
+    const qty = cart[p.id] ? cart[p.id].qte : 0;
+    const imgSrc = getOptimizedCloudinaryUrl(p.img, 300);
+    l.innerHTML += `<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.05);padding:10px;border-radius:10px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.05);">
+      <img src="${imgSrc}" alt="${p.n}" class="img-plat-client" onclick="toggleZoom(this)" onerror="this.onerror=null; this.src='https://via.placeholder.com/150';">
+      <div style="flex:1"><b class="text-white">${p.n}</b><br>${p.p.toLocaleString('fr-FR')} DZD <br><small class="text-gray-400">Dispo: ${p.stock}</small></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="changeQty(${p.id}, -1)" class="px-3 py-1 rounded-lg bg-white/10 text-white hover:bg-white/20">-</button>
+        <span class="text-white font-semibold">${qty}</span>
+        <button onclick="changeQty(${p.id}, 1)" class="px-3 py-1 rounded-lg bg-white/10 text-white hover:bg-white/20">+</button>
+      </div>
+    </div>`;
+  });
+}
+
+function openClientPin() {
+  const name = document.getElementById('c-name').value.trim();
+  if (!name) return setNotif("NOM REQUIS");
+  document.getElementById('client-pin-container').style.display = 'block';
+  clientTempPin = ''; document.getElementById('client-pin-view').innerText = '';
+  const okBtn = document.getElementById('client-ok-btn');
+  if (okBtn) okBtn.disabled = false;
+}
+function closeClientPin() {
+  document.getElementById('client-pin-container').style.display = 'none';
+  const okBtn = document.getElementById('client-ok-btn');
+  if (okBtn) okBtn.disabled = false;
+}
+
+// ========== ZOOM ==========
+function toggleZoom(img) {
+  const overlay = document.getElementById('zoom-overlay');
+  if (img.classList.contains('zoom-image')) {
+    img.classList.remove('zoom-image'); overlay.style.display = 'none';
+  } else {
+    document.querySelectorAll('.img-plat-client.zoom-image').forEach(el => el.classList.remove('zoom-image'));
+    const hdUrl = getOptimizedCloudinaryUrl(img.src, 800);
+    img.src = hdUrl;
+    img.classList.add('zoom-image');
+    overlay.style.display = 'block';
+  }
+}
+function closeZoom() {
+  document.querySelectorAll('.img-plat-client.zoom-image').forEach(el => el.classList.remove('zoom-image'));
+  document.getElementById('zoom-overlay').style.display = 'none';
+}
+
+// ========== INIT ==========
+function init() {
+  const grid = document.getElementById('res-grid');
+  grid.innerHTML = '';
+  restaurants.forEach(res => {
+    const imgSrc = getOptimizedCloudinaryUrl(res.img, 200);
+    const available = isRestaurantAvailable(res);
+    const cardClass = available ? '' : 'res-card-unavailable';
+    const clickAttr = available ? `onclick="openClientMenu(${res.id})"` : '';
+    grid.innerHTML += `
+      <div class="card glass-hover ${cardClass}" style="background:rgba(255,255,255,0.05);border-radius:12px;padding:10px;text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.08);position:relative;" ${clickAttr}>
+        <img src="${imgSrc}" alt="${res.name}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;margin-bottom:5px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/150';">
+        <br><b class="text-white">${res.name}</b><br><small style="color:var(--gold)">⭐ ${calcAvg(res.ratings)}</small>
+        ${!available ? `<div class="res-overlay">Indisponible</div>` : ''}
+      </div>
+    `;
+  });
+  generatePads();
+}
+
+function openClientMenu(rid) {
+  const r = restaurants.find(x => Number(x.id) === Number(rid));
+  if (!r) return;
+  if (!isRestaurantAvailable(r)) {
+    setNotif("RESTAURANT INDISPONIBLE POUR LE MOMENT");
+    return;
+  }
+  currentRes = r;
+  showSection('view-menu-client');
+  document.getElementById('client-res-name').innerText = `${r.name} (⭐ ${calcAvg(r.ratings)})`;
+  renderClientPlats();
+  updateCartUI();
+}
+
+// ========== LOGO ==========
+function uploadAppLogo() {
+  const fileInput = document.getElementById('adm-logo-file');
+  const file = fileInput.files[0];
+  if (!file) { setNotif("SÉLECTIONNEZ UN FICHIER PNG"); return; }
+  if (file.type !== 'image/png') { setNotif("SEUL LE FORMAT PNG EST AUTORISÉ"); return; }
+
+  const btn = document.getElementById('btn-upload-logo');
+  btn.disabled = true; btn.textContent = '...';
+
+  uploadToCloudinary(file, (url) => {
+    if (url) {
+      const newLogo = { id: Date.now(), url: url };
+      appLogos.push(newLogo);
+      pushAppLogos().then(() => { renderLogoGallery(); setNotif("LOGO AJOUTÉ À LA GALERIE"); });
+    } else { setNotif("ÉCHEC DE L'UPLOAD"); }
+    btn.disabled = false; btn.textContent = 'UPLOADER';
+    fileInput.value = '';
+  });
+}
+
+function renderLogoGallery() {
+  const gallery = document.getElementById('logo-gallery');
+  if (!gallery) return;
+  gallery.innerHTML = '';
+  if (appLogos.length === 0) {
+    gallery.innerHTML = '<p style="color:#888; font-size:0.9rem; grid-column:1/-1; text-align:center;">Aucun logo téléchargé.</p>';
+    return;
+  }
+  const sorted = [...appLogos].sort((a,b) => b.id - a.id);
+  sorted.forEach(logo => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'logo-thumb-wrapper';
+
+    const img = document.createElement('img');
+    img.src = getOptimizedCloudinaryUrl(logo.url, 150);
+    img.alt = "Logo";
+    img.className = 'logo-thumb';
+    if (logo.url === activeLogo) img.classList.add('selected');
+    else if (selectedLogoId === logo.id) img.classList.add('selected');
+    img.dataset.id = logo.id;
+    img.dataset.url = logo.url;
+    img.addEventListener('click', () => {
+      document.querySelectorAll('.logo-thumb').forEach(el => el.classList.remove('selected'));
+      img.classList.add('selected');
+      selectedLogoId = logo.id;
+    });
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'logo-delete-btn';
+    delBtn.textContent = '✕';
+    delBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm("Supprimer ce logo ?")) { deleteLogo(logo.id); }
+    });
+
+    wrapper.appendChild(img);
+    wrapper.appendChild(delBtn);
+    gallery.appendChild(wrapper);
+  });
+}
+
+function deleteLogo(logoId) {
+  const index = appLogos.findIndex(l => l.id === logoId);
+  if (index === -1) { setNotif("LOGO INTROUVABLE"); return; }
+  const removed = appLogos[index];
+  appLogos.splice(index, 1);
+
+  let resetActive = false;
+  if (removed.url === activeLogo) resetActive = true;
+
+  pushAppLogos().then(() => {
+    if (resetActive) {
+      pushActiveLogo(null).then(() => {
+        activeLogo = null;
+        selectedLogoId = null;
+        updateHeaderLogo();
+        renderLogoGallery();
+        setNotif("LOGO SUPPRIMÉ (logo actif réinitialisé)");
+      }).catch(err => { console.error(err); setNotif("ERREUR LORS DE LA RÉINITIALISATION DU LOGO ACTIF"); });
+    } else {
+      if (selectedLogoId === logoId) selectedLogoId = null;
+      renderLogoGallery();
+      setNotif("LOGO SUPPRIMÉ");
+    }
+  }).catch(err => { console.error(err); setNotif("ERREUR LORS DE LA SUPPRESSION"); });
+}
+
+function validateLogo() {
+  if (!selectedLogoId) { setNotif("SÉLECTIONNEZ UN LOGO D'ABORD"); return; }
+  const selected = appLogos.find(l => l.id === selectedLogoId);
+  if (!selected) { setNotif("LOGO INTROUVABLE"); return; }
+  const url = selected.url;
+  pushActiveLogo(url).then(() => {
+    activeLogo = url;
+    updateHeaderLogo();
+    renderLogoGallery();
+    setNotif("LOGO MIS À JOUR");
+  }).catch(err => { console.error(err); setNotif("ERREUR LORS DE LA MISE À JOUR"); });
+}
+
+function updateHeaderLogo() {
+  const titleSpan = document.getElementById('app-title');
+  const img = document.getElementById('app-logo-image');
+  if (activeLogo) {
+    titleSpan.style.display = 'none';
+    img.style.display = 'inline-block';
+    img.src = getOptimizedCloudinaryUrl(activeLogo, 150);
+    img.style.height = '50px';
+    img.style.width = 'auto';
+  } else {
+    titleSpan.style.display = 'inline-block';
+    img.style.display = 'none';
+  }
+}
+
+// ========== DÉMARRAGE ==========
+loadClientOrderTracking();
+bindCloudListeners();
+
+// Fallback : si le listener ne se déclenche pas, cacher le loading après 5s
+setTimeout(() => {
+  const loading = document.getElementById('loading-screen');
+  if (loading && loading.style.display !== 'none') {
+    console.warn("Loading screen forcé à disparaître (timeout)");
+    loading.style.display = 'none';
+    if (restaurants.length === 0) {
+      restaurants = [];
+      init();
+    }
+  }
+}, 5000);
+
+setOrderMode('livraison');
+updateCartUI();
+updateOrderLed();
+updateHeaderLogo();
+
+// === Long press sur la barre de notification ===
+(function setupLongPress() {
+  const notifBar = document.getElementById('notification-bar');
+  let longPressTimer = null;
+  function startLongPress(e) {
+    e.preventDefault();
+    longPressTimer = setTimeout(() => {
+      toggleLoginArea();
+      if (navigator.vibrate) navigator.vibrate(50);
+    }, 4000);
+  }
+  function cancelLongPress(e) { clearTimeout(longPressTimer); }
+  notifBar.addEventListener('mousedown', startLongPress);
+  notifBar.addEventListener('mouseup', cancelLongPress);
+  notifBar.addEventListener('mouseleave', cancelLongPress);
+  notifBar.addEventListener('touchstart', startLongPress, { passive: false });
+  notifBar.addEventListener('touchend', cancelLongPress);
+  notifBar.addEventListener('touchcancel', cancelLongPress);
+})();
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker enregistré', reg))
+      .catch(err => console.error('Erreur SW', err));
+  });
+}
 </script>
 </body>
 </html>
