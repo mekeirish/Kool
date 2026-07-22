@@ -386,6 +386,97 @@
       background: #ff0000;
       transform: scale(1.1);
     }
+
+    /* ===== MODALES CLIENT ===== */
+    .order-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 8000;
+    }
+    .order-modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(20,20,20,.96);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 24px;
+      padding: 28px;
+      z-index: 8100;
+      width: 360px;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+      color: #eee;
+    }
+    .order-modal .modal-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--gold);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .order-modal .order-line {
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+    }
+    .order-modal .order-line .label {
+      color: #aaa;
+    }
+    .order-modal .order-line .value {
+      font-weight: 500;
+    }
+    .order-modal .btn-close-modal {
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--gold);
+      color: black;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .order-modal .btn-close-modal:hover {
+      background: #e0a800;
+    }
+    .order-modal .btn-danger {
+      background: #cc0000;
+      color: white;
+    }
+    .order-modal .btn-danger:hover {
+      background: #ff0000;
+    }
+
+    /* ===== INDISPONIBILITÉ RESTAURANT ===== */
+    .res-card-unavailable {
+      position: relative;
+      opacity: 0.6;
+      pointer-events: none;
+      filter: grayscale(0.4);
+    }
+    .res-card-unavailable .res-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    }
   </style>
 </head>
 <body class="bg-[#0f0f0f] text-gray-200 font-sans antialiased min-h-screen pb-32">
@@ -396,6 +487,7 @@
 <!-- ===== MODAL DE NOTATION PAR ÉTOILES (CLIENT) ===== -->
 <div id="rating-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); z-index:7000; align-items:center; justify-content:center; padding:16px;">
   <div class="glass rounded-2xl p-6 max-w-md w-full border border-white/10 max-h-[90vh] overflow-y-auto">
+    <div id="rating-counter" style="text-align:right; font-size:0.8rem; color:#888; margin-bottom:4px;"></div>
     <h2 class="text-2xl font-bold text-amber-400 text-center mb-2">🎉 Votre commande est livrée !</h2>
     <p class="text-gray-300 text-center mb-6">Merci de noter votre expérience</p>
 
@@ -438,10 +530,28 @@
   </div>
 </div>
 
+<!-- ===== MODALES CLIENT ===== -->
+<!-- Confirmation -->
+<div class="order-modal-overlay" id="order-confirm-overlay" onclick="closeOrderConfirmModal()"></div>
+<div class="order-modal" id="order-confirm-modal">
+  <div class="modal-title">✅ Commande enregistrée !</div>
+  <div id="confirm-order-content"></div>
+  <button class="btn-close-modal" onclick="closeOrderConfirmModal()">OK</button>
+</div>
+
+<!-- Détail -->
+<div class="order-modal-overlay" id="order-detail-overlay" onclick="closeOrderDetailModal()"></div>
+<div class="order-modal" id="order-detail-modal">
+  <div class="modal-title">📋 Détail de la commande</div>
+  <div id="detail-order-content"></div>
+  <button id="detail-cancel-btn" class="btn-close-modal btn-danger" style="display:none;" onclick="cancelClientOrder()">ANNULER MA COMMANDE</button>
+  <button class="btn-close-modal" onclick="closeOrderDetailModal()">Fermer</button>
+</div>
+
 <!-- LOADING -->
 <div id="loading-screen"><div class="spinner"></div><h2 class="text-4xl font-bold italic text-amber-400">KOOL</h2></div>
 
-<!-- NOTIFICATION (barre avec long-press) -->
+<!-- NOTIFICATION -->
 <div id="notification-bar" class="sticky top-0 z-40 w-full min-h-[55px] bg-black/80 backdrop-blur-md border-b border-amber-400/30 flex items-center justify-center px-4 text-amber-400 font-bold text-sm uppercase tracking-wider relative">
   <span id="notif-message">BIENVENUE</span>
   <span style="display:flex; align-items:center; position:absolute; right:4px;">
@@ -450,20 +560,18 @@
   </span>
 </div>
 
-<!-- ORDER STATUS -->
-<div id="order-status-bar" class="hidden sticky top-[55px] z-30 w-full bg-black/60 backdrop-blur-sm border-b border-white/10 px-4 py-2 text-sm flex items-center gap-3">
+<!-- ORDER STATUS (cliquable) -->
+<div id="order-status-bar" class="hidden sticky top-[55px] z-30 w-full bg-black/60 backdrop-blur-sm border-b border-white/10 px-4 py-2 text-sm flex items-center gap-3 cursor-pointer" onclick="openOrderDetailModal()">
   <div class="status-dot" id="status-dot"></div>
   <span id="status-label" class="font-semibold text-white"></span>
 </div>
 
-<!-- HEADER (avec logo centré et bouton Pro absent) -->
+<!-- HEADER -->
 <header class="flex justify-between items-center px-4 py-4 relative" style="min-height:70px;">
-  <!-- Logo centré absolument -->
   <div id="app-logo-header" onclick="goToHome()" style="position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); cursor:pointer; z-index:10;">
     <span id="app-title" class="text-2xl font-bold text-amber-400">Kool</span>
     <img id="app-logo-image" style="height:50px; width:auto; display:none;" alt="Kool" />
   </div>
-  <!-- Espace réservé pour un éventuel bouton à droite (invisible) -->
   <div style="width:40px; visibility:hidden;"></div>
 </header>
 
@@ -472,7 +580,7 @@
 <div id="client-pin-container" class="numpad-container"><h3 class="text-amber-400 text-xl font-bold mb-2">CODE SECRET</h3><div class="pin-display" id="client-pin-view"></div><div class="grid grid-cols-3 gap-4" id="numpad-client"></div><button onclick="closeClientPin()" class="mt-4 text-gray-400 hover:text-white text-sm">ANNULER</button></div>
 <div id="delivery-validation-container" class="numpad-container"><h3 class="text-amber-400 text-xl font-bold mb-2">CODE CLIENT</h3><div class="pin-display" id="delivery-pin-view"></div><div class="grid grid-cols-3 gap-4" id="numpad-delivery"></div><button onclick="closeDeliveryPin()" class="mt-4 text-gray-400 hover:text-white text-sm">ANNULER</button></div>
 
-<!-- MODALS -->
+<!-- MODALS EDIT -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeEditModal()"></div>
 <div id="modal-edit-res" class="modal-edit"><h3 class="text-amber-400 text-xl font-bold mb-4">✏️ Modifier le Restaurant</h3>
   <input type="text" id="edit-res-name" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" />
@@ -529,22 +637,18 @@
   <button onclick="toggleSec('adm-liv')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Livreurs <span class="text-amber-400">+</span></button><div id="adm-liv" class="sub-section"><input type="text" id="adm-liv-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" /><input type="text" id="adm-liv-c" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Code" /><input type="number" id="adm-liv-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours)" min="0" /><input type="file" id="adm-liv-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" /><button id="btn-admin-add-liv" onclick="adminCreateLiv()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">AJOUTER</button><div id="list-liv-to-manage" class="mt-3 space-y-1"></div></div>
   <button onclick="toggleSec('adm-hist-section')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Journal Global <span class="text-amber-400">📜</span></button><div id="adm-hist-section" class="sub-section"><div class="flex justify-between items-center mb-3"><h3 class="text-lg font-semibold text-white">Historique</h3><div class="flex gap-2"><button onclick="exportHistory()" class="px-3 py-1 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition">💾 TXT</button><button onclick="showClearConfirm()" class="px-3 py-1 rounded-lg bg-red-500/20 text-red-400 text-sm hover:bg-red-500/30 transition">🗑️</button></div></div><div id="clear-confirm-panel" class="confirm-panel"><p class="mb-2">Vider l'historique définitivement ?</p><button onclick="clearHistory()" class="px-4 py-1 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-500">OUI</button><button onclick="showClearConfirm(false)" class="px-4 py-1 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-500 ml-2">NON</button></div><div id="admin-hist-list" class="space-y-2 max-h-96 overflow-y-auto"></div></div>
 
-  <!-- ===== Logo de l'App ===== -->
+  <!-- Logo -->
   <button onclick="toggleSec('adm-logo')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Logo de l'App <span class="text-amber-400">🖼️</span></button>
   <div id="adm-logo" class="sub-section">
-    <!-- Upload -->
     <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
       <input type="file" id="adm-logo-file" accept="image/png" style="flex:1; min-width:150px; padding:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:white;" />
       <button id="btn-upload-logo" onclick="uploadAppLogo()" class="px-4 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">UPLOADER</button>
     </div>
-    <!-- Galerie -->
     <div id="logo-gallery" class="logo-gallery" style="margin-top:12px;"></div>
-    <!-- Validation -->
     <div style="margin-top:12px;">
       <button id="btn-validate-logo" onclick="validateLogo()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">VALIDER</button>
     </div>
   </div>
-
 </div></div>
 <div id="view-pro-space" class="view-section container mx-auto px-4 py-6">
   <button onclick="goToHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
@@ -627,18 +731,90 @@ let stopProOrdersWatch = null;
 let knownProOrderIds = new Set();
 let editingId = null;
 
-// Suivi client : tableau
+// Suivi client
 let clientOrderTracking = [];
 let ratingQueue = [];
 
 let pendingRatingResto = null, pendingRatingLiv = null, pendingOrderForRating = null;
 let orderMode = 'livraison';
 
-// === Gestion du logo ===
+// Logo
 let appLogos = [];
 let activeLogo = null;
 let selectedLogoId = null;
 
+// Variables détail commande
+let currentBestOrder = null;
+let currentBestStatus = null;
+let currentBestMode = null;
+
+// ===== SAUVEGARDE PANIER =====
+let restoredFromDraft = false;
+
+function saveCartDraft() {
+  if (!currentRes) return;
+  const draft = {
+    cart: cart,
+    resId: currentRes.id
+  };
+  try {
+    localStorage.setItem('koul_cart_draft', JSON.stringify(draft));
+  } catch(e) {}
+}
+
+function clearCartDraft() {
+  localStorage.removeItem('koul_cart_draft');
+}
+
+function restoreCartDraft() {
+  if (restoredFromDraft) return;
+  try {
+    const raw = localStorage.getItem('koul_cart_draft');
+    if (!raw) return;
+    const draft = JSON.parse(raw);
+    if (!draft.cart || Object.keys(draft.cart).length === 0) {
+      localStorage.removeItem('koul_cart_draft');
+      return;
+    }
+    const r = restaurants.find(res => Number(res.id) === Number(draft.resId));
+    if (!r) {
+      localStorage.removeItem('koul_cart_draft');
+      return;
+    }
+    let valid = true;
+    for (let pid in draft.cart) {
+      const plat = r.plats.find(p => Number(p.id) === Number(pid));
+      if (!plat) {
+        valid = false;
+        break;
+      }
+    }
+    if (!valid) {
+      localStorage.removeItem('koul_cart_draft');
+      return;
+    }
+    cart = draft.cart;
+    currentRes = r;
+    showSection('view-menu-client');
+    document.getElementById('client-res-name').innerText = `${r.name} (⭐ ${calcAvg(r.ratings)})`;
+    renderClientPlats();
+    updateCartUI();
+    restoredFromDraft = true;
+    setNotif("🔄 Panier restauré");
+  } catch(e) {
+    localStorage.removeItem('koul_cart_draft');
+  }
+}
+
+// ===== INDISPONIBILITÉ RESTAURANT =====
+function isRestaurantAvailable(r) {
+  if (r.expiry && Date.now() > r.expiry) return false;
+  if (!r.plats || r.plats.length === 0) return false;
+  if (r.plats.every(p => p.stock === 0)) return false;
+  return true;
+}
+
+// ===== UTILITAIRES =====
 function calcAvg(arr) { if (!arr || arr.length===0) return "N/A"; const s = arr.reduce((a,b)=>a+b,0); return (s/arr.length).toFixed(1); }
 function resIndex(resId) { return restaurants.findIndex(r => Number(r.id)===Number(resId)); }
 function vibrate(ms=50) { if (navigator.vibrate) navigator.vibrate(ms); }
@@ -658,8 +834,11 @@ function showSection(id) {
 
 function goToHome() {
   cart = {};
+  clearCartDraft();
   if (stopProOrdersWatch) { stopProOrdersWatch(); stopProOrdersWatch = null; }
   currentRes = null; currentLivreur = null;
+  closeOrderConfirmModal();
+  closeOrderDetailModal();
   showSection('view-restaurants');
   updateCartUI();
   init();
@@ -713,7 +892,6 @@ function pushLivreurs() { return enqueueCloudWrite(() => db.ref('cloud_koul/livr
 function saveLivreur(liv) { const i = livreurs.findIndex(l => Number(l.id)===Number(liv.id)); if (i<0) return cloudWriteChain; livreurs[i]=liv; return enqueueCloudWrite(() => db.ref(`cloud_koul/livreurs/${i}`).set(liv)); }
 function pushHistory() { return enqueueCloudWrite(() => db.ref('cloud_koul/adminHistory').set(adminHistory)); }
 function pushPromo() { return enqueueCloudWrite(() => db.ref('cloud_koul/promoMessage').set(promoMessage)); }
-// === FONCTIONS LOGO ===
 function pushAppLogos() { return enqueueCloudWrite(() => db.ref('cloud_koul/appLogos').set(appLogos)); }
 function pushActiveLogo(url) { return enqueueCloudWrite(() => db.ref('cloud_koul/activeLogo').set(url)); }
 
@@ -752,7 +930,6 @@ function bindCloudListeners() {
     document.getElementById('notif-message').innerText = promoMessage;
   });
 
-  // === LOGOS ===
   db.ref('cloud_koul/appLogos').on('value', snap => {
     const data = snap.val();
     appLogos = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
@@ -771,6 +948,34 @@ function onRestaurantsUpdated() {
   if (currentRes) {
     const updated = restaurants.find(r => Number(r.id) === Number(currentRes.id));
     if (updated) currentRes = updated;
+  }
+  if (!restoredFromDraft && restaurants.length > 0) {
+    restoreCartDraft();
+  }
+  if (currentRes && cart && Object.keys(cart).length > 0) {
+    let needRefresh = false;
+    for (let pid in cart) {
+      const plat = currentRes.plats.find(p => Number(p.id) === Number(pid));
+      if (!plat) {
+        delete cart[pid];
+        needRefresh = true;
+        continue;
+      }
+      if (plat.stock < cart[pid].qte) {
+        const oldQty = cart[pid].qte;
+        cart[pid].qte = Math.max(0, plat.stock);
+        if (cart[pid].qte === 0) {
+          delete cart[pid];
+        }
+        needRefresh = true;
+        setNotif(`⚠️ Stock ajusté pour ${plat.n}`);
+      }
+    }
+    if (needRefresh) {
+      renderClientPlats();
+      updateCartUI();
+      saveCartDraft();
+    }
   }
   updateClientOrderStatus();
   refreshCurrentView();
@@ -1016,8 +1221,8 @@ function confirmClientOrder() {
         logResEvent(currentRes, "NOUVELLE COMMANDE", order);
         setNotif("COMMANDE RÉUSSIE");
         closeClientPin();
-        goToHome();
-        updateClientOrderStatus();
+        clearCartDraft();
+        showOrderConfirmModal(order);
         if (okBtn) okBtn.disabled = false;
       } else {
         setNotif("ERREUR LORS DE L'ENREGISTREMENT DE LA COMMANDE");
@@ -1042,6 +1247,158 @@ function confirmClientOrder() {
     });
 }
 
+function showOrderConfirmModal(order) {
+  const modal = document.getElementById('order-confirm-modal');
+  const overlay = document.getElementById('order-confirm-overlay');
+  const content = document.getElementById('confirm-order-content');
+  const modeLabel = order.mode === 'retrait' ? '🏠 À emporter' : '🚚 Livraison';
+  content.innerHTML = `
+    <div class="order-line"><span class="label">Restaurant</span><span class="value">${currentRes.name}</span></div>
+    <div class="order-line"><span class="label">Articles</span><span class="value">${order.itemsText}</span></div>
+    <div class="order-line"><span class="label">Total</span><span class="value">${Number(order.total).toLocaleString('fr-FR')} DZD</span></div>
+    <div class="order-line"><span class="label">Code secret</span><span class="value" style="color:var(--gold);">${order.pin}</span></div>
+    <div class="order-line"><span class="label">Mode</span><span class="value">${modeLabel}</span></div>
+  `;
+  overlay.style.display = 'block';
+  modal.style.display = 'block';
+  modal.style.transform = 'translate(-50%, -50%)';
+}
+
+function closeOrderConfirmModal() {
+  const modal = document.getElementById('order-confirm-modal');
+  const overlay = document.getElementById('order-confirm-overlay');
+  modal.style.display = 'none';
+  overlay.style.display = 'none';
+  goToHome();
+}
+
+function openOrderDetailModal() {
+  if (!currentBestOrder) {
+    setNotif("Aucune commande active");
+    return;
+  }
+  const modal = document.getElementById('order-detail-modal');
+  const overlay = document.getElementById('order-detail-overlay');
+  const content = document.getElementById('detail-order-content');
+  const cancelBtn = document.getElementById('detail-cancel-btn');
+  const order = currentBestOrder;
+  const resto = restaurants.find(r => Number(r.id) === Number(order.resId || currentBestOrder.resId));
+  const modeLabel = order.mode === 'retrait' ? '🏠 À emporter' : '🚚 Livraison';
+  const statusLabels = {
+    'new': '🔄 En attente de confirmation',
+    'waiting': order.mode === 'retrait' ? '✅ Prête, venez récupérer' : '⏳ En préparation',
+    'shipping': '🚚 En livraison',
+    'delivered': '✅ Livrée'
+  };
+  const statusText = statusLabels[order.status] || order.status;
+
+  content.innerHTML = `
+    <div class="order-line"><span class="label">Restaurant</span><span class="value">${resto ? resto.name : '?'}</span></div>
+    <div class="order-line"><span class="label">Articles</span><span class="value">${order.itemsText}</span></div>
+    <div class="order-line"><span class="label">Total</span><span class="value">${Number(order.total).toLocaleString('fr-FR')} DZD</span></div>
+    <div class="order-line"><span class="label">Code secret</span><span class="value" style="color:var(--gold);">${order.pin}</span></div>
+    <div class="order-line"><span class="label">Mode</span><span class="value">${modeLabel}</span></div>
+    <div class="order-line"><span class="label">Statut</span><span class="value">${statusText}</span></div>
+  `;
+
+  if (order.status === 'new') {
+    cancelBtn.style.display = 'block';
+    cancelBtn.dataset.orderId = order.id;
+    cancelBtn.dataset.restoId = resto ? resto.id : null;
+  } else {
+    cancelBtn.style.display = 'none';
+  }
+
+  overlay.style.display = 'block';
+  modal.style.display = 'block';
+  modal.style.transform = 'translate(-50%, -50%)';
+}
+
+function closeOrderDetailModal() {
+  const modal = document.getElementById('order-detail-modal');
+  const overlay = document.getElementById('order-detail-overlay');
+  modal.style.display = 'none';
+  overlay.style.display = 'none';
+}
+
+function cancelClientOrder() {
+  const cancelBtn = document.getElementById('detail-cancel-btn');
+  const orderId = parseInt(cancelBtn.dataset.orderId);
+  const restoId = parseInt(cancelBtn.dataset.restoId);
+  if (!orderId || !restoId) { setNotif("Erreur: commande introuvable"); return; }
+  if (!confirm("Annuler cette commande ?")) return;
+
+  const r = restaurants.find(x => Number(x.id) === Number(restoId));
+  if (!r) { setNotif("Restaurant introuvable"); return; }
+  const o = r.orders.find(x => Number(x.id) === Number(orderId));
+  if (!o) { setNotif("Commande introuvable"); return; }
+
+  const stockRestores = o.rawItems.map(item => {
+    const platIdx = r.plats.findIndex(p => Number(p.id) === Number(item.id));
+    if (platIdx === -1) return null;
+    return {
+      ref: db.ref(`cloud_koul/restaurants/${resIndex(r.id)}/plats/${platIdx}/stock`),
+      qty: item.qte
+    };
+  }).filter(x => x !== null);
+
+  if (stockRestores.length > 0) {
+    Promise.all(stockRestores.map(restore => {
+      return new Promise((resolve, reject) => {
+        restore.ref.transaction((current) => {
+          if (current === null) return undefined;
+          return current + restore.qty;
+        }, (error, committed, snapshot) => {
+          if (error || !committed) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        }, false);
+      });
+    }))
+    .then(() => {
+      updateRestaurantOrders(r.id, orders => orders.filter(order => order.id !== orderId))
+        .then(result => {
+          if (result.committed) {
+            logResEvent(r, "COMMANDE ANNULÉE PAR LE CLIENT", o);
+            clearClientOrderTracking(orderId);
+            closeOrderDetailModal();
+            setNotif("COMMANDE ANNULÉE");
+            updateClientOrderStatus();
+          } else {
+            setNotif("ERREUR LORS DE L'ANNULATION");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          setNotif("ERREUR LORS DE L'ANNULATION");
+        });
+    })
+    .catch(err => {
+      console.error(err);
+      setNotif("ERREUR RESTAURATION STOCK");
+    });
+  } else {
+    updateRestaurantOrders(r.id, orders => orders.filter(order => order.id !== orderId))
+      .then(result => {
+        if (result.committed) {
+          logResEvent(r, "COMMANDE ANNULÉE PAR LE CLIENT", o);
+          clearClientOrderTracking(orderId);
+          closeOrderDetailModal();
+          setNotif("COMMANDE ANNULÉE");
+          updateClientOrderStatus();
+        } else {
+          setNotif("ERREUR LORS DE L'ANNULATION");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setNotif("ERREUR LORS DE L'ANNULATION");
+      });
+  }
+}
+
 function loadClientOrderTracking() {
   const saved = localStorage.getItem('koul_client_tracking');
   if (saved) {
@@ -1062,6 +1419,15 @@ function loadClientOrderTracking() {
   } else {
     clientOrderTracking = [];
   }
+  const savedRating = localStorage.getItem('koul_rating_queue');
+  if (savedRating) {
+    try {
+      ratingQueue = JSON.parse(savedRating);
+      if (!Array.isArray(ratingQueue)) ratingQueue = [];
+    } catch(e) { ratingQueue = []; }
+  } else {
+    ratingQueue = [];
+  }
   updateOrderLed();
 }
 
@@ -1077,6 +1443,10 @@ function clearClientOrderTracking(orderId) {
   updateOrderLed();
 }
 
+function saveRatingQueue() {
+  localStorage.setItem('koul_rating_queue', JSON.stringify(ratingQueue));
+}
+
 function processRatingQueue() {
   const modal = document.getElementById('rating-modal');
   if (modal.style.display === 'flex') return;
@@ -1087,7 +1457,11 @@ function processRatingQueue() {
   pendingRatingResto = resto;
   pendingRatingLiv = liv || null;
   pendingOrderForRating = order;
+  const counter = document.getElementById('rating-counter');
+  const total = ratingQueue.length + 1;
+  counter.textContent = `1/${total}`;
   openRatingModal(resto, liv || null);
+  saveRatingQueue();
 }
 
 function updateClientOrderStatus() {
@@ -1112,6 +1486,7 @@ function updateClientOrderStatus() {
     if (o.status === 'delivered') {
       const liv = o.livId ? livreurs.find(l => Number(l.id) === Number(o.livId)) : null;
       ratingQueue.push({ resto: r, order: o, liv: liv });
+      saveRatingQueue();
       clearClientOrderTracking(entry.orderId);
       continue;
     }
@@ -1124,13 +1499,19 @@ function updateClientOrderStatus() {
     if (!bestStatus || priority > (bestStatus === 'shipping' ? 3 : bestStatus === 'waiting' ? 2 : 1)) {
       bestStatus = o.status;
       bestMode = o.mode;
-      bestOrder = o;
+      bestOrder = { ...o, resId: r.id };
     }
   }
 
   if (bestOrder && foundActive) {
+    currentBestOrder = bestOrder;
+    currentBestStatus = bestStatus;
+    currentBestMode = bestMode;
     showOrderStatusBar(bestStatus, bestMode);
   } else {
+    currentBestOrder = null;
+    currentBestStatus = null;
+    currentBestMode = null;
     hideOrderStatusBar();
   }
 
@@ -1163,6 +1544,7 @@ function openRatingModal(restaurant, livreur) {
   if (livreur) { livSection.style.display = 'block'; document.getElementById('rating-liv-name').textContent = livreur.name; }
   else { livSection.style.display = 'none'; }
 }
+
 function submitRatings() {
   const restoStar = document.querySelector('#resto-stars input:checked');
   const livStar = document.querySelector('#liv-stars input:checked');
@@ -1182,7 +1564,6 @@ function submitRatings() {
     saveLivreur(pendingRatingLiv);
   }
   setNotif("🎉 Merci pour vos notes !");
-  closeRatingModal();
   if (pendingRatingResto && pendingOrderForRating) {
     const r = pendingRatingResto;
     const idx = r.orders.findIndex(o => o.id === pendingOrderForRating.id);
@@ -1192,8 +1573,9 @@ function submitRatings() {
     }
   }
   pendingRatingResto = null; pendingRatingLiv = null; pendingOrderForRating = null;
-  processRatingQueue();
+  closeRatingModal();
 }
+
 function closeRatingModal() {
   document.getElementById('rating-modal').style.display = 'none';
   if (pendingRatingResto && pendingOrderForRating) {
@@ -1207,6 +1589,8 @@ function closeRatingModal() {
   }
   processRatingQueue();
 }
+
+// ===== ADMIN, PRO, LIVREUR =====
 
 function showClearConfirm(show=true) { document.getElementById('clear-confirm-panel').style.display = show ? 'block' : 'none'; }
 function exportHistory() {
@@ -1226,6 +1610,7 @@ function updatePromoMessage() {
   pushPromo();
 }
 
+// === FONCTIONS MANQUANTES AJOUTÉES ===
 function setOrderMode(mode) {
   orderMode = mode;
   const addrField = document.getElementById('c-address');
@@ -1238,228 +1623,21 @@ function setOrderMode(mode) {
   }
   updateModeButtons();
 }
+
 function updateModeButtons() {
   const livBtn = document.getElementById('mode-livraison');
   const retBtn = document.getElementById('mode-retrait');
   if (!livBtn || !retBtn) return;
-  if (orderMode === 'livraison') { livBtn.className = 'active-liv'; retBtn.className = 'inactive'; }
-  else { livBtn.className = 'inactive'; retBtn.className = 'active-retrait'; }
-}
-
-function cancelOrder(oid) {
-  const idx = currentRes.orders.findIndex(o => o.id === oid);
-  if (idx === -1) { setNotif("COMMANDE INTROUVABLE"); return; }
-  const o = currentRes.orders[idx];
-
-  const stockRestores = o.rawItems.map(item => {
-    const platIdx = currentRes.plats.findIndex(p => Number(p.id) === Number(item.id));
-    if (platIdx === -1) return null;
-    return {
-      ref: db.ref(`cloud_koul/restaurants/${resIndex(currentRes.id)}/plats/${platIdx}/stock`),
-      qty: item.qte
-    };
-  }).filter(x => x !== null);
-
-  if (stockRestores.length > 0) {
-    Promise.all(stockRestores.map(restore => {
-      return new Promise((resolve, reject) => {
-        restore.ref.transaction((current) => {
-          if (current === null) return undefined;
-          return current + restore.qty;
-        }, (error, committed, snapshot) => {
-          if (error || !committed) {
-            reject(error);
-          } else {
-            resolve();
-          }
-        }, false);
-      });
-    }))
-    .then(() => {
-      updateRestaurantOrders(currentRes.id, orders => orders.filter(o => o.id !== oid))
-        .then(result => {
-          if (result.committed) {
-            logResEvent(currentRes, "COMMANDE REJETÉE", o);
-            setNotif("COMMANDE ANNULÉE (STOCK RENDU)");
-            renderProOrders();
-          } else {
-            setNotif("ERREUR LORS DE L'ANNULATION");
-          }
-        })
-        .catch(err => {
-          console.error("Erreur cancelOrder:", err);
-          setNotif("ERREUR LORS DE L'ANNULATION");
-        });
-    })
-    .catch(err => {
-      console.error("Erreur restauration stock:", err);
-      setNotif("ERREUR RESTAURATION STOCK");
-    });
+  if (orderMode === 'livraison') {
+    livBtn.className = 'active-liv';
+    retBtn.className = 'inactive';
   } else {
-    updateRestaurantOrders(currentRes.id, orders => orders.filter(o => o.id !== oid))
-      .then(result => {
-        if (result.committed) {
-          logResEvent(currentRes, "COMMANDE REJETÉE", o);
-          setNotif("COMMANDE ANNULÉE");
-          renderProOrders();
-        } else {
-          setNotif("ERREUR LORS DE L'ANNULATION");
-        }
-      })
-      .catch(err => {
-        console.error("Erreur cancelOrder:", err);
-        setNotif("ERREUR LORS DE L'ANNULATION");
-      });
+    livBtn.className = 'inactive';
+    retBtn.className = 'active-retrait';
   }
 }
 
-function updateOrderStatus(orderId, status) {
-  const o = currentRes.orders.find(x => Number(x.id) === Number(orderId));
-  if (!o) { setNotif("COMMANDE INTROUVABLE"); return; }
-  const statusMessages = {
-    'waiting': o.mode === 'retrait' ? 'COMMANDE PRÊTE POUR RETRAIT' : 'COMMANDE PUBLIÉE',
-    'shipping': 'COMMANDE EN COURS DE LIVRAISON',
-    'delivered': 'COMMANDE LIVRÉE'
-  };
-  const msg = statusMessages[status] || 'COMMANDE MISE À JOUR';
-
-  const updateData = (orders) => {
-    return orders.map(order => {
-      if (Number(order.id) !== Number(orderId)) return order;
-      const updated = { ...order, status };
-      if (status === 'waiting') {
-        if (!updated.displayNumber) updated.displayNumber = Math.floor(1000 + Math.random() * 9000);
-        if (o.mode === 'livraison') {
-          if (currentRes.lat != null && currentRes.lng != null) {
-            updated.publishResLat = currentRes.lat;
-            updated.publishResLng = currentRes.lng;
-          } else {
-            return undefined;
-          }
-        }
-      }
-      return updated;
-    });
-  };
-
-  updateRestaurantOrders(currentRes.id, updateData)
-    .then(result => {
-      if (result.committed) {
-        logResEvent(currentRes, msg, o);
-        setNotif(msg);
-        renderProOrders();
-      } else {
-        setNotif("ÉCHEC MISE À JOUR DE LA COMMANDE");
-      }
-    })
-    .catch(err => {
-      console.error("Erreur updateOrderStatus:", err);
-      setNotif("ERREUR LORS DE LA MISE À JOUR");
-    });
-}
-
-function confirmDelivery() {
-  const r = restaurants.find(x => x.id === pendingResId);
-  if (!r) { setNotif("RESTAURANT INTROUVABLE"); closeDeliveryPin(); return; }
-  const idx = r.orders.findIndex(x => x.id === pendingOrderId);
-  if (idx === -1) { setNotif("COMMANDE INTROUVABLE"); closeDeliveryPin(); return; }
-  const o = r.orders[idx];
-  if (deliveryTempPin !== o.pin) {
-    vibrate([50,50]);
-    setNotif("CODE INCORRECT");
-    return;
-  }
-
-  updateRestaurantOrders(r.id, orders => orders.map(order => {
-    if (Number(order.id) !== Number(pendingOrderId)) return order;
-    return { ...order, status: 'delivered' };
-  }))
-  .then(result => {
-    if (result.committed) {
-      logResEvent(r, `LIVRÉE PAR ${currentLivreur ? currentLivreur.name : 'PRO'}`, o);
-      setNotif("COMMANDE LIVRÉE !");
-      if (currentLivreur) {
-        if (!currentLivreur.history) currentLivreur.history = [];
-        currentLivreur.history.push({
-          resName: r.name,
-          date: new Date().toLocaleDateString(),
-          time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-        });
-        saveLivreur(currentLivreur);
-      }
-      closeDeliveryPin();
-      if (currentLivreur) { renderLivreurOrders(); renderLivreurHistory(); }
-      if (currentRes) { renderProOrders(); renderResHistory(); }
-    } else {
-      setNotif("ERREUR LORS DE LA LIVRAISON");
-    }
-  })
-  .catch(err => {
-    console.error("Erreur confirmDelivery:", err);
-    setNotif("ERREUR LORS DE LA LIVRAISON");
-  });
-}
-
-function renderProPlats() {
-  const l = document.getElementById('manage-plats');
-  const focusedInput = document.activeElement;
-  let focusedId = null, focusedValue = null;
-  if (focusedInput && focusedInput.id && focusedInput.id.startsWith('stk-')) {
-    focusedId = focusedInput.id;
-    focusedValue = focusedInput.value;
-  }
-  l.innerHTML = '';
-  if (!currentRes.plats) return;
-  currentRes.plats.forEach((p, i) => {
-    const imgSrc = getOptimizedCloudinaryUrl(p.img, 80);
-    l.innerHTML += `
-      <div class="plat-manage-card" style="display:flex;align-items:center;gap:10px;background:#333;padding:10px;border-radius:8px;margin-bottom:8px;">
-        <img src="${imgSrc}" alt="${p.n}" class="mini-img" style="width:50px;height:50px;border-radius:5px;object-fit:cover;" onerror="this.onerror=null; this.src='https://via.placeholder.com/150';" />
-        <div style="flex:1"><b>${p.n}</b><br><small>${p.p.toLocaleString('fr-FR')} DZD</small></div>
-        <div style="display:flex;align-items:center">
-          <input type="number" value="${p.stock}" id="stk-${i}" style="width:50px;background:#222;border:1px solid #555;color:white;padding:5px;border-radius:4px;">
-          <button class="btn-icon" onclick="updateStock(${i})" style="background:#333;border:1px solid #555;color:white;padding:5px 10px;border-radius:5px;cursor:pointer;margin-left:5px;">OK</button>
-          <button class="btn-icon" onclick="deletePlat(${p.id})" style="color:red;border:none;background:none;font-size:1.2rem;cursor:pointer;margin-left:5px;">X</button>
-        </div>
-      </div>
-    `;
-  });
-  if (focusedId) { const el = document.getElementById(focusedId); if (el) el.value = focusedValue; }
-}
-
-function addNewPlat() {
-  const n = document.getElementById('new-n').value;
-  const p = document.getElementById('new-p').value;
-  const s = document.getElementById('new-s').value;
-  const file = document.getElementById('new-img').files[0];
-  if (!n || !p) return;
-  const btn = document.getElementById('btn-add-plat');
-  btn.disabled = true; btn.textContent = '...';
-  uploadToCloudinary(file, (imgUrl) => {
-    if (!currentRes.plats) currentRes.plats = [];
-    currentRes.plats.push({
-      id: Date.now() + Math.floor(Math.random() * 1000),
-      n: n,
-      p: parseInt(p),
-      stock: parseInt(s) || 0,
-      img: imgUrl || ''
-    });
-    logAdminEvent(currentRes.name, `Plat ajouté: ${n}`);
-    setNotif("PLAT AJOUTÉ");
-    renderProPlats();
-    document.getElementById('new-n').value = '';
-    document.getElementById('new-p').value = '';
-    document.getElementById('new-s').value = '';
-    document.getElementById('new-img').value = '';
-    saveRestaurant(currentRes);
-    btn.disabled = false; btn.textContent = 'ENREGISTRER';
-  });
-}
-
-function deletePlat(id) { id = Number(id); const p = currentRes.plats.find(x => Number(x.id)===id); if (!p) return; logAdminEvent(currentRes.name, `Plat supprimé: ${p.n}`); currentRes.plats = currentRes.plats.filter(x => Number(x.id)!==id); saveRestaurant(currentRes); renderProPlats(); }
-function updateStock(i) { const p = currentRes.plats[i]; const newStk = parseInt(document.getElementById(`stk-${i}`).value); logAdminEvent(currentRes.name, `Stock ${p.n} : ${p.stock} -> ${newStk}`); p.stock = newStk; setNotif("STOCK MIS À JOUR"); saveRestaurant(currentRes); }
-function renderResHistory() { const l = document.getElementById('res-event-log'); l.innerHTML = ''; if (!currentRes.eventHistory || currentRes.eventHistory.length===0) { l.innerHTML = '<p style="color:#888;font-size:0.8rem">Aucun événement.</p>'; return; } currentRes.eventHistory.forEach(ev => { l.innerHTML += `<div class="hist-card" style="background:#1a1a1a;border-radius:8px;padding:12px;margin-bottom:10px;font-size:0.75rem;border-left:4px solid var(--gold);"><small>${ev.date} ${ev.time}</small><br><b>${ev.status}</b> - ${ev.client}</div>`; }); }
-
+// ===== ADMIN, PRO, LIVREUR (suite) =====
 function adminCreateRes() {
   const n = document.getElementById('adm-res-n').value;
   const c = document.getElementById('adm-res-c').value;
@@ -1803,6 +1981,48 @@ function ignoreOrd(oid) { const key = `koul_hidden_orders_${currentLivreur.id}`;
 function openValPin(rid, oid) { pendingResId = rid; pendingOrderId = oid; deliveryTempPin = ''; document.getElementById('delivery-pin-view').innerText = ''; document.getElementById('delivery-validation-container').style.display = 'block'; }
 function closeDeliveryPin() { document.getElementById('delivery-validation-container').style.display = 'none'; }
 
+function confirmDelivery() {
+  const r = restaurants.find(x => x.id === pendingResId);
+  if (!r) { setNotif("RESTAURANT INTROUVABLE"); closeDeliveryPin(); return; }
+  const idx = r.orders.findIndex(x => x.id === pendingOrderId);
+  if (idx === -1) { setNotif("COMMANDE INTROUVABLE"); closeDeliveryPin(); return; }
+  const o = r.orders[idx];
+  if (deliveryTempPin !== o.pin) {
+    vibrate([50,50]);
+    setNotif("CODE INCORRECT");
+    return;
+  }
+
+  updateRestaurantOrders(r.id, orders => orders.map(order => {
+    if (Number(order.id) !== Number(pendingOrderId)) return order;
+    return { ...order, status: 'delivered' };
+  }))
+  .then(result => {
+    if (result.committed) {
+      logResEvent(r, `LIVRÉE PAR ${currentLivreur ? currentLivreur.name : 'PRO'}`, o);
+      setNotif("COMMANDE LIVRÉE !");
+      if (currentLivreur) {
+        if (!currentLivreur.history) currentLivreur.history = [];
+        currentLivreur.history.push({
+          resName: r.name,
+          date: new Date().toLocaleDateString(),
+          time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        });
+        saveLivreur(currentLivreur);
+      }
+      closeDeliveryPin();
+      if (currentLivreur) { renderLivreurOrders(); renderLivreurHistory(); }
+      if (currentRes) { renderProOrders(); renderResHistory(); }
+    } else {
+      setNotif("ERREUR LORS DE LA LIVRAISON");
+    }
+  })
+  .catch(err => {
+    console.error("Erreur confirmDelivery:", err);
+    setNotif("ERREUR LORS DE LA LIVRAISON");
+  });
+}
+
 function renderLivreurHistory() {
   const l = document.getElementById('liv-hist'); l.innerHTML = '<h4 class="text-md font-semibold text-white mt-4 mb-2">Historique</h4>';
   if (!currentLivreur.history) return;
@@ -1813,39 +2033,65 @@ function renderLivreurHistory() {
 function logoutLivreur() { currentLivreur = null; goToHome(); }
 
 function init() {
-  const grid = document.getElementById('res-grid'); grid.innerHTML = '';
+  const grid = document.getElementById('res-grid');
+  grid.innerHTML = '';
   restaurants.forEach(res => {
     const imgSrc = getOptimizedCloudinaryUrl(res.img, 200);
-    grid.innerHTML += `<div class="card glass-hover" style="background:rgba(255,255,255,0.05);border-radius:12px;padding:10px;text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.08);" onclick="openClientMenu(${res.id})">
-      <img src="${imgSrc}" alt="${res.name}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;margin-bottom:5px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/150';">
-      <br><b class="text-white">${res.name}</b><br><small style="color:var(--gold)">⭐ ${calcAvg(res.ratings)}</small>
-    </div>`;
+    const available = isRestaurantAvailable(res);
+    const cardClass = available ? '' : 'res-card-unavailable';
+    const clickAttr = available ? `onclick="openClientMenu(${res.id})"` : '';
+    grid.innerHTML += `
+      <div class="card glass-hover ${cardClass}" style="background:rgba(255,255,255,0.05);border-radius:12px;padding:10px;text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.08);position:relative;" ${clickAttr}>
+        <img src="${imgSrc}" alt="${res.name}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;margin-bottom:5px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/150';">
+        <br><b class="text-white">${res.name}</b><br><small style="color:var(--gold)">⭐ ${calcAvg(res.ratings)}</small>
+        ${!available ? `<div class="res-overlay">Indisponible</div>` : ''}
+      </div>
+    `;
   });
   generatePads();
 }
-function openClientMenu(rid) { currentRes = restaurants.find(x => x.id===rid); showSection('view-menu-client'); document.getElementById('client-res-name').innerText = `${currentRes.name} (⭐ ${calcAvg(currentRes.ratings)})`; renderClientPlats(); updateCartUI(); }
 
-function toggleZoom(img) {
-  const overlay = document.getElementById('zoom-overlay');
-  if (img.classList.contains('zoom-image')) {
-    img.classList.remove('zoom-image'); overlay.style.display = 'none';
-  } else {
-    document.querySelectorAll('.img-plat-client.zoom-image').forEach(el => el.classList.remove('zoom-image'));
-    const hdUrl = getOptimizedCloudinaryUrl(img.src, 800);
-    img.src = hdUrl;
-    img.classList.add('zoom-image');
-    overlay.style.display = 'block';
+function openClientMenu(rid) {
+  const r = restaurants.find(x => Number(x.id) === Number(rid));
+  if (!r) return;
+  if (!isRestaurantAvailable(r)) {
+    setNotif("RESTAURANT INDISPONIBLE POUR LE MOMENT");
+    return;
   }
-}
-function closeZoom() {
-  document.querySelectorAll('.img-plat-client.zoom-image').forEach(el => el.classList.remove('zoom-image'));
-  document.getElementById('zoom-overlay').style.display = 'none';
+  currentRes = r;
+  showSection('view-menu-client');
+  document.getElementById('client-res-name').innerText = `${r.name} (⭐ ${calcAvg(r.ratings)})`;
+  renderClientPlats();
+  updateCartUI();
 }
 
 function renderClientPlats() {
   const l = document.getElementById('plats-list-client');
   l.innerHTML = '';
   if (!currentRes.plats) return;
+  let needUpdate = false;
+  for (let pid in cart) {
+    const plat = currentRes.plats.find(p => Number(p.id) === Number(pid));
+    if (!plat) {
+      delete cart[pid];
+      needUpdate = true;
+      continue;
+    }
+    if (plat.stock < cart[pid].qte) {
+      const oldQty = cart[pid].qte;
+      cart[pid].qte = Math.max(0, plat.stock);
+      if (cart[pid].qte === 0) {
+        delete cart[pid];
+      }
+      needUpdate = true;
+      setNotif(`⚠️ Stock ajusté pour ${plat.n}`);
+    }
+  }
+  if (needUpdate) {
+    saveCartDraft();
+    updateCartUI();
+  }
+
   currentRes.plats.forEach(p => {
     const qty = cart[p.id] ? cart[p.id].qte : 0;
     const imgSrc = getOptimizedCloudinaryUrl(p.img, 300);
@@ -1871,28 +2117,9 @@ function changeQty(pid, d) {
   if (cart[pid].qte <= 0) delete cart[pid];
   renderClientPlats();
   updateCartUI();
+  saveCartDraft();
 }
 
-function openCartModal() {
-  document.getElementById('cart-modal-overlay').style.display = 'block';
-  const modal = document.getElementById('cart-modal');
-  modal.style.display = 'block';
-  requestAnimationFrame(() => {
-    modal.classList.add('open');
-    setTimeout(() => {
-      const nameField = document.getElementById('c-name');
-      if (nameField) nameField.focus();
-    }, 350);
-  });
-}
-function closeCartModal() {
-  const modal = document.getElementById('cart-modal');
-  modal.classList.remove('open');
-  setTimeout(() => {
-    modal.style.display = 'none';
-    document.getElementById('cart-modal-overlay').style.display = 'none';
-  }, 300);
-}
 function updateCartUI() {
   const keys = Object.keys(cart);
   const hasItems = keys.length > 0;
@@ -1932,6 +2159,27 @@ function updateCartUI() {
   updateModeButtons();
 }
 
+function openCartModal() {
+  document.getElementById('cart-modal-overlay').style.display = 'block';
+  const modal = document.getElementById('cart-modal');
+  modal.style.display = 'block';
+  requestAnimationFrame(() => {
+    modal.classList.add('open');
+    setTimeout(() => {
+      const nameField = document.getElementById('c-name');
+      if (nameField) nameField.focus();
+    }, 350);
+  });
+}
+function closeCartModal() {
+  const modal = document.getElementById('cart-modal');
+  modal.classList.remove('open');
+  setTimeout(() => {
+    modal.style.display = 'none';
+    document.getElementById('cart-modal-overlay').style.display = 'none';
+  }, 300);
+}
+
 function openClientPin() {
   const name = document.getElementById('c-name').value.trim();
   if (!name) return setNotif("NOM REQUIS");
@@ -1967,8 +2215,7 @@ function updateOrderLed() {
   }
 }
 
-// ===== FONCTIONS LOGO =====
-
+// ===== LOGO =====
 function uploadAppLogo() {
   const fileInput = document.getElementById('adm-logo-file');
   const file = fileInput.files[0];
@@ -2026,12 +2273,11 @@ function renderLogoGallery() {
       selectedLogoId = logo.id;
     });
 
-    // Bouton de suppression
     const delBtn = document.createElement('button');
     delBtn.className = 'logo-delete-btn';
     delBtn.textContent = '✕';
     delBtn.addEventListener('click', (e) => {
-      e.stopPropagation(); // Empêche la sélection
+      e.stopPropagation();
       if (confirm("Supprimer ce logo ?")) {
         deleteLogo(logo.id);
       }
@@ -2049,16 +2295,13 @@ function deleteLogo(logoId) {
   const removed = appLogos[index];
   appLogos.splice(index, 1);
 
-  // Si le logo supprimé était actif, on réinitialise activeLogo
   let resetActive = false;
   if (removed.url === activeLogo) {
     resetActive = true;
   }
 
-  // Mise à jour Firebase
   pushAppLogos().then(() => {
     if (resetActive) {
-      // Réinitialiser activeLogo à null
       pushActiveLogo(null).then(() => {
         activeLogo = null;
         selectedLogoId = null;
