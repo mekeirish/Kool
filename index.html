@@ -13,6 +13,7 @@
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
 
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -41,6 +42,7 @@
     .star-rating label { font-size:2.2rem; color:#444; cursor:pointer; transition:color 0.2s; }
     .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color:var(--gold); }
 
+    /* Styles du panier */
     #cart-bar { position:fixed; bottom:0; left:0; width:100%; background:rgba(20,20,20,.92); backdrop-filter:blur(16px); border-top:1px solid rgba(255,255,255,.1); z-index:2000; padding:12px 16px; box-sizing:border-box; display:none; cursor:pointer; color:white; justify-content:space-between; align-items:center; }
     #cart-bar .cart-summary { display:flex; gap:16px; align-items:baseline; }
     #cart-bar .cart-summary .count { font-weight:600; color:var(--gold); }
@@ -105,6 +107,42 @@
 
     .res-card-unavailable { position:relative; opacity:0.6; pointer-events:none; filter:grayscale(0.4); }
     .res-card-unavailable .res-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); color:white; font-weight:bold; font-size:1.1rem; border-radius:12px; text-shadow:0 0 10px rgba(0,0,0,0.8); }
+
+    /* Formulaire de connexion */
+    .login-form {
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top:8px;
+    }
+    .login-form input {
+      padding:10px 14px;
+      border-radius:10px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.1);
+      color:white;
+      font-size:1rem;
+    }
+    .login-form .btn-login {
+      background:var(--gold);
+      color:black;
+      border:none;
+      padding:12px;
+      border-radius:10px;
+      font-weight:bold;
+      font-size:1rem;
+      cursor:pointer;
+      transition:background 0.2s;
+    }
+    .login-form .btn-login:hover {
+      background:#e0a800;
+    }
+    .login-form .error-msg {
+      color:#ff6b6b;
+      font-size:0.9rem;
+      text-align:center;
+      min-height:1.5em;
+    }
   </style>
 </head>
 <body class="bg-[#0f0f0f] text-gray-200 font-sans antialiased min-h-screen pb-32">
@@ -187,8 +225,22 @@
 </header>
 
 <!-- NUMPADS -->
-<div id="login-container" class="numpad-container"><div class="pin-display" id="pin-view"></div><div class="grid grid-cols-3 gap-4" id="pad-main"></div><button onclick="toggleLoginArea()" class="mt-4 text-gray-400 hover:text-white text-sm">ANNULER</button></div>
+<!-- Login container : formulaire de connexion Firebase -->
+<div id="login-container" class="numpad-container" style="width:320px; padding:20px;">
+  <h3 style="color:var(--gold); font-size:1.2rem; font-weight:bold; margin-bottom:12px;">🔐 Connexion</h3>
+  <div class="login-form">
+    <input type="email" id="login-email" placeholder="Email" />
+    <input type="password" id="login-password" placeholder="Mot de passe" />
+    <div class="error-msg" id="login-error"></div>
+    <button class="btn-login" onclick="loginWithEmail()">SE CONNECTER</button>
+    <button onclick="toggleLoginArea()" class="mt-2 text-gray-400 hover:text-white text-sm">ANNULER</button>
+  </div>
+</div>
+
+<!-- Client PIN -->
 <div id="client-pin-container" class="numpad-container"><h3 class="text-amber-400 text-xl font-bold mb-2">CODE SECRET</h3><div class="pin-display" id="client-pin-view"></div><div class="grid grid-cols-3 gap-4" id="numpad-client"></div><button onclick="closeClientPin()" class="mt-4 text-gray-400 hover:text-white text-sm">ANNULER</button></div>
+
+<!-- Delivery PIN -->
 <div id="delivery-validation-container" class="numpad-container"><h3 class="text-amber-400 text-xl font-bold mb-2">CODE CLIENT</h3><div class="pin-display" id="delivery-pin-view"></div><div class="grid grid-cols-3 gap-4" id="numpad-delivery"></div><button onclick="closeDeliveryPin()" class="mt-4 text-gray-400 hover:text-white text-sm">ANNULER</button></div>
 
 <!-- MODALS EDIT -->
@@ -229,7 +281,7 @@
   <div class="h-40"></div>
 </div>
 <div id="view-admin-space" class="view-section container mx-auto px-4 py-6">
-  <button onclick="goToHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
+  <button onclick="logoutAndGoHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
   <div class="glass rounded-2xl p-6 border border-white/10"><h2 class="text-2xl font-bold text-amber-400 mb-4">Admin</h2>
     <button onclick="toggleSec('adm-promo')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Message Promo <span class="text-amber-400">📣</span></button>
     <div id="adm-promo" class="sub-section"><input type="text" id="adm-promo-txt" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Votre message promo..." /><button onclick="updatePromoMessage()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">METTRE À JOUR</button></div>
@@ -271,7 +323,7 @@
   </div>
 </div>
 <div id="view-pro-space" class="view-section container mx-auto px-4 py-6">
-  <button onclick="goToHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
+  <button onclick="logoutAndGoHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
   <div class="glass rounded-2xl p-6 border border-white/10"><h2 id="pro-res-title" class="text-2xl font-bold text-amber-400 mb-4"></h2><div id="orders-list-pro"></div>
     <button onclick="toggleSec('add-plat')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Nouveau Plat <span class="text-amber-400">+</span></button>
     <div id="add-plat" class="sub-section"><input type="text" id="new-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" /><input type="number" id="new-p" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Prix DZD" min="0" /><input type="number" id="new-s" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Stock initial" min="0" /><input type="file" id="new-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" /><button id="btn-add-plat" onclick="addNewPlat()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">ENREGISTRER</button></div>
@@ -281,7 +333,7 @@
   </div>
 </div>
 <div id="view-livreur-space" class="view-section container mx-auto px-4 py-6">
-  <button onclick="logoutLivreur()" class="btn-retour mb-4">← DÉCONNEXION</button>
+  <button onclick="logoutAndGoHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
   <div class="glass rounded-2xl p-6 border border-white/10"><h2 id="liv-name" class="text-2xl font-bold text-amber-400 mb-4"></h2><div id="liv-orders"></div><hr class="my-6 border-white/10" /><div id="liv-hist"></div></div>
 </div>
 
@@ -307,7 +359,9 @@
 </div>
 
 <script>
-// ==================== JAVASCRIPT COMPLET ====================
+// ==================== JAVASCRIPT COMPLET AVEC AUTHENTIFICATION FIREBASE ====================
+
+console.log("🚀 Démarrage de l'application Kool");
 
 const firebaseConfig = {
   apiKey: "AIzaSyD4ekJLYuL5QTsroQj_QlOUPohDwhlQ14s",
@@ -320,6 +374,34 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const auth = firebase.auth();
+
+// --- Vérification Firebase ---
+if (typeof firebase === 'undefined' || !firebase.initializeApp) {
+  const loading = document.getElementById('loading-screen');
+  if (loading) {
+    loading.innerHTML = `
+      <div style="color:white;text-align:center;padding:20px;">
+        <h2 style="color:#ff6b6b;">Erreur de chargement Firebase</h2>
+        <p>Vérifiez votre connexion et rafraîchissez la page.</p>
+      </div>
+    `;
+  }
+  throw new Error("Firebase non chargé");
+}
+
+// --- Timeout de secours pour cacher le loading (programmé immédiatement) ---
+const loadingTimeout = setTimeout(() => {
+  const loading = document.getElementById('loading-screen');
+  if (loading && loading.style.display !== 'none') {
+    console.warn("⏱️ Loading screen forcé à disparaître (timeout)");
+    loading.style.display = 'none';
+    if (restaurants.length === 0) {
+      restaurants = [];
+      init();
+    }
+  }
+}, 3000);
 
 const CLOUDINARY_CLOUD_NAME = 'y6u9peta';
 const CLOUDINARY_UPLOAD_PRESET = 'Kool_uploadsibra';
@@ -340,11 +422,8 @@ let adminHistory = [];
 let cart = {};
 let currentRes = null;
 let currentLivreur = null;
-let currentPin = "";
-let clientTempPin = "";
-let deliveryTempPin = "";
-let pendingResId = null;
-let pendingOrderId = null;
+let currentUser = null;
+let currentUserData = null;
 let promoMessage = "BIENVENUE";
 let cloudWriteChain = Promise.resolve();
 let stopProOrdersWatch = null;
@@ -384,7 +463,121 @@ function showSection(id) {
   document.getElementById(id).classList.add('active');
 }
 
-// ========== DÉCONNEXION ==========
+// ========== AUTHENTIFICATION ==========
+function toggleLoginArea() {
+  const container = document.getElementById('login-container');
+  if (container.style.display === 'block') {
+    container.style.display = 'none';
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+  } else {
+    container.style.display = 'block';
+  }
+}
+
+function loginWithEmail() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+  const errorEl = document.getElementById('login-error');
+  if (!email || !password) {
+    errorEl.textContent = 'Veuillez remplir tous les champs.';
+    return;
+  }
+  errorEl.textContent = '';
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      toggleLoginArea();
+    })
+    .catch(err => {
+      errorEl.textContent = err.message;
+    });
+}
+
+function logoutAndGoHome() {
+  auth.signOut().then(() => {
+    goToHome();
+  }).catch(err => {
+    console.error('Erreur déconnexion:', err);
+    goToHome();
+  });
+}
+
+// ========== NAVIGATION APRÈS CONNEXION ==========
+function handleUserLogin(uid) {
+  db.ref(`cloud_koul/users/${uid}`).once('value').then(snap => {
+    const data = snap.val();
+    if (!data) {
+      setNotif("⚠️ Compte non configuré.");
+      auth.signOut();
+      return;
+    }
+    currentUserData = data;
+    const role = data.role;
+    if (role === 'admin') {
+      showSection('view-admin-space');
+      renderAdminResList();
+      renderAdminLivList();
+      renderAdminHistory();
+      renderLogoGallery();
+    } else if (role === 'restaurant') {
+      const restoId = data.restoId;
+      const r = restaurants.find(x => Number(x.id) === Number(restoId));
+      if (!r) {
+        setNotif("⚠️ Restaurant introuvable.");
+        auth.signOut();
+        return;
+      }
+      currentRes = r;
+      showSection('view-pro-space');
+      document.getElementById('pro-res-title').innerText = r.name;
+      startProOrdersWatch(r.id);
+      renderProOrders();
+      renderProPlats();
+      renderResHistory();
+    } else if (role === 'livreur') {
+      const livId = data.livreurId;
+      const l = livreurs.find(x => Number(x.id) === Number(livId));
+      if (!l) {
+        setNotif("⚠️ Livreur introuvable.");
+        auth.signOut();
+        return;
+      }
+      currentLivreur = l;
+      showSection('view-livreur-space');
+      document.getElementById('liv-name').innerText = l.name;
+      renderLivreurOrders();
+      renderLivreurHistory();
+    } else {
+      setNotif("⚠️ Rôle inconnu.");
+      auth.signOut();
+    }
+  }).catch(err => {
+    console.error(err);
+    setNotif("Erreur chargement profil.");
+    auth.signOut();
+  });
+}
+
+// Écouteur d'état d'authentification
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    handleUserLogin(user.uid);
+  } else {
+    currentUser = null;
+    currentUserData = null;
+    currentRes = null;
+    currentLivreur = null;
+    if (stopProOrdersWatch) { stopProOrdersWatch(); stopProOrdersWatch = null; }
+    showSection('view-restaurants');
+    updateCartUI();
+    init();
+  }
+});
+
+// ========== AUTRES FONCTIONS MÉTIER ==========
+
 function goToHome() {
   cart = {};
   clearCartDraft();
@@ -402,57 +595,22 @@ function goToHome() {
   init();
 }
 
-function logoutLivreur() {
-  currentLivreur = null;
-  goToHome();
-}
-
-function closeOrderConfirmModalAndGoHome() {
-  closeOrderConfirmModal();
-  goToHome();
-}
-
 function toggleSec(id) { const el = document.getElementById(id); el.style.display = el.style.display === 'block' ? 'none' : 'block'; }
 
-// ========== SAUVEGARDE PANIER ==========
-function saveCartDraft() {
-  if (!currentRes) return;
-  try { localStorage.setItem('koul_cart_draft', JSON.stringify({ cart, resId: currentRes.id })); } catch(e) {}
-}
-function clearCartDraft() { localStorage.removeItem('koul_cart_draft'); }
-function restoreCartDraft() {
-  if (restoredFromDraft) return;
-  try {
-    const raw = localStorage.getItem('koul_cart_draft');
-    if (!raw) return;
-    const draft = JSON.parse(raw);
-    if (!draft.cart || Object.keys(draft.cart).length === 0) { localStorage.removeItem('koul_cart_draft'); return; }
-    const r = restaurants.find(res => Number(res.id) === Number(draft.resId));
-    if (!r) { localStorage.removeItem('koul_cart_draft'); return; }
-    let valid = true;
-    for (let pid in draft.cart) {
-      if (!r.plats.find(p => Number(p.id) === Number(pid))) { valid = false; break; }
-    }
-    if (!valid) { localStorage.removeItem('koul_cart_draft'); return; }
-    cart = draft.cart;
-    currentRes = r;
-    showSection('view-menu-client');
-    document.getElementById('client-res-name').innerText = `${r.name} (⭐ ${calcAvg(r.ratings)})`;
-    renderClientPlats();
-    updateCartUI();
-    restoredFromDraft = true;
-    setNotif("🔄 Panier restauré");
-  } catch(e) { localStorage.removeItem('koul_cart_draft'); }
+function getCurrentPosition(latInputId, lngInputId) {
+  if (!navigator.geolocation) { setNotif("Géolocalisation non supportée"); return; }
+  setNotif("📡 Récupération de la position...");
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      document.getElementById(latInputId).value = pos.coords.latitude.toFixed(6);
+      document.getElementById(lngInputId).value = pos.coords.longitude.toFixed(6);
+      setNotif("✅ Position récupérée");
+    },
+    () => setNotif("❌ Échec de la géolocalisation"),
+    { timeout: 10000, enableHighAccuracy: true }
+  );
 }
 
-function isRestaurantAvailable(r) {
-  if (r.expiry && Date.now() > r.expiry) return false;
-  if (!r.plats || r.plats.length === 0) return false;
-  if (r.plats.every(p => p.stock === 0)) return false;
-  return true;
-}
-
-// ========== CLOUDINARY UPLOAD ==========
 function uploadToCloudinary(file, callback) {
   if (!file) { callback(null); return; }
   const formData = new FormData();
@@ -478,7 +636,6 @@ function uploadToCloudinary(file, callback) {
   });
 }
 
-// ========== FIREBASE ÉCRITURE ==========
 function enqueueCloudWrite(task) { cloudWriteChain = cloudWriteChain.then(task).catch(console.error); return cloudWriteChain; }
 function pushRestaurants() { return enqueueCloudWrite(() => db.ref('cloud_koul/restaurants').set(restaurants)); }
 function saveRestaurant(res) { const i = resIndex(res.id); if (i<0) return cloudWriteChain; restaurants[i]=res; return enqueueCloudWrite(() => db.ref(`cloud_koul/restaurants/${i}`).set(res)); }
@@ -503,57 +660,59 @@ function logResEvent(res, status, order) {
   saveRestaurant(res);
 }
 
-// ========== GÉOLOCALISATION ==========
-function getCurrentPosition(latInputId, lngInputId) {
-  if (!navigator.geolocation) { setNotif("Géolocalisation non supportée"); return; }
-  setNotif("📡 Récupération de la position...");
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      document.getElementById(latInputId).value = pos.coords.latitude.toFixed(6);
-      document.getElementById(lngInputId).value = pos.coords.longitude.toFixed(6);
-      setNotif("✅ Position récupérée");
-    },
-    () => setNotif("❌ Échec de la géolocalisation"),
-    { timeout: 10000, enableHighAccuracy: true }
-  );
-}
-
-// ========== LISTENERS FIREBASE ==========
 function bindCloudListeners() {
+  console.log("📡 Attachement des listeners Firebase...");
+
+  // Gestionnaire d'erreur commun
+  function handleFirebaseError(err, path) {
+    console.error(`Erreur Firebase sur ${path}:`, err);
+    const loading = document.getElementById('loading-screen');
+    if (loading) loading.style.display = 'none';
+    setNotif("⚠️ Impossible de charger les données, réessayez plus tard");
+  }
+
   db.ref('cloud_koul/restaurants').on('value', snap => {
     const data = snap.val();
+    console.log("📦 Restaurants reçus:", data ? Object.keys(data).length : 0);
     restaurants = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
     onRestaurantsUpdated();
-  });
+  }, err => handleFirebaseError(err, 'restaurants'));
+
   db.ref('cloud_koul/livreurs').on('value', snap => {
     const data = snap.val();
     livreurs = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
     onLivreursUpdated();
-  });
+  }, err => handleFirebaseError(err, 'livreurs'));
+
   db.ref('cloud_koul/adminHistory').on('value', snap => {
     const data = snap.val();
     adminHistory = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
     if (document.getElementById('view-admin-space').classList.contains('active')) renderAdminHistory();
-  });
+  }, err => handleFirebaseError(err, 'adminHistory'));
+
   db.ref('cloud_koul/promoMessage').on('value', snap => {
     promoMessage = snap.val() || 'BIENVENUE';
     document.getElementById('notif-message').innerText = promoMessage;
-  });
+  }, err => handleFirebaseError(err, 'promoMessage'));
+
   db.ref('cloud_koul/appLogos').on('value', snap => {
     const data = snap.val();
     appLogos = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
     if (document.getElementById('view-admin-space').classList.contains('active')) renderLogoGallery();
-  });
+  }, err => handleFirebaseError(err, 'appLogos'));
+
   db.ref('cloud_koul/activeLogo').on('value', snap => {
     const data = snap.val();
     activeLogo = data || null;
     updateHeaderLogo();
     if (document.getElementById('view-admin-space').classList.contains('active')) renderLogoGallery();
-  });
+  }, err => handleFirebaseError(err, 'activeLogo'));
 }
 
 function onRestaurantsUpdated() {
-  document.getElementById('loading-screen').style.display = 'none';
+  console.log("🔄 onRestaurantsUpdated() appelé");
+  const loading = document.getElementById('loading-screen');
+  if (loading) loading.style.display = 'none';
   if (currentRes) {
     const updated = restaurants.find(r => Number(r.id) === Number(currentRes.id));
     if (updated) currentRes = updated;
@@ -598,10 +757,16 @@ function refreshCurrentView() {
   if (document.getElementById('view-livreur-space').classList.contains('active') && currentLivreur) { renderLivreurOrders(); renderLivreurHistory(); }
 }
 
-// ========== NUMPAD ==========
+// ========== PADS ==========
 function generatePads() {
-  ['pad-main','numpad-client','numpad-delivery'].forEach(id => {
-    const el = document.getElementById(id); el.innerHTML = '';
+  // On ne génère que les pavés numériques client et livreur
+  ['numpad-client', 'numpad-delivery'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) {
+      console.warn(`generatePads: élément #${id} introuvable, ignoré.`);
+      return; // vérification défensive
+    }
+    el.innerHTML = '';
     for (let i=1; i<=9; i++) el.innerHTML += `<button class="num-btn" onclick="pressPad('${id}','${i}')">${i}</button>`;
     el.innerHTML += `<button class="num-btn" style="color:red" onclick="pressPad('${id}','C')">C</button>`;
     el.innerHTML += `<button class="num-btn" onclick="pressPad('${id}','0')">0</button>`;
@@ -609,34 +774,14 @@ function generatePads() {
     el.innerHTML += `<button class="num-btn" style="color:green" onclick="submitPad('${id}')"${okId}>OK</button>`;
   });
 }
+
 function pressPad(id, v) {
   vibrate(30);
-  if (id === 'pad-main') { if (v==='C') currentPin=''; else if (currentPin.length<4) currentPin+=v; document.getElementById('pin-view').innerText = currentPin.replace(/./g,'*'); }
   if (id === 'numpad-client') { if (v==='C') clientTempPin=''; else if (clientTempPin.length<4) clientTempPin+=v; document.getElementById('client-pin-view').innerText = clientTempPin; }
   if (id === 'numpad-delivery') { if (v==='C') deliveryTempPin=''; else if (deliveryTempPin.length<4) deliveryTempPin+=v; document.getElementById('delivery-pin-view').innerText = deliveryTempPin; }
 }
-function submitPad(id) { if (id==='pad-main') processLogin(); if (id==='numpad-client') confirmClientOrder(); if (id==='numpad-delivery') confirmDelivery(); }
+function submitPad(id) { if (id==='numpad-client') confirmClientOrder(); if (id==='numpad-delivery') confirmDelivery(); }
 
-function toggleLoginArea() { const a = document.getElementById('login-container'); a.style.display = a.style.display==='block'?'none':'block'; currentPin=''; document.getElementById('pin-view').innerText=''; }
-
-function processLogin() {
-  const pin = currentPin; toggleLoginArea();
-  if (pin === "1747") { showSection('view-admin-space'); renderAdminResList(); renderAdminLivList(); renderAdminHistory(); renderLogoGallery(); }
-  else {
-    const r = restaurants.find(x => x.code === pin), l = livreurs.find(x => x.code === pin);
-    if (r) {
-      if (r.expiry && Date.now() > r.expiry) { vibrate([50,50]); return setNotif("CODE RESTO EXPIRÉ"); }
-      currentRes = r; showSection('view-pro-space'); document.getElementById('pro-res-title').innerText = r.name;
-      startProOrdersWatch(r.id); renderProOrders(); renderProPlats(); renderResHistory();
-    } else if (l) {
-      if (l.expiry && Date.now() > l.expiry) { vibrate([50,50]); return setNotif("CODE LIVREUR EXPIRÉ"); }
-      currentLivreur = l; showSection('view-livreur-space'); document.getElementById('liv-name').innerText = l.name;
-      renderLivreurOrders(); renderLivreurHistory();
-    } else { vibrate([50,50,50]); setNotif("CODE ERRONÉ"); }
-  }
-}
-
-// ========== PRO (RESTAURANT) ==========
 function startProOrdersWatch(resId) {
   if (stopProOrdersWatch) stopProOrdersWatch();
   const idx = resIndex(resId);
@@ -865,7 +1010,6 @@ function deletePlat(id) { id = Number(id); const p = currentRes.plats.find(x => 
 function updateStock(i) { const p = currentRes.plats[i]; const newStk = parseInt(document.getElementById(`stk-${i}`).value); logAdminEvent(currentRes.name, `Stock ${p.n} : ${p.stock} -> ${newStk}`); p.stock = newStk; setNotif("STOCK MIS À JOUR"); saveRestaurant(currentRes); }
 function renderResHistory() { const l = document.getElementById('res-event-log'); l.innerHTML = ''; if (!currentRes.eventHistory || currentRes.eventHistory.length===0) { l.innerHTML = '<p style="color:#888;font-size:0.8rem">Aucun événement.</p>'; return; } currentRes.eventHistory.forEach(ev => { l.innerHTML += `<div class="hist-card" style="background:#1a1a1a;border-radius:8px;padding:12px;margin-bottom:10px;font-size:0.75rem;border-left:4px solid var(--gold);"><small>${ev.date} ${ev.time}</small><br><b>${ev.status}</b> - ${ev.client}</div>`; }); }
 
-// ========== ADMIN ==========
 function adminCreateRes() {
   const n = document.getElementById('adm-res-n').value;
   const c = document.getElementById('adm-res-c').value;
@@ -1221,6 +1365,11 @@ function closeOrderConfirmModal() {
   const overlay = document.getElementById('order-confirm-overlay');
   modal.style.display = 'none';
   overlay.style.display = 'none';
+}
+
+function closeOrderConfirmModalAndGoHome() {
+  closeOrderConfirmModal();
+  goToHome();
 }
 
 function openOrderDetailModal() {
@@ -2017,55 +2166,102 @@ function updateHeaderLogo() {
   }
 }
 
-// ========== DÉMARRAGE ==========
-loadClientOrderTracking();
-bindCloudListeners();
-
-// Fallback : si le listener ne se déclenche pas, cacher le loading après 5s
-setTimeout(() => {
-  const loading = document.getElementById('loading-screen');
-  if (loading && loading.style.display !== 'none') {
-    console.warn("Loading screen forcé à disparaître (timeout)");
-    loading.style.display = 'none';
-    if (restaurants.length === 0) {
-      restaurants = [];
-      init();
+// ========== SAUVEGARDE PANIER ==========
+function saveCartDraft() {
+  if (!currentRes) return;
+  try { localStorage.setItem('koul_cart_draft', JSON.stringify({ cart, resId: currentRes.id })); } catch(e) {}
+}
+function clearCartDraft() { localStorage.removeItem('koul_cart_draft'); }
+function restoreCartDraft() {
+  if (restoredFromDraft) return;
+  try {
+    const raw = localStorage.getItem('koul_cart_draft');
+    if (!raw) return;
+    const draft = JSON.parse(raw);
+    if (!draft.cart || Object.keys(draft.cart).length === 0) { localStorage.removeItem('koul_cart_draft'); return; }
+    const r = restaurants.find(res => Number(res.id) === Number(draft.resId));
+    if (!r) { localStorage.removeItem('koul_cart_draft'); return; }
+    let valid = true;
+    for (let pid in draft.cart) {
+      if (!r.plats.find(p => Number(p.id) === Number(pid))) { valid = false; break; }
     }
+    if (!valid) { localStorage.removeItem('koul_cart_draft'); return; }
+    cart = draft.cart;
+    currentRes = r;
+    showSection('view-menu-client');
+    document.getElementById('client-res-name').innerText = `${r.name} (⭐ ${calcAvg(r.ratings)})`;
+    renderClientPlats();
+    updateCartUI();
+    restoredFromDraft = true;
+    setNotif("🔄 Panier restauré");
+  } catch(e) { localStorage.removeItem('koul_cart_draft'); }
+}
+
+function isRestaurantAvailable(r) {
+  if (r.expiry && Date.now() > r.expiry) return false;
+  if (!r.plats || r.plats.length === 0) return false;
+  if (r.plats.every(p => p.stock === 0)) return false;
+  return true;
+}
+
+// ========== DÉMARRAGE ==========
+try {
+  console.log("🔄 Initialisation de l'application...");
+  loadClientOrderTracking();
+
+  // Attacher les listeners Firebase
+  bindCloudListeners();
+  init();
+  setOrderMode('livraison');
+  updateCartUI();
+  updateOrderLed();
+  updateHeaderLogo();
+
+  // === Long press sur la barre de notification ===
+  (function setupLongPress() {
+    const notifBar = document.getElementById('notification-bar');
+    let longPressTimer = null;
+    function startLongPress(e) {
+      e.preventDefault();
+      longPressTimer = setTimeout(() => {
+        toggleLoginArea();
+        if (navigator.vibrate) navigator.vibrate(50);
+      }, 4000);
+    }
+    function cancelLongPress(e) { clearTimeout(longPressTimer); }
+    notifBar.addEventListener('mousedown', startLongPress);
+    notifBar.addEventListener('mouseup', cancelLongPress);
+    notifBar.addEventListener('mouseleave', cancelLongPress);
+    notifBar.addEventListener('touchstart', startLongPress, { passive: false });
+    notifBar.addEventListener('touchend', cancelLongPress);
+    notifBar.addEventListener('touchcancel', cancelLongPress);
+  })();
+
+  // Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker enregistré', reg))
+        .catch(err => console.error('Erreur SW', err));
+    });
   }
-}, 5000);
 
-setOrderMode('livraison');
-updateCartUI();
-updateOrderLed();
-updateHeaderLogo();
-
-// === Long press sur la barre de notification ===
-(function setupLongPress() {
-  const notifBar = document.getElementById('notification-bar');
-  let longPressTimer = null;
-  function startLongPress(e) {
-    e.preventDefault();
-    longPressTimer = setTimeout(() => {
-      toggleLoginArea();
-      if (navigator.vibrate) navigator.vibrate(50);
-    }, 4000);
+  console.log("✅ Application Kool prête");
+} catch (err) {
+  console.error("Erreur au démarrage:", err);
+  const loading = document.getElementById('loading-screen');
+  if (loading) loading.style.display = 'none';
+  // Afficher un message à l'utilisateur
+  try {
+    setNotif("Erreur de chargement, veuillez rafraîchir la page");
+  } catch (e) {
+    // Fallback si setNotif n'est pas défini
+    const body = document.body;
+    const msg = document.createElement('div');
+    msg.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#cc0000;color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:bold;';
+    msg.textContent = "Erreur de chargement, veuillez rafraîchir la page";
+    body.appendChild(msg);
   }
-  function cancelLongPress(e) { clearTimeout(longPressTimer); }
-  notifBar.addEventListener('mousedown', startLongPress);
-  notifBar.addEventListener('mouseup', cancelLongPress);
-  notifBar.addEventListener('mouseleave', cancelLongPress);
-  notifBar.addEventListener('touchstart', startLongPress, { passive: false });
-  notifBar.addEventListener('touchend', cancelLongPress);
-  notifBar.addEventListener('touchcancel', cancelLongPress);
-})();
-
-// Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('Service Worker enregistré', reg))
-      .catch(err => console.error('Erreur SW', err));
-  });
 }
 </script>
 </body>
