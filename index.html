@@ -305,7 +305,6 @@
       <input type="text" id="adm-liv-c" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Code" />
       <input type="number" id="adm-liv-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours)" min="0" />
       <input type="file" id="adm-liv-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" />
-      <!-- NOUVEAUX CHAMPS EMAIL / MOT DE PASSE POUR LE LIVREUR -->
       <input type="email" id="adm-liv-email" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Email du livreur" />
       <input type="password" id="adm-liv-password" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Mot de passe du livreur" />
       <button id="btn-admin-add-liv" onclick="adminCreateLiv()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">AJOUTER</button>
@@ -765,12 +764,11 @@ function refreshCurrentView() {
 
 // ========== PADS ==========
 function generatePads() {
-  // On ne génère que les pavés numériques client et livreur
   ['numpad-client', 'numpad-delivery'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) {
       console.warn(`generatePads: élément #${id} introuvable, ignoré.`);
-      return; // vérification défensive
+      return;
     }
     el.innerHTML = '';
     for (let i=1; i<=9; i++) el.innerHTML += `<button class="num-btn" onclick="pressPad('${id}','${i}')">${i}</button>`;
@@ -1016,8 +1014,8 @@ function deletePlat(id) { id = Number(id); const p = currentRes.plats.find(x => 
 function updateStock(i) { const p = currentRes.plats[i]; const newStk = parseInt(document.getElementById(`stk-${i}`).value); logAdminEvent(currentRes.name, `Stock ${p.n} : ${p.stock} -> ${newStk}`); p.stock = newStk; setNotif("STOCK MIS À JOUR"); saveRestaurant(currentRes); }
 function renderResHistory() { const l = document.getElementById('res-event-log'); l.innerHTML = ''; if (!currentRes.eventHistory || currentRes.eventHistory.length===0) { l.innerHTML = '<p style="color:#888;font-size:0.8rem">Aucun événement.</p>'; return; } currentRes.eventHistory.forEach(ev => { l.innerHTML += `<div class="hist-card" style="background:#1a1a1a;border-radius:8px;padding:12px;margin-bottom:10px;font-size:0.75rem;border-left:4px solid var(--gold);"><small>${ev.date} ${ev.time}</small><br><b>${ev.status}</b> - ${ev.client}</div>`; }); }
 
-// ===== NOUVELLE VERSION DE adminCreateRes AVEC CRÉATION DE COMPTE =====
-function adminCreateRes() {
+// ========== CRÉATION RESTAURANT AVEC COMPTE (CORRIGÉE) ==========
+async function adminCreateRes() {
   const n = document.getElementById('adm-res-n').value.trim();
   const c = document.getElementById('adm-res-c').value.trim();
   const dur = document.getElementById('adm-res-dur').value;
@@ -1027,25 +1025,21 @@ function adminCreateRes() {
   const email = document.getElementById('adm-res-email').value.trim();
   const password = document.getElementById('adm-res-password').value.trim();
 
-  if (!n || !c) {
-    setNotif("⚠️ Nom et code requis");
-    return;
-  }
-  if (!email || !password) {
-    setNotif("⚠️ Email et mot de passe du gérant requis");
-    return;
-  }
-  if (password.length < 6) {
-    setNotif("⚠️ Le mot de passe doit faire au moins 6 caractères");
-    return;
-  }
+  if (!n || !c) return setNotif("⚠️ Nom et code requis");
+  if (!email || !password) return setNotif("⚠️ Email et mot de passe du gérant requis");
+  if (password.length < 6) return setNotif("⚠️ Le mot de passe doit faire au moins 6 caractères");
 
   const btn = document.getElementById('btn-admin-add-res');
   btn.disabled = true;
   btn.textContent = '...';
 
-  // Étape 1 : upload image (si présente)
-  uploadToCloudinary(file, (imgUrl) => {
+  try {
+    // 1. Upload image (si présente)
+    const imgUrl = await new Promise((resolve) => {
+      uploadToCloudinary(file, resolve);
+    });
+
+    // 2. Construire l'objet restaurant
     const expiry = dur ? Date.now() + (parseInt(dur) * 24 * 60 * 60 * 1000) : null;
     const newResto = {
       id: Date.now(),
@@ -1061,59 +1055,62 @@ function adminCreateRes() {
       ratings: []
     };
 
-    // Ajouter localement
-    restaurants.push(newResto);
+    // 3. Écrire dans Firebase (on attend le résultat)
+    const updatedRestaurants = [...restaurants, newResto];
+    await db.ref('cloud_koul/restaurants').set(updatedRestaurants);
+
+    // 4. Mettre à jour le tableau local
+    restaurants = updatedRestaurants;
     renderAdminResList();
-    // Sauvegarder restaurant dans Firebase
-    pushRestaurants()
-      .then(() => {
-        // Créer le compte Firebase pour le gérant
-        return auth.createUserWithEmailAndPassword(email, password);
-      })
-      .then(userCredential => {
-        const uid = userCredential.user.uid;
-        // Enregistrer rôle et restoId
-        return db.ref(`cloud_koul/users/${uid}`).set({
-          role: 'restaurant',
-          restoId: newResto.id
-        });
-      })
-      .then(() => {
-        logAdminEvent("SYSTEM", `Resto créé: ${n} - Compte: ${email}`);
-        setNotif(`✅ Resto "${n}" et compte "${email}" créés !`);
-        // Vider le formulaire
-        document.getElementById('adm-res-n').value = '';
-        document.getElementById('adm-res-c').value = '';
-        document.getElementById('adm-res-dur').value = '';
-        document.getElementById('adm-res-lat').value = '';
-        document.getElementById('adm-res-lng').value = '';
-        document.getElementById('adm-res-img').value = '';
-        document.getElementById('adm-res-email').value = '';
-        document.getElementById('adm-res-password').value = '';
-        // Rafraîchir la liste
-        renderAdminResList();
-      })
-      .catch(err => {
-        console.error("Erreur création compte:", err);
-        // Si échec, on supprime le restaurant pour rester cohérent
-        restaurants = restaurants.filter(r => r.id !== newResto.id);
-        pushRestaurants();
-        renderAdminResList();
-        if (err.code === 'auth/email-already-in-use') {
-          setNotif(`⚠️ Email déjà utilisé. Resto ajouté mais compte non créé.`);
-        } else {
-          setNotif(`⚠️ Erreur: ${err.message}`);
-        }
-      })
-      .finally(() => {
-        btn.disabled = false;
-        btn.textContent = 'AJOUTER';
-      });
-  });
+
+    // 5. Créer le compte Firebase
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const uid = userCredential.user.uid;
+
+    // 6. Enregistrer le rôle et le restoId
+    await db.ref(`cloud_koul/users/${uid}`).set({
+      role: 'restaurant',
+      restoId: newResto.id
+    });
+
+    // 7. Log et notification
+    logAdminEvent("SYSTEM", `Resto créé: ${n} - Compte: ${email}`);
+    setNotif(`✅ Resto "${n}" et compte "${email}" créés !`);
+
+    // 8. Vider le formulaire
+    document.getElementById('adm-res-n').value = '';
+    document.getElementById('adm-res-c').value = '';
+    document.getElementById('adm-res-dur').value = '';
+    document.getElementById('adm-res-lat').value = '';
+    document.getElementById('adm-res-lng').value = '';
+    document.getElementById('adm-res-img').value = '';
+    document.getElementById('adm-res-email').value = '';
+    document.getElementById('adm-res-password').value = '';
+
+    // 9. Recharger les données depuis Firebase pour être sûr
+    const snap = await db.ref('cloud_koul/restaurants').once('value');
+    restaurants = snap.val() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
+    renderAdminResList();
+    if (document.getElementById('view-restaurants').classList.contains('active')) init();
+
+  } catch (err) {
+    console.error("Erreur création restaurant:", err);
+    // Si erreur, on retire le restaurant du tableau local s'il a été ajouté
+    restaurants = restaurants.filter(r => r.id !== newResto?.id);
+    renderAdminResList();
+    if (err.code === 'auth/email-already-in-use') {
+      setNotif(`⚠️ Email déjà utilisé. Le restaurant a été ajouté mais pas le compte.`);
+    } else {
+      setNotif(`⚠️ Erreur: ${err.message}`);
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'AJOUTER';
+  }
 }
 
-// ===== NOUVELLE VERSION DE adminCreateLiv AVEC CRÉATION DE COMPTE =====
-function adminCreateLiv() {
+// ========== CRÉATION LIVREUR AVEC COMPTE (CORRIGÉE) ==========
+async function adminCreateLiv() {
   const n = document.getElementById('adm-liv-n').value.trim();
   const c = document.getElementById('adm-liv-c').value.trim();
   const dur = document.getElementById('adm-liv-dur').value;
@@ -1121,24 +1118,19 @@ function adminCreateLiv() {
   const email = document.getElementById('adm-liv-email').value.trim();
   const password = document.getElementById('adm-liv-password').value.trim();
 
-  if (!n || !c) {
-    setNotif("⚠️ Nom et code requis");
-    return;
-  }
-  if (!email || !password) {
-    setNotif("⚠️ Email et mot de passe du livreur requis");
-    return;
-  }
-  if (password.length < 6) {
-    setNotif("⚠️ Le mot de passe doit faire au moins 6 caractères");
-    return;
-  }
+  if (!n || !c) return setNotif("⚠️ Nom et code requis");
+  if (!email || !password) return setNotif("⚠️ Email et mot de passe du livreur requis");
+  if (password.length < 6) return setNotif("⚠️ Le mot de passe doit faire au moins 6 caractères");
 
   const btn = document.getElementById('btn-admin-add-liv');
   btn.disabled = true;
   btn.textContent = '...';
 
-  uploadToCloudinary(file, (imgUrl) => {
+  try {
+    const imgUrl = await new Promise((resolve) => {
+      uploadToCloudinary(file, resolve);
+    });
+
     const expiry = dur ? Date.now() + (parseInt(dur) * 24 * 60 * 60 * 1000) : null;
     const newLiv = {
       id: Date.now(),
@@ -1150,48 +1142,49 @@ function adminCreateLiv() {
       ratings: []
     };
 
-    livreurs.push(newLiv);
+    const updatedLivreurs = [...livreurs, newLiv];
+    await db.ref('cloud_koul/livreurs').set(updatedLivreurs);
+
+    livreurs = updatedLivreurs;
     renderAdminLivList();
-    pushLivreurs()
-      .then(() => {
-        return auth.createUserWithEmailAndPassword(email, password);
-      })
-      .then(userCredential => {
-        const uid = userCredential.user.uid;
-        return db.ref(`cloud_koul/users/${uid}`).set({
-          role: 'livreur',
-          livreurId: newLiv.id
-        });
-      })
-      .then(() => {
-        logAdminEvent("SYSTEM", `Livreur créé: ${n} - Compte: ${email}`);
-        setNotif(`✅ Livreur "${n}" et compte "${email}" créés !`);
-        document.getElementById('adm-liv-n').value = '';
-        document.getElementById('adm-liv-c').value = '';
-        document.getElementById('adm-liv-dur').value = '';
-        document.getElementById('adm-liv-img').value = '';
-        document.getElementById('adm-liv-email').value = '';
-        document.getElementById('adm-liv-password').value = '';
-        renderAdminLivList();
-      })
-      .catch(err => {
-        console.error("Erreur création compte livreur:", err);
-        livreurs = livreurs.filter(l => l.id !== newLiv.id);
-        pushLivreurs();
-        renderAdminLivList();
-        if (err.code === 'auth/email-already-in-use') {
-          setNotif(`⚠️ Email déjà utilisé. Livreur ajouté mais compte non créé.`);
-        } else {
-          setNotif(`⚠️ Erreur: ${err.message}`);
-        }
-      })
-      .finally(() => {
-        btn.disabled = false;
-        btn.textContent = 'AJOUTER';
-      });
-  });
+
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const uid = userCredential.user.uid;
+    await db.ref(`cloud_koul/users/${uid}`).set({
+      role: 'livreur',
+      livreurId: newLiv.id
+    });
+
+    logAdminEvent("SYSTEM", `Livreur créé: ${n} - Compte: ${email}`);
+    setNotif(`✅ Livreur "${n}" et compte "${email}" créés !`);
+
+    document.getElementById('adm-liv-n').value = '';
+    document.getElementById('adm-liv-c').value = '';
+    document.getElementById('adm-liv-dur').value = '';
+    document.getElementById('adm-liv-img').value = '';
+    document.getElementById('adm-liv-email').value = '';
+    document.getElementById('adm-liv-password').value = '';
+
+    const snap = await db.ref('cloud_koul/livreurs').once('value');
+    livreurs = snap.val() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
+    renderAdminLivList();
+
+  } catch (err) {
+    console.error("Erreur création livreur:", err);
+    livreurs = livreurs.filter(l => l.id !== newLiv?.id);
+    renderAdminLivList();
+    if (err.code === 'auth/email-already-in-use') {
+      setNotif(`⚠️ Email déjà utilisé. Le livreur a été ajouté mais pas le compte.`);
+    } else {
+      setNotif(`⚠️ Erreur: ${err.message}`);
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'AJOUTER';
+  }
 }
 
+// ========== GESTION ADMIN (LISTES, MODIFICATIONS, ETC.) ==========
 function renderAdminResList() {
   const l = document.getElementById('list-res-to-manage'); l.innerHTML = '';
   restaurants.forEach(r => {
@@ -2375,11 +2368,9 @@ try {
   console.error("Erreur au démarrage:", err);
   const loading = document.getElementById('loading-screen');
   if (loading) loading.style.display = 'none';
-  // Afficher un message à l'utilisateur
   try {
     setNotif("Erreur de chargement, veuillez rafraîchir la page");
   } catch (e) {
-    // Fallback si setNotif n'est pas défini
     const body = document.body;
     const msg = document.createElement('div');
     msg.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#cc0000;color:white;padding:12px 24px;border-radius:8px;z-index:9999;font-weight:bold;';
