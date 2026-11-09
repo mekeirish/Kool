@@ -4710,24 +4710,19 @@ function init() {
   grid.innerHTML = '';
   if (restaurants.length === 0) {
     _resGridSig = '';
-    // R — Empty state premium après un court délai (laisse le temps aux données d'arriver)
-    const sk = document.getElementById('res-skeleton');
-    if (sk) { sk.style.display = 'none'; sk.innerHTML = ''; }
-    grid.className = 'grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4';
-    // Tant que Firebase n'a pas répondu au moins une fois, on affiche des squelettes au lieu du message vide
+    // Tant que Firebase n'a pas répondu : on ne montre RIEN (ni rectangle, ni message).
+    // La grille reste vide et le loading-screen d'origine couvre déjà l'écran.
     if (!initialLoadDone && !cloudState.restaurants) {
-      grid.className = 'grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4';
+      grid.className = '';
+      grid.style.minHeight = '0';
       grid.innerHTML = '';
-      for (let i = 0; i < 4; i++) {
-        grid.innerHTML += `
-          <div class="res-card" style="pointer-events:none; opacity:0.6;">
-            <div style="width:100%; aspect-ratio:2/1; background:linear-gradient(90deg,#1a1a1a 0%,#2a2a2a 50%,#1a1a1a 100%); background-size:800px 100%; animation:shimmer 1.4s infinite linear;"></div>
-          </div>
-        `;
-      }
       return;
     }
+    // Chargement terminé et toujours vide : message propre
+    const sk = document.getElementById('res-skeleton');
+    if (sk) { sk.style.display = 'none'; sk.innerHTML = ''; }
     grid.className = '';
+    grid.style.minHeight = '';
     grid.innerHTML = `
       <div class="empty-restaurants">
         <div class="empty-icon">🍽️</div>
@@ -4740,6 +4735,7 @@ function init() {
   }
   _resGridSig = sig;
   hideResSkeleton();
+  grid.style.minHeight = '';
   grid.className = 'grid grid-cols-1 gap-4';
   sortedRestos.forEach((res, idx) => {
     const imgSrc = getOptimizedCloudinaryUrl(res.img, 600);
