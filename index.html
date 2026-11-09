@@ -10,6 +10,11 @@
   <link rel="apple-touch-icon" href="icon.png" />
   <meta name="theme-color" content="#fbbf24" />
 
+  <!-- Google Fonts : police d'affichage du titre Kool -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
+
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -220,7 +225,45 @@ header.flex { transition: background 0.3s ease, border-color 0.3s ease, box-shad
 header.flex.scrolled { background: rgba(15,15,15,0.75); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom-color: rgba(251,191,36,0.25); box-shadow: 0 4px 20px -8px rgba(0,0,0,0.6); }
 header.flex #app-logo-image { transition: height 0.3s ease; }
 header.flex.scrolled #app-logo-image { height: 40px !important; }
-header.flex #app-title { transition: font-size 0.3s ease; }
+header.flex #app-title {
+  font-family: 'Marcellus', 'Cinzel', 'Arial Black', serif;
+  font-weight: 400;
+  font-size: 1.9rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: font-size 0.3s ease;
+  position: relative;
+  display: inline-block;
+  padding: 0 3.4em;
+  background: linear-gradient(180deg, #fff4d0 0%, #fbbf24 45%, #b9791a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 10px rgba(251,191,36,0.35));
+}
+/* Lignes dorées dégradées de part et d'autre du titre */
+header.flex #app-title::before,
+header.flex #app-title::after {
+  position: absolute;
+  top: 50%;
+  width: 2.6em;
+  height: 1px;
+  content: '';
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+header.flex #app-title::before {
+  left: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(251,191,36,0.15) 35%, rgba(251,191,36,0.95) 100%);
+  box-shadow: 0 0 8px rgba(251,191,36,0.55);
+}
+header.flex #app-title::after {
+  right: 0;
+  background: linear-gradient(270deg, transparent 0%, rgba(251,191,36,0.15) 35%, rgba(251,191,36,0.95) 100%);
+  box-shadow: 0 0 8px rgba(251,191,36,0.55);
+}
+header.flex #app-title::marker { content: none; }
+header.flex #app-title > span { position: relative; }
 header.flex.scrolled #app-title { font-size: 1.4rem !important; }
 #order-status-bar { background: #000 !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border-bottom: 1px solid rgba(255,255,255,0.10) !important; padding: 10px 16px !important; }
 #order-status-bar .status-timeline { display: flex; align-items: center; gap: 0; flex: 1; min-width: 0; }
@@ -331,7 +374,45 @@ header.flex.scrolled #app-title { font-size: 1.4rem !important; }
 #zoom-overlay .zoom-close-btn:hover { background: rgba(251,191,36,0.15); }
 #zoom-overlay .zoom-close-btn:active { transform: scale(0.92); }
 #loading-screen { background: radial-gradient(ellipse at center, #1a1410 0%, #0a0a0a 100%) !important; animation: splash-fade 0.6s ease-out; }
-#loading-screen .splash-logo { font-size: 3.4rem; font-weight: 900; font-style: italic; color: var(--gold); letter-spacing: 0.05em; text-shadow: 0 0 40px rgba(251,191,36,0.5), 0 0 80px rgba(251,191,36,0.2); animation: splash-logo 1s cubic-bezier(0.22, 1, 0.36, 1); margin-top: 18px; }
+#loading-screen .splash-logo {
+  font-family: 'Marcellus', 'Cinzel', 'Arial Black', serif;
+  font-size: 3.8rem;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  position: relative;
+  display: inline-block;
+  padding: 0 1.6em;
+  margin-top: 18px;
+  background: linear-gradient(180deg, #fff4d0 0%, #fbbf24 45%, #b9791a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 0 rgba(0,0,0,0.55)) drop-shadow(0 0 24px rgba(251,191,36,0.55)) drop-shadow(0 0 60px rgba(251,191,36,0.25));
+  animation: splash-logo 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#loading-screen .splash-logo::before,
+#loading-screen .splash-logo::after {
+  position: absolute;
+  top: 50%;
+  width: 1.2em;
+  height: 2px;
+  content: '';
+  transform: translateY(-50%);
+  pointer-events: none;
+  border-radius: 2px;
+}
+#loading-screen .splash-logo::before {
+  left: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(251,191,36,0.2) 30%, rgba(251,191,36,1) 100%);
+  box-shadow: 0 0 12px rgba(251,191,36,0.8);
+}
+#loading-screen .splash-logo::after {
+  right: 0;
+  background: linear-gradient(270deg, transparent 0%, rgba(251,191,36,0.2) 30%, rgba(251,191,36,1) 100%);
+  box-shadow: 0 0 12px rgba(251,191,36,0.8);
+}
 #loading-screen .splash-sub { font-size: 0.75rem; color: rgba(251,191,36,0.6); letter-spacing: 0.35em; text-transform: uppercase; font-weight: 600; margin-top: 8px; animation: splash-logo 1s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both; }
 #loading-screen .spinner { width: 44px; height: 44px; border: 3px solid rgba(251,191,36,0.15); border-top-color: var(--gold); animation: spin 0.9s linear infinite; margin-bottom: 0; }
 #view-admin-space h2.glass-title, #view-pro-space h2.glass-title, #view-livreur-space h2.glass-title, #pro-res-title, #liv-name { position: relative; padding-bottom: 12px; animation: fadeUp 0.4s ease-out; }
