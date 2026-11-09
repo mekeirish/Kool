@@ -1,54 +1,15 @@
-const CACHE_NAME = 'kool-v1';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon.png',
-  'https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js',
-  'https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js',
-  'https://cdn.tailwindcss.com'
-];
-
-// Installation : mise en cache des ressources
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS))
-      .then(() => self.skipWaiting())
-  );
+const PREFIX="Kool-";
+const CACHE="Kool-v1794222692440";
+const ASSETS=['./','./index.html','./manifest.json','./icon.png','./icon-192.png'];
+self.addEventListener('install',e=>{
+self.skipWaiting();
+e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));
 });
-
-// Activation : nettoyage des anciens caches
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      );
-    }).then(() => self.clients.claim())
-  );
+self.addEventListener('activate',e=>{
+e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(PREFIX)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
-
-// Interception des requêtes
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  // Stratégie Network-first pour la page HTML (toujours la version la plus récente)
-  if (url.pathname === '/' || url.pathname === '/index.html') {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
-  } else {
-    // Stratégie Cache-first pour les assets (scripts, icônes, manifeste)
-    event.respondWith(
-      caches.match(event.request)
-        .then(response => response || fetch(event.request))
-    );
-  }
+self.addEventListener('fetch',e=>{
+const req=e.request;
+if(req.method!=='GET'||new URL(req.url).origin!==self.location.origin)return;
+e.respondWith(fetch(req).then(res=>{const copy=res.clone();caches.open(CACHE).then(c=>c.put(req,copy));return res;}).catch(()=>caches.match(req).then(r=>r||caches.match('./index.html'))));
 });
