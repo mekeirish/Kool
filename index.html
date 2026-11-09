@@ -1719,6 +1719,7 @@ function bindCloudListeners() {
 
 function onRestaurantsUpdated() {
   cloudState.restaurants = true;
+  initialLoadDone = true;
   const loading = document.getElementById('loading-screen');
   if (loading) loading.style.display = 'none';
   hideResSkeleton();
@@ -4674,6 +4675,7 @@ function closeZoom() {
 }
 
 // ========== INIT ==========
+let initialLoadDone = false;
 function init() {
   const grid = document.getElementById('res-grid');
   // Demande la position une seule fois ; re-render dès qu'elle arrive
@@ -4711,6 +4713,20 @@ function init() {
     // R — Empty state premium après un court délai (laisse le temps aux données d'arriver)
     const sk = document.getElementById('res-skeleton');
     if (sk) { sk.style.display = 'none'; sk.innerHTML = ''; }
+    grid.className = 'grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4';
+    // Tant que Firebase n'a pas répondu au moins une fois, on affiche des squelettes au lieu du message vide
+    if (!initialLoadDone && !cloudState.restaurants) {
+      grid.className = 'grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4';
+      grid.innerHTML = '';
+      for (let i = 0; i < 4; i++) {
+        grid.innerHTML += `
+          <div class="res-card" style="pointer-events:none; opacity:0.6;">
+            <div style="width:100%; aspect-ratio:2/1; background:linear-gradient(90deg,#1a1a1a 0%,#2a2a2a 50%,#1a1a1a 100%); background-size:800px 100%; animation:shimmer 1.4s infinite linear;"></div>
+          </div>
+        `;
+      }
+      return;
+    }
     grid.className = '';
     grid.innerHTML = `
       <div class="empty-restaurants">
