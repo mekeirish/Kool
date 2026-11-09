@@ -788,8 +788,10 @@ async function callWorker(path, body, withAuth) {
   }
   // Timeout obligatoire : sans lui, un Worker lent ou injoignable
   // laisse la requête bloquée pour toujours (aucun retour utilisateur).
+  // 25 s : une commande enchaîne plusieurs écritures Firebase côté Worker,
+  // un délai trop court affiche une erreur alors que la commande est créée.
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
+  const timeoutId = setTimeout(() => controller.abort(), 25000);
   try {
     const res = await fetch(WORKER_URL + path, {
       method: 'POST',
@@ -3717,12 +3719,13 @@ function changeQty(pid, d) {
   if (!cart[pid]) cart[pid] = { n: p.n, p: p.p, qte: 0, id: p.id };
   cart[pid].qte += d;
   if (cart[pid].qte <= 0) delete cart[pid];
-  renderClientPlats();
+  // Met à jour uniquement le compteur du plat : plus de reconstruction de la liste (pas de clignotement)
+  const counter = document.getElementById(`qty-${pid}`);
+  if (counter) counter.innerText = cart[pid] ? cart[pid].qte : 0;
   updateCartUI();
   saveCartDraft();
   if (d > 0) haptic('light');
   else haptic('tap');
-  const counter = document.getElementById(`qty-${pid}`);
   if (counter) { counter.classList.add('bump'); setTimeout(() => counter.classList.remove('bump'), 300); }
   const badge = document.getElementById('cart-item-count');
   if (badge) { badge.classList.add('bump'); setTimeout(() => badge.classList.remove('bump'), 300); }
