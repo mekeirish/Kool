@@ -157,12 +157,29 @@ body { background: radial-gradient(ellipse at top, #1a1410 0%, #0f0f0f 55%) fixe
 .plat-skeleton .sk-line.tiny { width: 40%; height: 10px; }
 .plat-card { display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,0.04); padding: 12px; border-radius: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.06); opacity: 0; transform: translateY(12px); animation: fadeUp 0.3s ease-out both; transition: border-color 0.2s ease, background 0.2s ease; position: relative; }
 .plat-card.revealed { animation: fadeUp 0.4s ease-out forwards; }
-.plat-card:hover { border-color: rgba(251,191,36,0.2); background: rgba(255,255,255,0.06); }
-.plat-card img { width: 72px; height: 72px; border-radius: 12px; object-fit: cover; flex-shrink: 0; transition: transform 0.2s ease; -webkit-tap-highlight-color: transparent; cursor: pointer; user-select: none; -webkit-user-select: none; }
-.plat-card img:hover { transform: scale(1.05); }
-.plat-card img:active { transform: scale(0.96); }
-.plat-card img.long-press { transform: scale(1.05); outline: 2px solid var(--gold); outline-offset: 2px; }
-.plat-card .plat-new-badge { position: absolute; top: 6px; left: 6px; padding: 2px 8px; border-radius: 999px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #000; font-size: 0.6rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; box-shadow: 0 4px 12px -2px rgba(251,191,36,0.6); z-index: 2; animation: pop 0.6s ease-out; }
+.plat-card:hover { border-color: rgba(251,191,36,0.35); background: rgba(255,255,255,0.06); box-shadow: 0 12px 28px -16px rgba(251,191,36,0.45); transform: translateY(-2px); }
+.plat-card img.plat-img { width: 72px; height: 72px; border-radius: 12px; object-fit: cover; flex-shrink: 0; transition: transform 0.2s ease; -webkit-tap-highlight-color: transparent; cursor: pointer; user-select: none; -webkit-user-select: none; }
+.plat-card img.plat-img.zoomed-source { opacity: 0; }
+.plat-card img.plat-img:hover { transform: scale(1.05); }
+.plat-card img.plat-img:active { transform: scale(0.96); }
+.plat-card img.plat-img.long-press { transform: scale(1.05); outline: 2px solid var(--gold); outline-offset: 2px; }
+.plat-zoom-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.25s ease; pointer-events: none; }
+.plat-zoom-overlay.active { opacity: 1; pointer-events: auto; }
+.plat-zoom-overlay img { border-radius: 16px; box-shadow: 0 20px 60px -10px rgba(0,0,0,0.9); cursor: pointer; max-width: 90vw; max-height: 85vh; object-fit: contain; }
+.plat-card .plat-new-badge { position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 999px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #000; font-size: 0.65rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; box-shadow: 0 4px 12px -2px rgba(251,191,36,0.6); z-index: 2; animation: pop 0.6s ease-out; }
+.plat-card-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.plat-name { color: #fff; font-weight: 700; font-size: 1rem; line-height: 1.25; letter-spacing: 0.01em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.plat-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
+.plat-price { color: var(--gold); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; white-space: nowrap; }
+.plat-stock { font-size: 0.7rem; color: #888; font-weight: 600; white-space: nowrap; }
+.plat-stock.low { color: #f59e0b; }
+.plat-stock.out { color: #f87171; }
+.plat-actions { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.plat-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 6px; }
+@media (min-width: 640px) { .plat-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
+#view-menu-client .section-header { display: flex; justify-content: space-between; align-items: baseline; margin: 18px 0 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(251,191,36,0.15); }
+#view-menu-client .section-header h3 { color: #fff; font-size: 1.15rem; font-weight: 800; letter-spacing: 0.02em; }
+#view-menu-client .section-header .section-count { color: var(--gold); font-size: 0.8rem; font-weight: 700; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); padding: 2px 10px; border-radius: 999px; }
 .qty-btn { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(255,255,255,0.08); color: #fff; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: background 0.15s ease, transform 0.1s ease; }
 .qty-btn:hover { background: rgba(255,255,255,0.16); }
 .qty-btn:active { transform: scale(0.9); }
@@ -495,12 +512,15 @@ header.flex.scrolled #app-title { font-size: 1.4rem !important; }
 [data-theme="light"] .res-card:hover { border-color: rgba(251,191,36,0.6); box-shadow: 0 12px 32px -10px rgba(251,191,36,0.4), 0 0 0 1px rgba(251,191,36,0.2); }
 [data-theme="light"] .plat-card { background: #fff; border-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .plat-card:hover { background: #fffdf6; border-color: rgba(251,191,36,0.5); }
-[data-theme="light"] .plat-card .text-white { color: #1a1a1a !important; }
-[data-theme="light"] .plat-card .text-gray-400 { color: #666 !important; }
+[data-theme="light"] .plat-card .plat-name { color: #1a1a1a !important; }
+[data-theme="light"] .plat-card .plat-stock { color: #666 !important; }
 [data-theme="light"] .plat-card .qty-btn { background: rgba(0,0,0,0.06); color: #1a1a1a; }
 [data-theme="light"] .plat-card .qty-btn:hover { background: rgba(0,0,0,0.12); }
 [data-theme="light"] .plat-card .qty-btn.primary { background: #fbbf24; color: #000; }
 [data-theme="light"] .qty-count { color: #1a1a1a; }
+[data-theme="light"] #view-menu-client .section-header { border-bottom-color: rgba(251,191,36,0.3); }
+[data-theme="light"] #view-menu-client .section-header h3 { color: #1a1a1a; }
+[data-theme="light"] #view-menu-client .section-header .section-count { background: rgba(251,191,36,0.15); color: #92400e; border-color: rgba(251,191,36,0.5); }
 [data-theme="light"] .plat-skeleton { background: #f0ebe2; border-color: rgba(0,0,0,0.06); }
 [data-theme="light"] .plat-skeleton .sk-img, [data-theme="light"] .plat-skeleton .sk-line { background: linear-gradient(90deg, #e5dfd3 0%, #f5efe5 50%, #e5dfd3 100%); background-size: 800px 100%; }
 [data-theme="light"] #cart-bar { background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,253,245,0.98) 100%); border-color: rgba(251,191,36,0.5); color: #1a1a1a; box-shadow: 0 12px 40px -8px rgba(251,191,36,0.35), 0 0 0 1px rgba(251,191,36,0.15) inset; }
@@ -3236,16 +3256,43 @@ function cancelClientOrder() {
   const orderId = parseInt(cancelBtn.dataset.orderId);
   const restoId = parseInt(cancelBtn.dataset.restoId);
   if (!orderId || !restoId) { setNotif("Erreur: commande introuvable"); return; }
-  if (!confirm("Annuler cette commande ?")) return;
+
+  // Double confirmation interne (pas de popup externe)
+  if (cancelBtn.dataset.confirming !== '1') {
+    cancelBtn.dataset.confirming = '1';
+    cancelBtn.dataset.originalText = cancelBtn.textContent;
+    cancelBtn.textContent = '⚠️ CONFIRMER L\'ANNULATION';
+    cancelBtn.style.background = '#cc0000';
+    cancelBtn.style.color = '#fff';
+    haptic('warn');
+    // Annule la confirmation si l'utilisateur ne reclique pas sous 3 s
+    clearTimeout(cancelBtn._confirmTimer);
+    cancelBtn._confirmTimer = setTimeout(() => {
+      cancelBtn.dataset.confirming = '0';
+      cancelBtn.textContent = cancelBtn.dataset.originalText || 'ANNULER MA COMMANDE';
+      cancelBtn.style.background = '';
+      cancelBtn.style.color = '';
+    }, 3000);
+    return;
+  }
+
+  // Deuxième clic : on annule réellement
+  clearTimeout(cancelBtn._confirmTimer);
+  cancelBtn.dataset.confirming = '0';
+  cancelBtn.textContent = cancelBtn.dataset.originalText || 'ANNULER MA COMMANDE';
+  cancelBtn.style.background = '';
+  cancelBtn.style.color = '';
+  cancelBtn.disabled = true;
 
   const r = restaurants.find(x => Number(x.id) === Number(restoId));
-  if (!r) { setNotif("Restaurant introuvable"); return; }
+  if (!r) { setNotif("Restaurant introuvable"); cancelBtn.disabled = false; return; }
   const entry = clientOrderTracking.find(e => Number(e.orderId) === Number(orderId));
-  if (!entry) { setNotif("Erreur: commande introuvable"); return; }
+  if (!entry) { setNotif("Erreur: commande introuvable"); cancelBtn.disabled = false; return; }
 
   haptic('warn');
   releaseOrder(r.id, orderId, false, entry.pin)
     .then(res => {
+      cancelBtn.disabled = false;
       if (!res.ok) {
         setNotif("ANNULATION IMPOSSIBLE : COMMANDE DÉJÀ TRAITÉE");
         closeOrderDetailModal();
@@ -3258,7 +3305,11 @@ function cancelClientOrder() {
       setNotif("COMMANDE ANNULÉE");
       updateClientOrderStatus();
     })
-    .catch(err => { console.error(err); setNotif("ERREUR LORS DE L'ANNULATION"); });
+    .catch(err => {
+      console.error(err);
+      cancelBtn.disabled = false;
+      setNotif("ERREUR LORS DE L'ANNULATION");
+    });
 }
 
 // ========== SUIVI CLIENTS ==========
@@ -3593,48 +3644,99 @@ function bindPlatTapAdd() {
   const l = document.getElementById('plats-list-client');
   if (!l || l.dataset.tapBound) return;
   l.dataset.tapBound = '1';
-  let pressTimer = null;
-  let longPress = false;
 
-  l.addEventListener('pointerdown', (e) => {
-    const img = e.target.closest('.plat-card img');
+  // Clic simple sur l'image → zoom en plein écran
+  l.addEventListener('click', (e) => {
+    const img = e.target.closest('.plat-card img.plat-img');
     if (!img) return;
-    longPress = false;
-    img.classList.add('long-press');
-    pressTimer = setTimeout(() => {
-      longPress = true;
-      img.classList.remove('long-press');
-      // Appui long → zoom
-      toggleZoom(img);
-    }, 400);
+    // Ne pas zoomer si l'image est déjà masquée par un zoom en cours
+    if (img.classList.contains('zoomed-source')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openPlatZoom(img);
+  });
+}
+function openPlatZoom(sourceImg) {
+  if (!sourceImg) return;
+  // Empêche l'ouverture multiple (anti double-clic)
+  if (document.querySelector('.plat-zoom-overlay')) return;
+
+  const rect = sourceImg.getBoundingClientRect();
+  const hdUrl = getOptimizedCloudinaryUrl(sourceImg.src, 900);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'plat-zoom-overlay';
+
+  const zoomImg = document.createElement('img');
+  zoomImg.src = sourceImg.src;
+
+  // Position de départ (FLIP)
+  zoomImg.style.position = 'fixed';
+  zoomImg.style.top = rect.top + 'px';
+  zoomImg.style.left = rect.left + 'px';
+  zoomImg.style.width = rect.width + 'px';
+  zoomImg.style.height = rect.height + 'px';
+  zoomImg.style.borderRadius = '12px';
+  zoomImg.style.transition = 'all 0.35s cubic-bezier(0.22, 1, 0.36, 1)';
+  zoomImg.style.margin = '0';
+  zoomImg.style.maxWidth = 'none';
+  zoomImg.style.maxHeight = 'none';
+
+  overlay.appendChild(zoomImg);
+  document.body.appendChild(overlay);
+  sourceImg.classList.add('zoomed-source');
+
+  // Force reflow pour que la transition s'applique
+  void overlay.offsetWidth;
+
+  overlay.classList.add('active');
+
+  // Calcul de la taille finale (contain dans 90vw / 85vh)
+  const maxW = window.innerWidth * 0.9;
+  const maxH = window.innerHeight * 0.85;
+  const ratio = sourceImg.naturalWidth / sourceImg.naturalHeight || 1;
+  let finalW = maxW;
+  let finalH = finalW / ratio;
+  if (finalH > maxH) {
+    finalH = maxH;
+    finalW = finalH * ratio;
+  }
+
+  const finalTop = (window.innerHeight - finalH) / 2;
+  const finalLeft = (window.innerWidth - finalW) / 2;
+
+  requestAnimationFrame(() => {
+    zoomImg.style.top = finalTop + 'px';
+    zoomImg.style.left = finalLeft + 'px';
+    zoomImg.style.width = finalW + 'px';
+    zoomImg.style.height = finalH + 'px';
+    zoomImg.style.borderRadius = '16px';
+    // Charge la HD en arrière-plan
+    const temp = new Image();
+    temp.onload = () => { zoomImg.src = hdUrl; };
+    temp.src = hdUrl;
   });
 
-  const cancel = (e) => {
-    clearTimeout(pressTimer);
-    const img = e.target.closest && e.target.closest('.plat-card img');
-    if (img) img.classList.remove('long-press');
+  const close = () => {
+    if (overlay.dataset.closing) return;
+    overlay.dataset.closing = '1';
+
+    overlay.classList.remove('active');
+    zoomImg.style.top = rect.top + 'px';
+    zoomImg.style.left = rect.left + 'px';
+    zoomImg.style.width = rect.width + 'px';
+    zoomImg.style.height = rect.height + 'px';
+    zoomImg.style.borderRadius = '12px';
+
+    setTimeout(() => {
+      overlay.remove();
+      sourceImg.classList.remove('zoomed-source');
+    }, 350);
   };
 
-  l.addEventListener('pointerup', (e) => {
-    clearTimeout(pressTimer);
-    const img = e.target.closest('.plat-card img');
-    if (!img) return;
-    img.classList.remove('long-press');
-    if (longPress) { longPress = false; return; }
-    // Tap court → +1
-    const card = img.closest('.plat-card');
-    if (!card || !currentRes) return;
-    // On retrouve le plat via son index dans la liste rendue (même ordre que currentRes.plats)
-    const allCards = [...l.querySelectorAll('.plat-card')];
-    const idx = allCards.indexOf(card);
-    if (idx < 0) return;
-    const p = currentRes.plats[idx];
-    if (!p) return;
-    changeQty(p.id, 1);
-  });
-
-  l.addEventListener('pointercancel', cancel);
-  l.addEventListener('pointerleave', cancel);
+  overlay.addEventListener('click', close);
+  zoomImg.addEventListener('click', close);
+  haptic('light');
 }
 function updateLiveOrderBar() {
   let bar = document.getElementById('live-order-bar');
@@ -4442,7 +4544,7 @@ function renderClientPlats() {
   const l = document.getElementById('plats-list-client');
   l.innerHTML = '';
   if (!currentRes || !currentRes.plats) {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
       l.innerHTML += `
         <div class="plat-skeleton">
           <div class="sk-img"></div>
@@ -4469,24 +4571,38 @@ function renderClientPlats() {
   }
   if (needUpdate) { saveCartDraft(); updateCartUI(); }
 
+  const platsCount = currentRes.plats.length;
+  l.innerHTML = `
+    <div class="section-header">
+      <h3>Notre carte</h3>
+      <span class="section-count">${platsCount} plat${platsCount > 1 ? 's' : ''}</span>
+    </div>
+    <div class="plat-grid"></div>
+  `;
+  const grid = l.querySelector('.plat-grid');
+
   currentRes.plats.forEach((p, idx) => {
     const qty = cart[p.id] ? cart[p.id].qte : 0;
-    const imgSrc = getOptimizedCloudinaryUrl(p.img, 300);
+    const imgSrc = getOptimizedCloudinaryUrl(p.img, 400);
     const isNew = isPlatNew(p);
     const newBadge = isNew ? `<span class="plat-new-badge">✨ Nouveau</span>` : '';
-    l.innerHTML += `
+    const stockClass = p.stock === 0 ? 'out' : (p.stock <= 5 ? 'low' : '');
+    const stockLabel = p.stock === 0 ? 'Épuisé' : `Reste ${p.stock}`;
+    grid.innerHTML += `
       <div class="plat-card">
         ${newBadge}
-        <img src="${imgSrc}" alt="${esc(p.n)}" data-plat-id="${p.id}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150';">
-        <div style="flex:1;min-width:0;">
-          <div class="text-white font-semibold truncate">${esc(p.n)}</div>
-          <div style="color:var(--gold);font-weight:700;font-size:0.95rem;">${p.p.toLocaleString('fr-FR')} DZD</div>
-          <div class="text-gray-400" style="font-size:0.75rem;">Dispo: ${p.stock}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button class="qty-btn" onclick="changeQty(${p.id}, -1)" aria-label="Retirer">−</button>
-          <span class="qty-count" id="qty-${p.id}">${qty}</span>
-          <button class="qty-btn primary" onclick="changeQty(${p.id}, 1)" aria-label="Ajouter">+</button>
+        <img class="plat-img" src="${imgSrc}" alt="${esc(p.n)}" data-plat-id="${p.id}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400';">
+        <div class="plat-card-body">
+          <div class="plat-name">${esc(p.n)}</div>
+          <div class="plat-meta">
+            <span class="plat-price">${p.p.toLocaleString('fr-FR')} DZD</span>
+            <span class="plat-stock ${stockClass}">${stockLabel}</span>
+          </div>
+          <div class="plat-actions">
+            <button class="qty-btn" onclick="changeQty(${p.id}, -1)" aria-label="Retirer">−</button>
+            <span class="qty-count" id="qty-${p.id}">${qty}</span>
+            <button class="qty-btn primary" onclick="changeQty(${p.id}, 1)" aria-label="Ajouter" ${p.stock === 0 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>+</button>
+          </div>
         </div>
       </div>
     `;
@@ -4539,20 +4655,8 @@ function closeClientPin() {
 
 // ========== ZOOM ==========
 function toggleZoom(img) {
-  const overlay = document.getElementById('zoom-overlay');
-  if (!overlay) return;
-  if (img.classList.contains('zoom-image')) {
-    closeZoom();
-    return;
-  }
-  document.querySelectorAll('.zoom-image').forEach(el => el.classList.remove('zoom-image'));
-  const hdUrl = getOptimizedCloudinaryUrl(img.src, 900);
-  img.dataset.origSrc = img.src;
-  img.src = hdUrl;
-  img.classList.add('zoom-image');
-  overlay.classList.add('visible');
-  overlay.style.display = 'block';
-  haptic('light');
+  // Désactivé : remplacé par openPlatZoom (animation FLIP fluide)
+  return;
 }
 function closeZoom() {
   const overlay = document.getElementById('zoom-overlay');
@@ -4629,6 +4733,14 @@ function init() {
     const delay = Math.min(idx, 8) * 40;
     const avg = calcAvg(res.ratings);
     const ratingLabel = avg === 'N/A' ? '✨ Nouveau' : `⭐ ${avg}`;
+    // Distance géo (remplace le temps de préparation)
+    let distanceLabel = '📍 ?';
+    if (userPosition.lat != null && userPosition.lng != null && res.lat != null && res.lng != null) {
+      const km = haversineDistance(userPosition.lat, userPosition.lng, res.lat, res.lng);
+      distanceLabel = km < 1
+        ? `📍 ${Math.round(km * 1000)} m`
+        : `📍 ${km.toFixed(1)} km`;
+    }
     grid.innerHTML += `
       <div class="${cardClass}" style="animation-delay:${delay}ms;" ${clickAttr}>
         <img src="${imgSrc}" alt="${esc(res.name)}" onerror="this.onerror=null; this.src='https://via.placeholder.com/600x340';">
@@ -4638,7 +4750,7 @@ function init() {
           <div class="res-name">${esc(res.name)}</div>
           <div class="res-meta">
             <div class="res-rating">${ratingLabel}</div>
-            <div class="res-time">⏱ ${restaurantEta(res.id)}</div>
+            <div class="res-time">${distanceLabel}</div>
           </div>
         </div>
       </div>
