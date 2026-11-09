@@ -46,9 +46,6 @@
 #cart-modal .cart-fields input { flex:1; min-width:120px; padding:10px 14px; border-radius:12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:white; font-size:16px; }
 
     #notification-bar { user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; cursor:default; }
-    #order-led { display:inline-block; width:12px; height:12px; border-radius:50%; background:#555; margin-left:8px; transition:background 0.3s; vertical-align:middle; box-shadow:0 0 4px rgba(0,0,0,0.5); }
-    #order-led.active { background:#ffcc00; box-shadow:0 0 12px #ffcc00; animation:blink-led 0.8s infinite alternate; }
-    @keyframes blink-led { 0%{opacity:0.4; transform:scale(0.9);} 100%{opacity:1; transform:scale(1.1);} }
     #c-address:disabled { opacity:0.5; cursor:not-allowed; }
 
     .logo-gallery { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:8px; }
@@ -484,6 +481,71 @@ header.flex.scrolled #app-title { font-size: 1.4rem !important; }
 #gallery-lightbox .glb-nav.glb-prev { left: 16px; }
 #gallery-lightbox .glb-nav.glb-next { right: 16px; }
 #gallery-lightbox .glb-counter { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.75); font-weight: 700; font-size: 0.85rem; background: rgba(20,20,20,0.85); border: 1px solid rgba(251,191,36,0.35); border-radius: 999px; padding: 6px 16px; z-index: 5101; }
+.adm-res-summary { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; font-size:0.75rem; color:#aaa; }
+.adm-res-count { font-weight:800; color:var(--gold); }
+.adm-res-search { width:100%; padding:10px 14px; border-radius:10px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); color:white; margin-bottom:10px; font-size:0.85rem; box-sizing:border-box; }
+.adm-res-search:focus { outline:none; border-color:rgba(251,191,36,0.6); box-shadow:0 0 0 3px rgba(251,191,36,0.15); }
+.adm-res-list { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+.adm-res-empty { color:#888; font-size:0.8rem; text-align:center; padding:16px 8px; }
+.adm-res-toggle-btn { width:100%; padding:11px; border-radius:10px; background:rgba(251,191,36,0.08); border:1px dashed rgba(251,191,36,0.4); color:var(--gold); font-weight:700; cursor:pointer; font-size:0.85rem; margin-bottom:8px; transition:background 0.2s; box-sizing:border-box; }
+.adm-res-toggle-btn:hover { background:rgba(251,191,36,0.15); }
+.adm-res-card { background:#1a1a1a; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px 12px; font-size:0.8rem; }
+.adm-res-card-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; }
+.adm-res-card-title { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
+.adm-res-card-name { font-weight:700; color:var(--gold); cursor:pointer; text-decoration:underline; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.adm-res-status { font-size:0.65rem; font-weight:800; padding:2px 8px; border-radius:999px; white-space:nowrap; flex-shrink:0; }
+.adm-res-status.open { background:rgba(34,197,94,0.15); color:#4ade80; border:1px solid rgba(34,197,94,0.4); }
+.adm-res-status.closed { background:rgba(220,38,38,0.15); color:#f87171; border:1px solid rgba(220,38,38,0.4); }
+.adm-res-status.warn { background:rgba(251,191,36,0.15); color:#fbbf24; border:1px solid rgba(251,191,36,0.5); }
+.adm-hist-search { width:100%; padding:8px 12px; border-radius:10px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); color:white; margin-bottom:8px; font-size:0.82rem; box-sizing:border-box; }
+.adm-hist-search:focus { outline:none; border-color:rgba(251,191,36,0.6); box-shadow:0 0 0 3px rgba(251,191,36,0.15); }
+.adm-hist-filters { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.adm-hist-filter-btn { font-size:0.72rem; font-weight:700; padding:5px 10px; border-radius:999px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+.adm-hist-filter-btn:hover { color:#fff; background:rgba(255,255,255,0.1); }
+.adm-hist-filter-btn.active { background:rgba(251,191,36,0.15); color:var(--gold); border-color:rgba(251,191,36,0.5); }
+.adm-hist-group-header { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:#666; font-weight:800; margin:10px 0 6px; padding-left:4px; }
+.adm-hist-entry { background:#151515; border-radius:10px; padding:10px 12px; margin-bottom:8px; border-left:4px solid #666; display:flex; flex-direction:column; gap:4px; }
+.adm-hist-entry.adm-hist-cat-sys { border-left-color:#94a3b8; }
+.adm-hist-entry.adm-hist-cat-adm { border-left-color:#fbbf24; }
+.adm-hist-entry.adm-hist-cat-res { border-left-color:#4ade80; }
+.adm-hist-entry.adm-hist-cat-liv { border-left-color:#c084fc; }
+.adm-hist-entry.adm-hist-cat-client { border-left-color:#60a5fa; }
+.adm-hist-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.adm-hist-badge { font-size:0.62rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; padding:2px 8px; border-radius:999px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:65%; }
+.adm-hist-badge.adm-hist-cat-sys { background:rgba(148,163,184,0.15); color:#cbd5e1; border:1px solid rgba(148,163,184,0.4); }
+.adm-hist-badge.adm-hist-cat-adm { background:rgba(251,191,36,0.15); color:#fbbf24; border:1px solid rgba(251,191,36,0.4); }
+.adm-hist-badge.adm-hist-cat-res { background:rgba(34,197,94,0.15); color:#4ade80; border:1px solid rgba(34,197,94,0.4); }
+.adm-hist-badge.adm-hist-cat-liv { background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.4); }
+.adm-hist-badge.adm-hist-cat-client { background:rgba(96,165,250,0.15); color:#60a5fa; border:1px solid rgba(96,165,250,0.4); }
+.adm-hist-time { color:#888; font-size:0.7rem; white-space:nowrap; flex-shrink:0; }
+.adm-hist-details { color:#eee; font-weight:600; font-size:0.82rem; word-break:break-word; line-height:1.4; }
+.adm-hist-empty { text-align:center; color:#666; font-size:0.82rem; padding:24px 8px; }
+.adm-res-card-actions { display:flex; gap:4px; flex-shrink:0; }
+.adm-res-card-actions button { background:none; border:none; color:var(--gold); cursor:pointer; font-size:1rem; padding:4px 6px; border-radius:6px; }
+.adm-res-card-actions button:hover { background:rgba(251,191,36,0.1); }
+.adm-res-card-actions button.danger { color:#f87171; }
+.adm-res-card-actions button.danger:hover { background:rgba(220,38,38,0.1); }
+.adm-res-card-meta { display:flex; flex-wrap:wrap; gap:8px; font-size:0.72rem; color:#aaa; margin-bottom:6px; }
+.adm-res-card-account { display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-size:0.72rem; color:#ccc; border-top:1px solid rgba(255,255,255,0.05); padding-top:6px; }
+.adm-res-card-account button { color:var(--gold); border:1px solid #444; border-radius:6px; padding:3px 8px; background:none; cursor:pointer; font-size:0.7rem; }
+.adm-res-card-account button:hover { background:rgba(251,191,36,0.1); border-color:var(--gold); }
+.adm-res-email { cursor:pointer; text-decoration:underline; color:#bbb; }
+.adm-res-email:hover { color:var(--gold); }
+.adm-liv-phone { color:#60a5fa; text-decoration:none; }
+.adm-liv-phone:hover { text-decoration:underline; color:#93c5fd; }
+.adm-res-add-form { display:none; padding:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:10px; }
+.adm-res-group { margin-bottom:10px; }
+.adm-res-label { display:block; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; color:#888; font-weight:700; margin-bottom:4px; }
+.adm-section-title { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:#666; font-weight:800; margin:16px 0 8px; padding-left:2px; }
+.adm-nav-btn { width:100%; display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#fff; font-weight:700; font-size:0.9rem; cursor:pointer; transition:background 0.2s ease, border-color 0.2s ease, transform 0.1s ease; margin-bottom:8px; text-align:left; box-sizing:border-box; }
+.adm-nav-icon { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg, rgba(251,191,36,0.15), rgba(251,191,36,0.05)); border:1px solid rgba(251,191,36,0.25); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+.adm-nav-body { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.adm-nav-title { font-size:0.9rem; font-weight:800; color:#fff; line-height:1.15; }
+.adm-nav-sub { font-size:0.7rem; color:#888; font-weight:500; line-height:1.3; }
+.adm-nav-btn:hover { background:rgba(251,191,36,0.08); border-color:rgba(251,191,36,0.3); }
+.adm-nav-btn:active { transform:scale(0.98); }
+.adm-nav-arrow { color:var(--gold); font-size:1.3rem; font-weight:700; opacity:0.7; transition:opacity 0.2s ease, transform 0.2s ease; flex-shrink:0; line-height:1; }
+.adm-nav-btn:hover .adm-nav-arrow { opacity:1; transform:translateX(2px); }
   </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -566,7 +628,6 @@ header.flex.scrolled #app-title { font-size: 1.4rem !important; }
   <span id="notif-message">BIENVENUE</span>
   <span style="display:flex; align-items:center; position:absolute; right:4px;">
     <span id="client-secret-code-display" class="text-xs text-white/50"></span>
-    <span id="order-led"></span>
   </span>
 </div>
 
@@ -645,6 +706,16 @@ header.flex.scrolled #app-title { font-size: 1.4rem !important; }
   <button id="btn-creds-save" onclick="saveNewCredentials()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">REMPLACER LE COMPTE</button>
   <button onclick="closeCredsModal()" class="w-full mt-2 text-gray-400 hover:text-white text-sm">ANNULER</button>
 </div>
+<div class="modal-overlay" id="credit-overlay" onclick="closeCreditModal()"></div>
+<div id="modal-credit" class="modal-edit">
+  <h3 class="text-amber-400 text-xl font-bold mb-2">💰 Modifier le crédit</h3>
+  <p id="credit-target-label" class="text-sm text-gray-300 mb-2"></p>
+  <p id="credit-current-label" class="text-xs text-gray-400 mb-3"></p>
+  <p class="text-xs text-gray-400 mb-2">Entrez le nombre de jours à ajouter depuis maintenant. 0 = expiré. Vide = permanent.</p>
+  <input type="number" id="credit-days" min="0" class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 mb-4" placeholder="Ex: 30" />
+  <button id="btn-credit-save" onclick="saveCredit()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">ENREGISTRER</button>
+  <button onclick="closeCreditModal()" class="w-full mt-2 text-gray-400 hover:text-white text-sm">ANNULER</button>
+</div>
 
 <!-- VIEWS -->
 <div id="view-restaurants" class="view-section active container mx-auto px-4 py-6"><div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4" id="res-grid"></div>
@@ -670,54 +741,212 @@ header.flex.scrolled #app-title { font-size: 1.4rem !important; }
 </div>
 <div id="view-admin-space" class="view-section container mx-auto px-4 py-6">
   <button onclick="logoutAndGoHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
-  <div class="glass rounded-2xl p-6 border border-white/10"><h2 class="text-2xl font-bold text-amber-400 mb-4">Admin</h2>
-    <button onclick="toggleSec('adm-promo')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Message Promo <span class="text-amber-400">📣</span></button>
-    <div id="adm-promo" class="sub-section"><input type="text" id="adm-promo-txt" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Votre message promo..." /><button onclick="updatePromoMessage()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">METTRE À JOUR</button></div>
-    <button onclick="toggleSec('adm-res')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Restos <span class="text-amber-400">+</span></button>
-    <div id="adm-res" class="sub-section">
-      <input type="text" id="adm-res-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" />
-      <input type="number" id="adm-res-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours)" min="0" />
-      <div class="flex gap-2 mb-2"><input type="text" id="adm-res-lat" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" placeholder="Latitude" /><input type="text" id="adm-res-lng" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" placeholder="Longitude" /></div>
+<div class="glass rounded-2xl p-6 border border-white/10">
+  <h2 class="text-2xl font-bold text-amber-400 mb-1">🛠️ Panneau Admin</h2>
+  <p class="text-xs text-gray-400 mb-4">Vue d'ensemble et gestion de la plateforme</p>
+
+  <div class="adm-section-title">📣 Communication</div>
+  <button class="adm-nav-btn" onclick="toggleSec('adm-promo')">
+    <div class="adm-nav-icon">📣</div>
+    <div class="adm-nav-body">
+      <div class="adm-nav-title">Message Promo</div>
+      <div class="adm-nav-sub">Bandeau affiché en haut de l'application</div>
+    </div>
+    <span class="adm-nav-arrow">›</span>
+  </button>
+  <div id="adm-promo" class="sub-section"><input type="text" id="adm-promo-txt" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Votre message promo..." /><button onclick="updatePromoMessage()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">METTRE À JOUR</button></div>
+
+  <div class="adm-section-title">🏪 Gestion</div>
+  <button class="adm-nav-btn" onclick="toggleSec('adm-res')">
+    <div class="adm-nav-icon">🏪</div>
+    <div class="adm-nav-body">
+      <div class="adm-nav-title">Restaurants</div>
+      <div class="adm-nav-sub">Créer, modifier et gérer les comptes gérants</div>
+    </div>
+    <span class="adm-nav-arrow">›</span>
+  </button>
+<div id="adm-res" class="sub-section">
+  <!-- Résumé global + compteur -->
+  <div class="adm-res-summary">
+    <span id="adm-res-count" class="adm-res-count">0 restaurant(s)</span>
+    <span id="adm-res-summary"></span>
+  </div>
+
+  <!-- Recherche -->
+  <input type="text" id="adm-res-search" class="adm-res-search" placeholder="🔍 Rechercher par nom ou email..." oninput="renderAdminResList()" />
+
+  <!-- Liste des restaurants existants -->
+  <div id="list-res-to-manage" class="adm-res-list"></div>
+
+  <!-- Bouton d'ouverture du formulaire d'ajout -->
+  <button type="button" class="adm-res-toggle-btn" onclick="toggleSec('adm-res-add-form')">➕ Ajouter un restaurant</button>
+
+  <!-- Formulaire d'ajout -->
+  <div id="adm-res-add-form" class="adm-res-add-form">
+    <div class="adm-res-group">
+      <label class="adm-res-label">Nom &amp; validité</label>
+      <input type="text" id="adm-res-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom du restaurant" />
+      <input type="number" id="adm-res-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours, vide = permanent)" min="0" />
+    </div>
+
+    <div class="adm-res-group">
+      <label class="adm-res-label">Position GPS</label>
+      <div class="flex gap-2 mb-2">
+        <input type="text" id="adm-res-lat" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" placeholder="Latitude" />
+        <input type="text" id="adm-res-lng" class="flex-1 min-w-0 px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" placeholder="Longitude" />
+      </div>
       <button onclick="getCurrentPosition('adm-res-lat', 'adm-res-lng')" class="w-full py-1 mb-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 text-sm hover:bg-blue-500/30">📍 Récupérer ma position</button>
-      <input type="file" id="adm-res-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" />
+    </div>
+
+    <div class="adm-res-group">
+      <label class="adm-res-label">Image du restaurant</label>
+      <input type="file" id="adm-res-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" accept="image/*" />
+    </div>
+
+    <div class="adm-res-group">
+      <label class="adm-res-label">Compte du gérant</label>
       <input type="email" id="adm-res-email" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Email du gérant" />
       <input type="password" id="adm-res-password" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Mot de passe du gérant" />
-      <button id="btn-admin-add-res" onclick="adminCreateRes()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">AJOUTER</button>
-      <div id="list-res-to-manage" class="mt-3 space-y-1"></div>
     </div>
-    <button onclick="toggleSec('adm-liv')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Livreurs <span class="text-amber-400">+</span></button>
-    <div id="adm-liv" class="sub-section">
-      <input type="text" id="adm-liv-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom" />
+
+    <button id="btn-admin-add-res" onclick="adminCreateRes()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">AJOUTER</button>
+  </div>
+</div>
+
+  <button class="adm-nav-btn" onclick="toggleSec('adm-liv')">
+    <div class="adm-nav-icon">🛵</div>
+    <div class="adm-nav-body">
+      <div class="adm-nav-title">Livreurs</div>
+      <div class="adm-nav-sub">Gérer les profils et comptes des livreurs</div>
+    </div>
+    <span class="adm-nav-arrow">›</span>
+  </button>
+<div id="adm-liv" class="sub-section">
+  <!-- Résumé global + compteur -->
+  <div class="adm-res-summary">
+    <span id="adm-liv-count" class="adm-res-count">0 livreur(s)</span>
+    <span id="adm-liv-summary"></span>
+  </div>
+
+  <!-- Recherche -->
+  <input type="text" id="adm-liv-search" class="adm-res-search" placeholder="🔍 Rechercher par nom, email ou téléphone..." oninput="renderAdminLivList()" />
+
+  <!-- Liste des livreurs existants -->
+  <div id="list-liv-to-manage" class="adm-res-list"></div>
+
+  <!-- Bouton d'ouverture du formulaire d'ajout -->
+  <button type="button" class="adm-res-toggle-btn" onclick="toggleSec('adm-liv-add-form')">➕ Ajouter un livreur</button>
+
+  <!-- Formulaire d'ajout -->
+  <div id="adm-liv-add-form" class="adm-res-add-form">
+    <div class="adm-res-group">
+      <label class="adm-res-label">Identité &amp; contact</label>
+      <input type="text" id="adm-liv-n" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Nom du livreur" />
       <input type="tel" id="adm-liv-tel" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Téléphone" />
-      <input type="number" id="adm-liv-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours)" min="0" />
-      <input type="file" id="adm-liv-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" accept="image/*" />
+    </div>
+
+    <div class="adm-res-group">
+      <label class="adm-res-label">Validité</label>
+      <input type="number" id="adm-liv-dur" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Validité (jours, vide = permanent)" min="0" />
+    </div>
+
+    <div class="adm-res-group">
+      <label class="adm-res-label">Photo du livreur</label>
+      <input type="file" id="adm-liv-img" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400" accept="image/*" />
+    </div>
+
+    <div class="adm-res-group">
+      <label class="adm-res-label">Compte du livreur</label>
       <input type="email" id="adm-liv-email" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Email du livreur" />
       <input type="password" id="adm-liv-password" class="w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 text-white placeholder-gray-400 mb-2" placeholder="Mot de passe du livreur" />
-      <button id="btn-admin-add-liv" onclick="adminCreateLiv()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">AJOUTER</button>
-      <div id="list-liv-to-manage" class="mt-3 space-y-1"></div>
     </div>
-    <button onclick="toggleSec('adm-hist-section')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Journal Global <span class="text-amber-400">📜</span></button>
-    <div id="adm-hist-section" class="sub-section">
-      <div class="flex justify-between items-center mb-3"><h3 class="text-lg font-semibold text-white">Historique</h3><div class="flex gap-2"><button onclick="exportHistory()" class="px-3 py-1 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition">💾 TXT</button><button onclick="showClearConfirm()" class="px-3 py-1 rounded-lg bg-red-500/20 text-red-400 text-sm hover:bg-red-500/30 transition">🗑️</button></div></div>
-      <div id="clear-confirm-panel" class="confirm-panel"><p class="mb-2">Vider l'historique définitivement ?</p><button onclick="clearHistory()" class="px-4 py-1 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-500">OUI</button><button onclick="showClearConfirm(false)" class="px-4 py-1 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-500 ml-2">NON</button></div>
-      <div id="admin-hist-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
+
+    <button id="btn-admin-add-liv" onclick="adminCreateLiv()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">AJOUTER</button>
+  </div>
+</div>
+
+  <button class="adm-nav-btn" onclick="toggleSec('adm-reglements')">
+    <div class="adm-nav-icon">💰</div>
+    <div class="adm-nav-body">
+      <div class="adm-nav-title">Règlements</div>
+      <div class="adm-nav-sub">Suivi des crédits et dates d'expiration</div>
     </div>
-    <button onclick="toggleSec('adm-logo')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Logo de l'App <span class="text-amber-400">🖼️</span></button>
-    <div id="adm-logo" class="sub-section">
-      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-        <input type="file" id="adm-logo-file" accept="image/png" style="flex:1; min-width:150px; padding:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:white;" />
-        <button id="btn-upload-logo" onclick="uploadAppLogo()" class="px-4 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">UPLOADER</button>
-      </div>
-      <div id="logo-gallery" class="logo-gallery" style="margin-top:12px;"></div>
-      <div style="margin-top:12px;"><button id="btn-validate-logo" onclick="validateLogo()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">VALIDER</button></div>
+    <span class="adm-nav-arrow">›</span>
+  </button>
+<div id="adm-reglements" class="sub-section">
+  <div class="adm-res-summary">
+    <span id="reglements-count" class="adm-res-count">0 entité(s)</span>
+    <span id="reglements-summary"></span>
+  </div>
+  <div id="reglements-list" class="adm-res-list"></div>
+</div>
+
+  <div class="adm-section-title">📊 Données</div>
+  <button class="adm-nav-btn" onclick="toggleSec('adm-hist-section')">
+    <div class="adm-nav-icon">📜</div>
+    <div class="adm-nav-body">
+      <div class="adm-nav-title">Journal Global</div>
+      <div class="adm-nav-sub">Toutes les actions de la plateforme</div>
     </div>
-<button onclick="toggleSec('adm-maintenance')" class="w-full flex justify-between items-center px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition mb-2">Maintenance <span class="text-amber-400">🛠️</span></button>
+    <span class="adm-nav-arrow">›</span>
+  </button>
+<div id="adm-hist-section" class="sub-section">
+  <div class="flex justify-between items-center mb-3">
+    <h3 class="text-lg font-semibold text-white">Historique</h3>
+    <div class="flex gap-2">
+      <button onclick="exportHistory()" class="px-3 py-1 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition">💾 TXT</button>
+      <button onclick="showClearConfirm()" class="px-3 py-1 rounded-lg bg-red-500/20 text-red-400 text-sm hover:bg-red-500/30 transition">🗑️</button>
+    </div>
+  </div>
+  <div id="clear-confirm-panel" class="confirm-panel">
+    <p class="mb-2">Vider l'historique définitivement ?</p>
+    <button onclick="clearHistory()" class="px-4 py-1 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-500">OUI</button>
+    <button onclick="showClearConfirm(false)" class="px-4 py-1 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-500 ml-2">NON</button>
+  </div>
+  <input type="text" id="adm-hist-search" class="adm-hist-search" placeholder="🔍 Rechercher dans l'historique..." oninput="setAdminHistSearch(this.value)" />
+  <div class="adm-hist-filters" id="adm-hist-filters">
+    <button class="adm-hist-filter-btn active" data-cat="all" onclick="setAdminHistFilter('all')">Tous</button>
+    <button class="adm-hist-filter-btn" data-cat="sys" onclick="setAdminHistFilter('sys')">🛠️ Système</button>
+    <button class="adm-hist-filter-btn" data-cat="adm" onclick="setAdminHistFilter('adm')">👑 Admin</button>
+    <button class="adm-hist-filter-btn" data-cat="res" onclick="setAdminHistFilter('res')">🍽️ Restos</button>
+    <button class="adm-hist-filter-btn" data-cat="liv" onclick="setAdminHistFilter('liv')">🛵 Livreurs</button>
+    <button class="adm-hist-filter-btn" data-cat="client" onclick="setAdminHistFilter('client')">🧑 Clients</button>
+  </div>
+  <div id="admin-hist-list" class="max-h-96 overflow-y-auto"></div>
+</div>
+
+  <button class="adm-nav-btn" onclick="toggleSec('adm-logo')">
+    <div class="adm-nav-icon">🖼️</div>
+    <div class="adm-nav-body">
+      <div class="adm-nav-title">Logo de l'App</div>
+      <div class="adm-nav-sub">Galerie et logo actif de l'application</div>
+    </div>
+    <span class="adm-nav-arrow">›</span>
+  </button>
+<div id="adm-logo" class="sub-section">
+  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+    <input type="file" id="adm-logo-file" accept="image/png" style="flex:1; min-width:150px; padding:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:white;" />
+    <button id="btn-upload-logo" onclick="uploadAppLogo()" class="px-4 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">UPLOADER</button>
+  </div>
+  <div id="logo-gallery" class="logo-gallery" style="margin-top:12px;"></div>
+  <div style="margin-top:12px;"><button id="btn-validate-logo" onclick="validateLogo()" class="w-full py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 transition">VALIDER</button></div>
+</div>
+
+  <div class="adm-section-title">⚙️ Système</div>
+  <button class="adm-nav-btn" onclick="toggleSec('adm-maintenance')">
+    <div class="adm-nav-icon">🛠️</div>
+    <div class="adm-nav-body">
+      <div class="adm-nav-title">Maintenance</div>
+      <div class="adm-nav-sub">Outils de migration et de nettoyage</div>
+    </div>
+    <span class="adm-nav-arrow">›</span>
+  </button>
 <div id="adm-maintenance" class="sub-section">
   <p class="text-xs text-gray-400 mb-3">Outils de développement. À n'utiliser qu'en connaissance de cause.</p>
   <button id="btn-migrate" onclick="migrateToIdKeys()" class="w-full py-2 mb-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 text-sm hover:bg-blue-500/30">🛠️ Migration des données</button>
   <button id="btn-purge-legacy" onclick="purgeLegacyOrders()" class="w-full py-2 mb-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 text-sm hover:bg-blue-500/30">🧹 Purger les anciennes commandes</button>
 </div>
-  </div>
+</div>
 </div>
 <div id="view-pro-space" class="view-section container mx-auto px-4 py-6">
   <button onclick="logoutAndGoHome()" class="btn-retour mb-4">← DÉCONNEXION</button>
@@ -851,6 +1080,8 @@ function getOptimizedCloudinaryUrl(url, width = 300) {
 
 // ========== VARIABLES GLOBALES ==========
 let restaurants = [];
+let userPosition = { lat: null, lng: null };
+let userPositionRequested = false;
 let _resGridSig = '';
 let livreurs = [];
 let adminHistory = [];
@@ -916,6 +1147,17 @@ function normalizeLiv(l) {
   l.history = toList(l.history);
   l.ratings = toList(l.ratings);
   return l;
+}
+// Distance en km entre deux points (lat/lng en degrés)
+function haversineDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 function resRef(resId) { return db.ref(`cloud_koul/restaurants/${resId}`); }
 function livRef(livId) { return db.ref(`cloud_koul/livreurs/${livId}`); }
@@ -1024,6 +1266,9 @@ function forgotPassword() {
     });
 }
 let _audioCtx = null;
+let creditTarget = null;
+let _adminHistFilter = 'all';
+let _adminHistSearch = '';
 function playSuccessTone(kind) {
   try {
     const pref = localStorage.getItem('koul_sound_enabled');
@@ -1167,6 +1412,7 @@ function openUserSpace() {
     renderAdminLivList();
     renderAdminHistory();
     renderLogoGallery();
+    renderReglements();
     loadAdminUsers();
   } else if (role === 'restaurant') {
     const restoId = data.restoId;
@@ -1252,6 +1498,21 @@ function getCurrentPosition(latInputId, lngInputId) {
     },
     () => setNotif("❌ Échec de la géolocalisation"),
     { timeout: 10000, enableHighAccuracy: true }
+  );
+}
+// Récupère la position de l'utilisateur une seule fois, en arrière-plan.
+// Le callback est appelé à la fin (succès ou échec).
+function requestUserPosition(callback) {
+  if (userPositionRequested) { if (callback) callback(); return; }
+  userPositionRequested = true;
+  if (!navigator.geolocation) { if (callback) callback(); return; }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      if (callback) callback();
+    },
+    () => { if (callback) callback(); },
+    { timeout: 8000, enableHighAccuracy: false, maximumAge: 300000 }
   );
 }
 
@@ -1480,7 +1741,7 @@ async function purgeLegacyOrders() {
 }
 
 function refreshCurrentView() {
-  if (document.getElementById('view-admin-space').classList.contains('active')) { renderAdminResList(); renderAdminLivList(); renderAdminHistory(); renderLogoGallery(); }
+  if (document.getElementById('view-admin-space').classList.contains('active')) { renderAdminResList(); renderAdminLivList(); renderAdminHistory(); renderLogoGallery(); renderReglements(); }
   if (document.getElementById('view-pro-space').classList.contains('active') && currentRes) { renderProOrders(); renderProPlats(); renderResHistory(); }
   if (document.getElementById('view-livreur-space').classList.contains('active') && currentLivreur) { renderLivreurOrders(); renderLivreurHistory(); }
 }
@@ -1946,23 +2207,91 @@ async function adminCreateLiv() {
 
 // ========== GESTION ADMIN (LISTES, MODIFICATIONS, ETC.) ==========
 function renderAdminResList() {
-  const l = document.getElementById('list-res-to-manage'); l.innerHTML = '';
-  restaurants.forEach(r => {
-    const exp = r.expiry ? ` (Exp: ${new Date(r.expiry).toLocaleDateString()} ${new Date(r.expiry).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})})` : ' (Permanent)';
-    const pos = (r.lat && r.lng) ? `📍 ${r.lat}, ${r.lng}` : '';
+  const l = document.getElementById('list-res-to-manage');
+  if (!l) return;
+
+  // Filtre de recherche
+  const searchInput = document.getElementById('adm-res-search');
+  const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
+
+  // Résumé global (avant filtre)
+  const total = restaurants.length;
+  const openCount = restaurants.filter(r => isRestaurantAvailable(r)).length;
+
+  // Filtre appliqué
+  let list = restaurants;
+  if (q) {
+    list = restaurants.filter(r => {
+      const acc = adminUsers['res:' + r.id];
+      const email = acc && acc.email ? acc.email : '';
+      return (r.name || '').toLowerCase().includes(q) || email.toLowerCase().includes(q);
+    });
+  }
+
+  // Compteur
+  const countEl = document.getElementById('adm-res-count');
+  if (countEl) {
+    countEl.textContent = q
+      ? `${list.length} / ${total} restaurant(s)`
+      : `${total} restaurant(s)`;
+  }
+  const summaryEl = document.getElementById('adm-res-summary');
+  if (summaryEl) {
+    summaryEl.textContent = total > 0
+      ? `● ${openCount} ouvert(s) · ${total - openCount} indispo`
+      : '';
+  }
+
+  // Liste vide
+  l.innerHTML = '';
+  if (list.length === 0) {
+    l.innerHTML = q
+      ? `<p class="adm-res-empty">Aucun résultat pour « ${esc(q)} »</p>`
+      : `<p class="adm-res-empty">Aucun restaurant. Ajoutez-en un ci-dessous.</p>`;
+    return;
+  }
+
+  // Cartes
+  list.forEach(r => {
+    const available = isRestaurantAvailable(r);
+    const exp = r.expiry
+      ? `⏳ Exp: ${new Date(r.expiry).toLocaleDateString('fr-FR')} ${new Date(r.expiry).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'})}`
+      : '♾️ Permanent';
+    const posHtml = (r.lat != null && r.lng != null)
+      ? `<span>📍 ${r.lat}, ${r.lng}</span>`
+      : `<span style="color:#f59e0b">📍 non défini</span>`;
     const acc = adminUsers['res:' + r.id];
-    const mail = acc ? (acc.email ? `📧 ${esc(acc.email)}` : '📧 email non renseigné') : '⚠️ aucun compte lié';
-    l.innerHTML += `<div style="background:#222;padding:5px;margin-bottom:2px;font-size:0.85rem">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="flex:1;cursor:pointer;text-decoration:underline;color:var(--gold)" onclick="openEditResModal(${r.id})">${esc(r.name)}${exp} - ⭐ ${calcAvg(r.ratings)} ${pos}</span>
-        <button onclick="openEditResModal(${r.id})" style="color:var(--gold);border:none;background:none;font-size:1rem;cursor:pointer;margin-right:4px">✏️</button>
-        <button onclick="deleteRes(${r.id})" style="color:red;border:none;background:none">X</button>
+    const mail = acc
+      ? (acc.email ? `📧 ${esc(acc.email)}` : '📧 email non renseigné')
+      : '⚠️ aucun compte lié';
+
+    l.innerHTML += `
+      <div class="adm-res-card">
+        <div class="adm-res-card-head">
+          <div class="adm-res-card-title">
+            <span class="adm-res-card-name" onclick="openEditResModal(${r.id})">${esc(r.name)}</span>
+            <span class="adm-res-status ${available ? 'open' : 'closed'}">${available ? '● Ouvert' : '● Indispo'}</span>
+          </div>
+          <div class="adm-res-card-actions">
+            <button onclick="openEditResModal(${r.id})" title="Modifier" aria-label="Modifier">✏️</button>
+            <button onclick="deleteRes(${r.id})" title="Supprimer" aria-label="Supprimer" class="danger">🗑️</button>
+          </div>
+        </div>
+        <div class="adm-res-card-meta">
+          <span>⭐ ${calcAvg(r.ratings)}</span>
+          <span>🍽️ ${(r.plats || []).length} plat(s)</span>
+          <span>${exp}</span>
+          ${posHtml}
+        </div>
+        <div class="adm-res-card-account">
+          <span class="adm-res-email" onclick="saveAccountEmail('res',${r.id})">${mail}</span>
+          ${acc ? `
+            <button onclick="sendAccountReset('res',${r.id})" title="Envoyer un lien de réinitialisation">🔑 Lien</button>
+            <button onclick="openCredsModal('res',${r.id})" title="Changer les identifiants">🔄 Identifiants</button>
+          ` : ''}
+        </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:0.75rem;color:#aaa">
-        <span onclick="saveAccountEmail('res',${r.id})" style="cursor:pointer;text-decoration:underline">${mail}</span>
-        ${acc ? `<button onclick="sendAccountReset('res',${r.id})" style="color:var(--gold);border:1px solid #555;border-radius:6px;padding:2px 8px;background:none;cursor:pointer">🔑 Lien</button><button onclick="openCredsModal('res',${r.id})" style="color:var(--gold);border:1px solid #555;border-radius:6px;padding:2px 8px;background:none;cursor:pointer">🔄 Identifiants</button>` : ''}
-      </div>
-    </div>`;
+    `;
   });
 }
 function deleteRes(id) {
@@ -1982,23 +2311,261 @@ function deleteRes(id) {
   }
 }
 function renderAdminLivList() {
-  const l = document.getElementById('list-liv-to-manage'); l.innerHTML = '';
-  livreurs.forEach(liv => {
-    const exp = liv.expiry ? ` (Exp: ${new Date(liv.expiry).toLocaleDateString()} ${new Date(liv.expiry).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})})` : ' (Permanent)';
+  const l = document.getElementById('list-liv-to-manage');
+  if (!l) return;
+
+  // Filtre de recherche
+  const searchInput = document.getElementById('adm-liv-search');
+  const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
+
+  // Résumé global (avant filtre)
+  const total = livreurs.length;
+  const activeCount = livreurs.filter(liv => !liv.expiry || Date.now() <= liv.expiry).length;
+
+  // Filtre appliqué
+  let list = livreurs;
+  if (q) {
+    list = livreurs.filter(liv => {
+      const acc = adminUsers['liv:' + liv.id];
+      const email = acc && acc.email ? acc.email : '';
+      return (liv.name || '').toLowerCase().includes(q)
+          || email.toLowerCase().includes(q)
+          || (liv.tel || '').toLowerCase().includes(q);
+    });
+  }
+
+  // Compteur
+  const countEl = document.getElementById('adm-liv-count');
+  if (countEl) {
+    countEl.textContent = q
+      ? `${list.length} / ${total} livreur(s)`
+      : `${total} livreur(s)`;
+  }
+  const summaryEl = document.getElementById('adm-liv-summary');
+  if (summaryEl) {
+    summaryEl.textContent = total > 0
+      ? `● ${activeCount} actif(s) · ${total - activeCount} expiré(s)`
+      : '';
+  }
+
+  // Liste vide
+  l.innerHTML = '';
+  if (list.length === 0) {
+    l.innerHTML = q
+      ? `<p class="adm-res-empty">Aucun résultat pour « ${esc(q)} »</p>`
+      : `<p class="adm-res-empty">Aucun livreur. Ajoutez-en un ci-dessous.</p>`;
+    return;
+  }
+
+  // Cartes
+  list.forEach(liv => {
+    const active = !liv.expiry || Date.now() <= liv.expiry;
+    const exp = liv.expiry
+      ? `⏳ Exp: ${new Date(liv.expiry).toLocaleDateString('fr-FR')} ${new Date(liv.expiry).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'})}`
+      : '♾️ Permanent';
+    const delivCount = (liv.history || []).length;
     const acc = adminUsers['liv:' + liv.id];
-    const mail = acc ? (acc.email ? `📧 ${esc(acc.email)}` : '📧 email non renseigné') : '⚠️ aucun compte lié';
-    l.innerHTML += `<div style="background:#222;padding:5px;margin-bottom:2px;font-size:0.85rem">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="flex:1;cursor:pointer;text-decoration:underline;color:var(--gold)" onclick="openEditLivModal(${liv.id})">${esc(liv.name)}${exp} - ⭐ ${calcAvg(liv.ratings)}</span>
-        <button onclick="openEditLivModal(${liv.id})" style="color:var(--gold);border:none;background:none;font-size:1rem;cursor:pointer;margin-right:4px">✏️</button>
-        <button onclick="deleteLiv(${liv.id})" style="color:red;border:none;background:none">X</button>
+    const mail = acc
+      ? (acc.email ? `📧 ${esc(acc.email)}` : '📧 email non renseigné')
+      : '⚠️ aucun compte lié';
+    const telHtml = liv.tel
+      ? `<a class="adm-liv-phone" href="tel:${esc(liv.tel)}">📞 ${esc(liv.tel)}</a>`
+      : `<span style="color:#f59e0b">📞 non renseigné</span>`;
+
+    l.innerHTML += `
+      <div class="adm-res-card">
+        <div class="adm-res-card-head">
+          <div class="adm-res-card-title">
+            <span class="adm-res-card-name" onclick="openEditLivModal(${liv.id})">${esc(liv.name)}</span>
+            <span class="adm-res-status ${active ? 'open' : 'closed'}">${active ? '● Actif' : '● Expiré'}</span>
+          </div>
+          <div class="adm-res-card-actions">
+            <button onclick="openEditLivModal(${liv.id})" title="Modifier" aria-label="Modifier">✏️</button>
+            <button onclick="deleteLiv(${liv.id})" title="Supprimer" aria-label="Supprimer" class="danger">🗑️</button>
+          </div>
+        </div>
+        <div class="adm-res-card-meta">
+          <span>⭐ ${calcAvg(liv.ratings)}</span>
+          <span>🛵 ${delivCount} course(s)</span>
+          <span>${exp}</span>
+          ${telHtml}
+        </div>
+        <div class="adm-res-card-account">
+          <span class="adm-res-email" onclick="saveAccountEmail('liv',${liv.id})">${mail}</span>
+          ${acc ? `
+            <button onclick="sendAccountReset('liv',${liv.id})" title="Envoyer un lien de réinitialisation">🔑 Lien</button>
+            <button onclick="openCredsModal('liv',${liv.id})" title="Changer les identifiants">🔄 Identifiants</button>
+          ` : ''}
+        </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:0.75rem;color:#aaa">
-        <span onclick="saveAccountEmail('liv',${liv.id})" style="cursor:pointer;text-decoration:underline">${mail}</span>
-        ${acc ? `<button onclick="sendAccountReset('liv',${liv.id})" style="color:var(--gold);border:1px solid #555;border-radius:6px;padding:2px 8px;background:none;cursor:pointer">🔑 Lien</button><button onclick="openCredsModal('liv',${liv.id})" style="color:var(--gold);border:1px solid #555;border-radius:6px;padding:2px 8px;background:none;cursor:pointer">🔄 Identifiants</button>` : ''}
-      </div>
-    </div>`;
+    `;
   });
+}
+function renderReglements() {
+  const l = document.getElementById('reglements-list');
+  if (!l) return;
+
+  const now = Date.now();
+  const WEEK = 7 * 24 * 60 * 60 * 1000;
+  const DAY = 24 * 60 * 60 * 1000;
+
+  const classify = (expiry) => {
+    if (!expiry) return { code: 'permanent', label: '♾️ Permanent', cls: 'open', sort: 3 };
+    const remaining = expiry - now;
+    if (remaining <= 0) return { code: 'expired', label: '● Expiré', cls: 'closed', sort: 0 };
+    const days = Math.ceil(remaining / DAY);
+    if (remaining <= WEEK) return { code: 'warn', label: `● ${days}j restants`, cls: 'warn', sort: 1 };
+    return { code: 'ok', label: `● ${days}j restants`, cls: 'open', sort: 2 };
+  };
+
+  const items = [];
+  restaurants.forEach(r => {
+    const c = classify(r.expiry);
+    items.push({ kind: 'res', id: r.id, name: r.name, expiry: r.expiry, ...c });
+  });
+  livreurs.forEach(liv => {
+    const c = classify(liv.expiry);
+    items.push({ kind: 'liv', id: liv.id, name: liv.name, expiry: liv.expiry, ...c });
+  });
+
+  items.sort((a, b) => {
+    if (a.sort !== b.sort) return a.sort - b.sort;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  const expCount = items.filter(i => i.code === 'expired').length;
+  const warnCount = items.filter(i => i.code === 'warn').length;
+  const countEl = document.getElementById('reglements-count');
+  const summaryEl = document.getElementById('reglements-summary');
+  if (countEl) countEl.textContent = `${items.length} entité(s)`;
+  if (summaryEl) {
+    summaryEl.textContent = items.length > 0
+      ? `● ${expCount} expiré(s) · ${warnCount} bientôt`
+      : '';
+  }
+
+  l.innerHTML = '';
+  if (items.length === 0) {
+    l.innerHTML = '<p class="adm-res-empty">Aucun restaurant ni livreur enregistré.</p>';
+    return;
+  }
+
+  items.forEach(it => {
+    const icon = it.kind === 'res' ? '🍽️' : '🛵';
+    const kindLabel = it.kind === 'res' ? 'Restaurant' : 'Livreur';
+    const expStr = it.expiry
+      ? `${new Date(it.expiry).toLocaleDateString('fr-FR')} ${new Date(it.expiry).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'})}`
+      : '—';
+    l.innerHTML += `
+      <div class="adm-res-card">
+        <div class="adm-res-card-head">
+          <div class="adm-res-card-title">
+            <span style="font-size:1rem">${icon}</span>
+            <span class="adm-res-card-name">${esc(it.name)}</span>
+            <span class="adm-res-status ${it.cls}">${it.label}</span>
+          </div>
+          <div class="adm-res-card-actions">
+            <button onclick="openCreditModal('${it.kind}', ${it.id})" title="Modifier le crédit" aria-label="Modifier le crédit">✏️</button>
+          </div>
+        </div>
+        <div class="adm-res-card-meta">
+          <span>${kindLabel}</span>
+          <span>⏳ Exp: ${expStr}</span>
+        </div>
+      </div>
+    `;
+  });
+}
+function openCreditModal(kind, id) {
+  let entity = null;
+  let label = '';
+  if (kind === 'res') {
+    entity = restaurants.find(r => Number(r.id) === Number(id));
+    label = 'Restaurant';
+  } else {
+    entity = livreurs.find(l => Number(l.id) === Number(id));
+    label = 'Livreur';
+  }
+  if (!entity) { setNotif("⚠️ Entité introuvable"); return; }
+
+  creditTarget = { kind, id: Number(id) };
+  document.getElementById('credit-target-label').textContent = `${label} : ${entity.name}`;
+  const cur = entity.expiry
+    ? `Expire le ${new Date(entity.expiry).toLocaleDateString('fr-FR')} à ${new Date(entity.expiry).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'})}`
+    : 'Permanent (aucune expiration)';
+  document.getElementById('credit-current-label').textContent = cur;
+  document.getElementById('credit-days').value = '';
+  document.getElementById('credit-overlay').style.display = 'block';
+  document.getElementById('modal-credit').style.display = 'block';
+}
+function closeCreditModal() {
+  document.getElementById('modal-credit').style.display = 'none';
+  document.getElementById('credit-overlay').style.display = 'none';
+  creditTarget = null;
+}
+function saveCredit() {
+  if (!creditTarget) return;
+  const { kind, id } = creditTarget;
+  const daysStr = document.getElementById('credit-days').value.trim();
+  const btn = document.getElementById('btn-credit-save');
+
+  let newExpiry;
+  if (daysStr === '') {
+    newExpiry = null;
+  } else {
+    const days = parseInt(daysStr, 10);
+    if (isNaN(days) || days < 0) {
+      setNotif("⚠️ Nombre de jours invalide");
+      return;
+    }
+    if (days === 0) newExpiry = Date.now() - 1;
+    else newExpiry = Date.now() + days * 24 * 60 * 60 * 1000;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  let entityName = '';
+  if (kind === 'res') {
+    const r = restaurants.find(x => Number(x.id) === Number(id));
+    if (!r) { btn.disabled = false; btn.textContent = 'ENREGISTRER'; return; }
+    entityName = r.name;
+    r.expiry = newExpiry;
+    enqueueCloudWrite(() => resRef(id).child('expiry').set(newExpiry));
+  } else {
+    const liv = livreurs.find(x => Number(x.id) === Number(id));
+    if (!liv) { btn.disabled = false; btn.textContent = 'ENREGISTRER'; return; }
+    entityName = liv.name;
+    liv.expiry = newExpiry;
+    enqueueCloudWrite(() => livRef(id).child('expiry').set(newExpiry));
+  }
+
+  const dateStr = newExpiry ? new Date(newExpiry).toLocaleDateString('fr-FR') : 'permanent';
+  logAdminEvent("ADMIN", `Crédit modifié: ${entityName} → ${dateStr}`);
+  setNotif("✅ Crédit mis à jour");
+  closeCreditModal();
+  renderReglements();
+  renderAdminResList();
+  renderAdminLivList();
+  btn.disabled = false;
+  btn.textContent = 'ENREGISTRER';
+}
+// Détermine la catégorie d'une entrée d'historique
+function histCategory(h) {
+  const t = (h && h.type) ? String(h.type) : '';
+  if (t === 'SYSTEM') return 'sys';
+  if (t === 'ADMIN') return 'adm';
+  if (t === 'CLIENT') return 'client';
+  if (t === 'LIVREUR') return 'liv';
+  return 'res';
+}
+function setAdminHistFilter(cat) {
+  _adminHistFilter = cat;
+  renderAdminHistory();
+}
+function setAdminHistSearch(q) {
+  _adminHistSearch = (q || '').trim();
+  renderAdminHistory();
 }
 function deleteLiv(id) {
   id = Number(id);
@@ -2117,7 +2684,74 @@ async function saveNewCredentials() {
     btn.textContent = 'REMPLACER LE COMPTE';
   }
 }
-function renderAdminHistory() { const l = document.getElementById('admin-hist-list'); l.innerHTML = ''; adminHistory.forEach(h => { l.innerHTML += `<div class="hist-card" style="background:#1a1a1a;border-radius:8px;padding:12px;margin-bottom:10px;font-size:0.8rem;border-left:4px solid var(--gold);"><span class="type-tag" style="font-size:0.65rem;padding:2px 5px;border-radius:3px;background:#333;display:inline-block;margin-bottom:5px;">${esc(h.type)}</span><br><b>${esc(h.details)}</b><br><small>${esc(h.date)} ${esc(h.time)}</small></div>`; }); }
+function renderAdminHistory() {
+  const l = document.getElementById('admin-hist-list');
+  if (!l) return;
+  const all = adminHistory || [];
+
+  // Comptage par catégorie
+  const counts = { all: all.length, sys: 0, adm: 0, res: 0, liv: 0, client: 0 };
+  all.forEach(h => { counts[histCategory(h)]++; });
+
+  // Mise à jour des onglets
+  const catLabels = { all: 'Tous', sys: '🛠️ Système', adm: '👑 Admin', res: '🍽️ Restos', liv: '🛵 Livreurs', client: '🧑 Clients' };
+  document.querySelectorAll('.adm-hist-filter-btn').forEach(btn => {
+    const c = btn.dataset.cat;
+    btn.classList.toggle('active', c === _adminHistFilter);
+    btn.textContent = `${catLabels[c] || c} (${counts[c] || 0})`;
+  });
+
+  // Filtrage
+  let list = all;
+  if (_adminHistFilter !== 'all') {
+    list = list.filter(h => histCategory(h) === _adminHistFilter);
+  }
+  if (_adminHistSearch) {
+    const q = _adminHistSearch.toLowerCase();
+    list = list.filter(h =>
+      String(h.details || '').toLowerCase().includes(q) ||
+      String(h.type || '').toLowerCase().includes(q)
+    );
+  }
+
+  if (list.length === 0) {
+    l.innerHTML = `<div class="adm-hist-empty">${(_adminHistFilter === 'all' && !_adminHistSearch) ? 'Aucun événement pour le moment.' : 'Aucun résultat pour ce filtre.'}</div>`;
+    return;
+  }
+
+  // Groupement par date
+  const groups = {};
+  list.forEach(h => {
+    const key = h.date || '—';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(h);
+  });
+
+  const today = new Date().toLocaleDateString();
+  const yesterday = new Date(Date.now() - 86400000).toLocaleDateString();
+  const icons = { sys: '🛠️', adm: '👑', res: '🍽️', liv: '🛵', client: '🧑' };
+
+  let html = '';
+  Object.keys(groups).forEach(dateKey => {
+    let label = dateKey;
+    if (dateKey === today) label = "Aujourd'hui";
+    else if (dateKey === yesterday) label = 'Hier';
+    html += `<div class="adm-hist-group-header">${esc(label)}</div>`;
+    groups[dateKey].forEach(h => {
+      const cat = histCategory(h);
+      html += `
+        <div class="adm-hist-entry adm-hist-cat-${cat}">
+          <div class="adm-hist-head">
+            <span class="adm-hist-badge adm-hist-cat-${cat}">${icons[cat] || ''} ${esc(h.type || '?')}</span>
+            <span class="adm-hist-time">${esc(h.time || '')}</span>
+          </div>
+          <div class="adm-hist-details">${esc(h.details || '')}</div>
+        </div>
+      `;
+    });
+  });
+  l.innerHTML = html;
+}
 function clearHistory() { adminHistory = []; pushHistory(); showClearConfirm(false); setNotif("HISTORIQUE VIDÉ"); }
 function closeEditModal() { document.getElementById('modal-edit-res').style.display='none'; document.getElementById('modal-edit-liv').style.display='none'; document.getElementById('modal-overlay').style.display='none'; editingId=null; }
 function openEditResModal(resId) {
@@ -2559,7 +3193,6 @@ function loadClientOrderTracking() {
   const savedRating = localStorage.getItem('koul_rating_queue');
   try { ratingQueue = savedRating ? JSON.parse(savedRating) : []; if (!Array.isArray(ratingQueue)) ratingQueue = []; } catch(e) { ratingQueue = []; }
   watchClientOrders();
-  updateOrderLed();
 }
 // Un écouteur par commande suivie : le client ne lit que ses propres commandes
 function watchClientOrders() {
@@ -2591,7 +3224,6 @@ function clearClientOrderTracking(orderId) {
     document.getElementById('client-secret-code-display').innerText = "CODE: " + clientOrderTracking[0].pin;
   }
   watchClientOrders();
-  updateOrderLed();
 }
 
 function saveRatingQueue() { localStorage.setItem('koul_rating_queue', JSON.stringify(ratingQueue)); }
@@ -2669,7 +3301,6 @@ function updateClientOrderStatus() {
     hideOrderStatusBar();
   }
   processRatingQueue();
-  updateOrderLed();
   updateLiveOrderBar();
 }
 
@@ -3312,17 +3943,6 @@ function bindRatingStarPop() {
 }
 function hideOrderStatusBar() { document.getElementById('order-status-bar').style.display = 'none'; }
 
-function updateOrderLed() {
-  const led = document.getElementById('order-led');
-  if (!led) return;
-  let hasActive = false;
-  for (let entry of clientOrderTracking) {
-    const o = clientOrdersCache[String(entry.orderId)];
-    if (!o) continue;
-    if (o.status === 'new' || o.status === 'waiting' || o.status === 'shipping') { hasActive = true; break; }
-  }
-  if (hasActive) { led.classList.add('active'); } else { led.classList.remove('active'); }
-}
 
 // ========== NOTATION ==========
 function openRatingModal(restaurant, livreur) {
@@ -3871,8 +4491,34 @@ function closeZoom() {
 // ========== INIT ==========
 function init() {
   const grid = document.getElementById('res-grid');
+  // Demande la position une seule fois ; re-render dès qu'elle arrive
+  if (!userPositionRequested) {
+    requestUserPosition(() => { if (userPosition.lat != null) init(); });
+  }
+  // Tri : ouverts d'abord, puis par distance géo croissante
+  const sortedRestos = [...restaurants].sort((a, b) => {
+    const aAvail = isRestaurantAvailable(a) ? 0 : 1;
+    const bAvail = isRestaurantAvailable(b) ? 0 : 1;
+    if (aAvail !== bAvail) return aAvail - bAvail;
+    if (userPosition.lat != null && userPosition.lng != null) {
+      const aHas = a.lat != null && a.lng != null;
+      const bHas = b.lat != null && b.lng != null;
+      if (aHas && bHas) {
+        return haversineDistance(userPosition.lat, userPosition.lng, a.lat, a.lng)
+             - haversineDistance(userPosition.lat, userPosition.lng, b.lat, b.lng);
+      }
+      if (aHas) return -1;
+      if (bHas) return 1;
+    }
+    return 0;
+  });
   // Évite de reconstruire (et de faire clignoter) la grille si rien d'affiché n'a changé
-  const sig = restaurants.map(r => [r.id, r.name, r.img, calcAvg(r.ratings), isRestaurantAvailable(r)].join('|')).join('~');
+  const sig = sortedRestos.map(r => {
+    const d = (userPosition.lat != null && userPosition.lng != null && r.lat != null && r.lng != null)
+      ? haversineDistance(userPosition.lat, userPosition.lng, r.lat, r.lng).toFixed(2)
+      : '-';
+    return [r.id, r.name, r.img, calcAvg(r.ratings), isRestaurantAvailable(r), d].join('|');
+  }).join('~');
   if (restaurants.length > 0 && sig === _resGridSig && grid.children.length > 0) return;
   grid.innerHTML = '';
   if (restaurants.length === 0) {
@@ -3894,7 +4540,7 @@ function init() {
   _resGridSig = sig;
   hideResSkeleton();
   grid.className = 'grid grid-cols-1 gap-4';
-  restaurants.forEach((res, idx) => {
+  sortedRestos.forEach((res, idx) => {
     const imgSrc = getOptimizedCloudinaryUrl(res.img, 600);
     const available = isRestaurantAvailable(res);
     const cardClass = available ? 'res-card' : 'res-card res-card-unavailable';
@@ -4134,7 +4780,6 @@ try {
   init();
   setOrderMode('livraison');
   updateCartUI();
-  updateOrderLed();
   updateHeaderLogo();
   updateAppContextTitle();
   bindHeaderScroll();
