@@ -1,0 +1,368 @@
+name: Build APK Android
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Configuration Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Configuration Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Cache Gradle et NPM
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.npm
+          key: ${{ runner.os }}-build-${{ hashFiles('**/*.gradle*', '**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Construction de l'environnement PWA → APK
+        run: |
+          mkdir -p capacitor-app/www
+          rsync -av --exclude='capacitor-app' --exclude='.git' --exclude='.github' ./ capacitor-app/www/
+          cd capacitor-app
+          npm init -y
+          npm install @capacitor/core @capacitor/android @capacitor/haptics @capacitor/local-notifications
+          npm install @capawesome-team/capacitor-android-foreground-service
+          npm install -D @capacitor/cli
+          cat > capacitor.config.json << JSONEOF
+          {
+            "appId": "com.brahim.kool",
+            "appName": "Kool",
+            "webDir": "www",
+            "bundledWebRuntime": true
+          }
+          JSONEOF
+          npx cap init "Kool" "com.brahim.kool" --web-dir www
+          npx cap add android
+
+      - name: 🔐 Détection et injection automatique des permissions
+        run: |
+          cd capacitor-app/www
+          MANIFEST="../android/app/src/main/AndroidManifest.xml"
+          add_permission() {
+            local perm="$1"
+            if ! grep -q "android.permission.$perm" "$MANIFEST"; then
+              sed -i "/<manifest/a\    <uses-permission android:name=\"android.permission.$perm\" />" "$MANIFEST"
+            fi
+          }
+          rm -f .need_*_shim
+          add_permission "INTERNET"
+          add_permission "ACCESS_NETWORK_STATE"
+          if grep -rq -E "passerAppelDirect" .; then add_permission "CALL_PHONE"; touch .need_call_shim; fi
+          if grep -rq -E "navigator\.vibrate|\.vibrate\(" .; then add_permission "VIBRATE"; touch .need_vibrate_shim; fi
+          if grep -rq -E "navigator\.geolocation|getCurrentPosition|watchPosition" .; then
+            add_permission "ACCESS_FINE_LOCATION"
+            add_permission "ACCESS_COARSE_LOCATION"
+            touch .need_geolocation_shim
+          fi
+          if grep -rq "getUserMedia" . && grep -rq -E "video\s*:\s*(true|\{)" .; then add_permission "CAMERA"; touch .need_camera_shim; fi
+          if grep -rq "getUserMedia" . && grep -rq -E "audio\s*:\s*(true|\{)" .; then
+            add_permission "RECORD_AUDIO"
+            add_permission "MODIFY_AUDIO_SETTINGS"
+            add_permission "FOREGROUND_SERVICE"
+            add_permission "FOREGROUND_SERVICE_MICROPHONE"
+            add_permission "WAKE_LOCK"
+            touch .need_microphone_shim
+            touch .need_bg_service
+          fi
+          if grep -rq -E "new Notification\(|Notification\.requestPermission" .; then 
+            add_permission "POST_NOTIFICATIONS"
+            touch .need_notification_shim
+          fi
+
+      - name: 🔧 Configuration Service Arrière-plan
+        run: |
+          cd capacitor-app
+          if [ -f www/.need_bg_service ]; then
+            MANIFEST="android/app/src/main/AndroidManifest.xml"
+            if ! grep -q "AndroidForegroundService" "$MANIFEST"; then
+              sed -i '/<\/application>/i \        <receiver android:name="io.capawesome.capacitorjs.plugins.foregroundservice.NotificationActionBroadcastReceiver" />\n        <service android:name="io.capawesome.capacitorjs.plugins.foregroundservice.AndroidForegroundService" android:foregroundServiceType="microphone" android:exported="false" />' "$MANIFEST"
+            fi
+          fi
+
+      - name: 📱 Configuration des permissions natives (MainActivity)
+        run: |
+          cd capacitor-app
+          MAIN_ACTIVITY="android/app/src/main/java/com/brahim/kool/MainActivity.java"
+          
+          REQ_CODE=""
+          if [ -f www/.need_microphone_shim ]; then
+            REQ_CODE="$REQ_CODE
+                  if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                      permissionsNeeded.add(Manifest.permission.RECORD_AUDIO);
+                  }"
+          fi
+          if [ -f www/.need_notification_shim ]; then
+            REQ_CODE="$REQ_CODE
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                      if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                          permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS);
+                      }
+                  }"
+          fi
+
+          cat > $MAIN_ACTIVITY << EOF
+          package com.brahim.kool;
+          
+          import android.Manifest;
+          import android.content.pm.PackageManager;
+          import android.os.Build;
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import androidx.core.app.ActivityCompat;
+          import androidx.core.content.ContextCompat;
+          import com.getcapacitor.BridgeActivity;
+          import java.util.ArrayList;
+          import java.util.List;
+          
+          public class MainActivity extends BridgeActivity {
+              private static final int PERMISSION_REQUEST_CODE = 1001;
+          
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  
+                  WebView webView = this.bridge.getWebView();
+                  webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+          
+                  List<String> permissionsNeeded = new ArrayList<>();
+                  ${REQ_CODE}
+                  
+                  if (!permissionsNeeded.isEmpty()) {
+                      ActivityCompat.requestPermissions(this, permissionsNeeded.toArray(new String[0]), PERMISSION_REQUEST_CODE);
+                  }
+              }
+          }
+          EOF
+
+      - name: 🌉 Injection des shims
+        run: |
+          cd capacitor-app/www
+          NEED_VIBRATE=false
+          NEED_NOTIFICATION=false
+          [ -f .need_vibrate_shim ] && NEED_VIBRATE=true
+          [ -f .need_notification_shim ] && NEED_NOTIFICATION=true
+          if [ "$NEED_VIBRATE" = "true" ] || [ "$NEED_NOTIFICATION" = "true" ]; then
+            cat > shims.js << 'SHIMEOF'
+          (function() {
+            var Capacitor = window.Capacitor;
+            console.log('🔌 Shims:', !!(Capacitor && Capacitor.Plugins) ? 'natif' : 'web');
+          })();
+          SHIMEOF
+            if [ "$NEED_VIBRATE" = "true" ]; then
+              cat >> shims.js << 'VIBEOF'
+          (function() {
+            var C = window.Capacitor;
+            if (C && C.Plugins && C.Plugins.Haptics) {
+              navigator.vibrate = function(p) {
+                var d = (typeof p === 'number') ? p : (Array.isArray(p) && p.length) ? p[0] : 200;
+                try { C.Plugins.Haptics.vibrate({ duration: d }); } catch(e) {}
+                return true;
+              };
+            }
+          })();
+          VIBEOF
+            fi
+            if [ "$NEED_NOTIFICATION" = "true" ]; then
+              cat >> shims.js << 'NOTIFEOF'
+          (function() {
+            var C = window.Capacitor;
+            if (C && C.Plugins && C.Plugins.LocalNotifications) {
+              C.Plugins.LocalNotifications.createChannel({
+                id: 'default', name: 'Notifications', importance: 5, visibility: 1
+              }).catch(function(){});
+              window.Notification = function(title, options) {
+                options = options || {};
+                C.Plugins.LocalNotifications.schedule({
+                  notifications: [{
+                    id: Math.floor(Math.random() * 2147483647),
+                    title: title || '',
+                    body: options.body || '',
+                    channelId: 'default',
+                    schedule: { at: new Date(Date.now() + 1000) }
+                  }]
+                }).catch(function(){});
+                return { close: function() {} };
+              };
+              window.Notification.requestPermission = function() {
+                return C.Plugins.LocalNotifications.requestPermissions().then(function(r) {
+                  return r.display === 'granted' ? 'granted' : 'denied';
+                });
+              };
+              window.Notification.permission = 'default';
+            }
+          })();
+          NOTIFEOF
+            fi
+          fi
+
+      - name: 🔌 Injection du Bridge et Background
+        run: |
+          cd capacitor-app/www
+          if [ -f .need_bg_service ]; then
+            cat > background.js << 'BGEOF'
+          (function() {
+            var started = false;
+            function startService() {
+              var C = window.Capacitor;
+              if (started || !C || !C.Plugins || !C.Plugins.ForegroundService) return;
+              started = true;
+              var FS = C.Plugins.ForegroundService;
+              FS.requestPermissions().catch(function(){}).then(function() {
+                return FS.createNotificationChannel({
+                  id: 'talkie_channel',
+                  name: 'Talkie-Walkie Audio',
+                  importance: 3
+                }).catch(function(){});
+              }).then(function() {
+                return FS.startForegroundService({
+                  id: 1,
+                  title: 'Talkie-Walkie Actif',
+                  body: 'Communication en cours en arrière-plan...',
+                  notificationChannelId: 'talkie_channel',
+                  smallIcon: 'ic_launcher'
+                });
+              }).then(function() {
+                FS.acquireWakeLock({ tag: 'talkie', timeout: 0 }).catch(function(){});
+              }).catch(function(e) {
+                started = false;
+                console.log("Erreur service premier plan:", e);
+              });
+            }
+            var md = navigator.mediaDevices;
+            if (md && md.getUserMedia) {
+              var orig = md.getUserMedia.bind(md);
+              md.getUserMedia = function(c) {
+                return orig(c).then(function(s) {
+                  if (c && c.audio) startService();
+                  return s;
+                });
+              };
+            }
+          })();
+          BGEOF
+          fi
+          
+          MAIN_HTML=$(find . -maxdepth 1 -name "*.html" | head -n 1)
+          if [ -n "$MAIN_HTML" ]; then
+            curl -f -s -o bridge.js "https://raw.githubusercontent.com/mekeirish/APK-Creator/main/bridge.js"
+            if [ -f "../node_modules/@capacitor/core/dist/capacitor.js" ]; then
+              cp ../node_modules/@capacitor/core/dist/capacitor.js capacitor.js
+            else
+              touch capacitor.js
+            fi
+            node -e "
+              const fs = require('fs');
+              const h = '${MAIN_HTML}';
+              let c = fs.readFileSync(h, 'utf8');
+              let parts = c.split(/<\/body>/i);
+              if (parts.length > 1) {
+                let last = parts.pop();
+                let s = '<script src="capacitor.js"><\/script>\n';
+                if (fs.existsSync('shims.js')) s += '<script src="shims.js"><\/script>\n';
+                if (fs.existsSync('background.js')) s += '<script src="background.js"><\/script>\n';
+                s += '<script src="bridge.js"><\/script>\n</body>';
+                fs.writeFileSync(h, parts.join('</body>') + s + last, 'utf8');
+              } else {
+                let a = '<script src="capacitor.js"><\/script>\n';
+                if (fs.existsSync('shims.js')) a += '<script src="shims.js"><\/script>\n';
+                if (fs.existsSync('background.js')) a += '<script src="background.js"><\/script>\n';
+                a += '<script src="bridge.js"><\/script>\n';
+                fs.appendFileSync(h, a);
+              }
+            "
+          fi
+
+      - name: 🔄 Sync assets Android
+        run: |
+          cd capacitor-app
+          npx cap sync android
+
+      - name: Génération icône
+        run: |
+          cd capacitor-app
+          npm install -D @capacitor/assets
+          mkdir -p assets
+          if [ -f "../icon.png" ]; then
+            cp ../icon.png assets/icon.png
+            npx @capacitor/assets generate --android
+          fi
+
+      - name: Versioning et Signature
+        run: |
+          cd capacitor-app/android/app
+          sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/g" build.gradle
+          
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.keystore
+            cat >> build.gradle << EOF
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file("release.keystore")
+                      storePassword "${{ secrets.KEYSTORE_PASSWORD }}"
+                      keyAlias "${{ secrets.KEY_ALIAS }}"
+                      keyPassword "${{ secrets.KEY_PASSWORD }}"
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                  }
+              }
+          }
+          EOF
+          fi
+
+      - name: Résolution conflits Kotlin
+        run: |
+          echo "configurations.all { exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'; exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8' }" >> capacitor-app/android/app/build.gradle
+
+      - name: Compilation APK
+        run: |
+          cd capacitor-app/android
+          chmod +x gradlew
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            ./gradlew assembleRelease
+          else
+            ./gradlew assembleDebug
+          fi
+
+      - name: Renommer APK
+        run: |
+          cd capacitor-app/android/app/build/outputs/apk/
+          if [ -d "release" ]; then
+            mv release/app-release.apk ../../../../../Kool.apk
+          else
+            mv debug/app-debug.apk ../../../../../Kool.apk
+          fi
+
+      - name: Publication en Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "capacitor-app/Kool.apk"
+          tag: "v${{ github.run_number }}"
+          name: "Kool v${{ github.run_number }}"
+          allowUpdates: false
+          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
