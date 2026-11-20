@@ -642,7 +642,6 @@ header.flex.scrolled #app-title { font-size: 1.4rem !important; }
 #view-menu-client .client-hero .client-hero-gallery-btn { position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 50%; background: rgba(20,20,20,0.85); backdrop-filter: blur(12px); border: 1px solid rgba(251,191,36,0.4); color: var(--gold); font-size: 1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; box-shadow: 0 4px 16px -4px rgba(0,0,0,0.5); transition: background 0.2s ease, transform 0.1s ease; }
 #view-menu-client .client-hero .client-hero-gallery-btn:hover { background: rgba(251,191,36,0.15); }
 #view-menu-client .client-hero .client-hero-gallery-btn:active { transform: scale(0.9); }
-#client-history-btn.visible { display: flex; }
 #client-history-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 9000; }
 #client-history-overlay.visible { display: block; }
 #client-history-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 32px); max-width: 480px; max-height: 80vh; background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%); border: 1px solid rgba(251,191,36,0.3); border-radius: 20px; z-index: 9001; padding: 20px; box-sizing: border-box; flex-direction: column; color: #eee; box-shadow: 0 24px 60px -12px rgba(0,0,0,0.8), 0 0 0 1px rgba(251,191,36,0.1) inset; animation: pop-in 0.28s var(--ease) both; }
@@ -679,17 +678,24 @@ header.flex.scrolled #app-title { font-size: 1.4rem !important; }
 #login-container .login-form .forgot-password-link { text-align: center; font-size: 0.82rem; color: rgba(251,191,36,0.7); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; transition: color 0.2s ease; margin-top: -4px; user-select: none; }
 #login-container .login-form .forgot-password-link:hover { color: var(--gold); }
 #login-container .login-form .forgot-password-link:active { transform: scale(0.97); }
-#sound-toggle-btn, #theme-toggle-btn, #client-profile-btn, #push-toggle-btn, #client-history-btn { position: fixed; top: 10px; width: 38px; height: 38px; border-radius: 50%; background: rgba(20,20,20,0.85); backdrop-filter: blur(12px); border: 1px solid rgba(251,191,36,0.35); color: var(--gold); font-size: 1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 45; box-shadow: 0 4px 16px -4px rgba(0,0,0,0.5); }
-#sound-toggle-btn { right: 10px; }
-#theme-toggle-btn { right: 56px; }
-#client-profile-btn { right: 102px; }
-#push-toggle-btn { right: 148px; }
-#client-history-btn { left: 10px; }
-#client-profile-btn, #push-toggle-btn, #client-history-btn { display: none; }
-:is(#sound-toggle-btn, #theme-toggle-btn, #client-profile-btn, #push-toggle-btn, #client-history-btn):hover { background: rgba(251,191,36,0.15); }
-:is(#sound-toggle-btn, #theme-toggle-btn, #client-profile-btn, #push-toggle-btn, #client-history-btn):active { transform: scale(0.9); }
-#client-profile-btn.visible { display: flex; }
-#push-toggle-btn.visible { display: flex; }
+#sound-toggle-btn { position: fixed; top: 10px; right: 10px; width: 38px; height: 38px; border-radius: 50%; background: rgba(20,20,20,0.85); backdrop-filter: blur(12px); border: 1px solid rgba(251,191,36,0.35); color: var(--gold); font-size: 1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 45; box-shadow: 0 4px 16px -4px rgba(0,0,0,0.5); }
+#sound-toggle-btn:hover { background: rgba(251,191,36,0.15); }
+#sound-toggle-btn:active { transform: scale(0.9); }
+#settings-panel { position: fixed; top: 56px; right: 10px; width: 260px; max-width: calc(100vw - 20px); padding: 6px; background: rgba(20,20,20,0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(251,191,36,0.35); border-radius: 16px; box-shadow: 0 16px 40px -10px rgba(0,0,0,0.7); z-index: 46; display: none; transform-origin: top right; }
+#settings-panel.open { display: block; animation: panel-in 0.2s var(--ease) both; }
+.set-row { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: none; border-radius: 11px; background: transparent; color: #eee; font-size: 0.88rem; font-weight: 700; text-align: left; cursor: pointer; }
+.set-row:hover { background: rgba(251,191,36,0.1); }
+.set-ico { width: 22px; text-align: center; font-size: 1.05rem; }
+.set-lbl { flex: 1; }
+.set-go { color: var(--gold); font-size: 1.2rem; line-height: 1; }
+.set-sw { position: relative; width: 40px; height: 22px; border-radius: 999px; background: #444; flex-shrink: 0; transition: background 0.2s ease; }
+.set-sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 0.2s var(--ease); }
+.set-sw.on { background: var(--gold); }
+.set-sw.on::after { transform: translateX(18px); }
+[data-theme="light"] #settings-panel { background: rgba(255,253,247,0.97); border-color: rgba(251,191,36,0.5); box-shadow: 0 16px 40px -10px rgba(0,0,0,0.25); }
+[data-theme="light"] .set-row { color: #1a1a1a; }
+[data-theme="light"] .set-sw:not(.on) { background: #ccc; }
+@keyframes panel-in { from { opacity: 0; transform: translateY(-6px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 [data-theme="light"] body { background: radial-gradient(ellipse at top, #fef9f3 0%, #f5f0e8 55%) fixed !important; color: #1a1a1a; }
 [data-theme="light"] header.flex.scrolled { background: rgba(255,255,255,0.85); border-bottom-color: rgba(251,191,36,0.35); box-shadow: 0 4px 20px -8px rgba(0,0,0,0.15); }
 [data-theme="light"] header.flex.scrolled #app-title { color: #b45309 !important; }
@@ -754,7 +760,7 @@ header.flex.scrolled #app-title { font-size: 1.4rem !important; }
 [data-theme="light"] .empty-restaurants .empty-sub { color: #666; }
 [data-theme="light"] #view-menu-client .client-hero { border-color: rgba(251,191,36,0.3); }
 [data-theme="light"] #client-res-name { color: #1a1a1a !important; }
-[data-theme="light"] #theme-toggle-btn, [data-theme="light"] #sound-toggle-btn, [data-theme="light"] #client-profile-btn, [data-theme="light"] #client-history-btn, [data-theme="light"] #push-toggle-btn, [data-theme="light"] #back-to-top { background: rgba(255,255,255,0.92); color: #92400e; border-color: rgba(251,191,36,0.5); box-shadow: 0 4px 16px -4px rgba(0,0,0,0.15); }
+[data-theme="light"] #sound-toggle-btn, [data-theme="light"] #back-to-top { background: rgba(255,255,255,0.92); color: #92400e; border-color: rgba(251,191,36,0.5); box-shadow: 0 4px 16px -4px rgba(0,0,0,0.15); }
 [data-theme="light"] #login-container { background: linear-gradient(160deg, rgba(255,253,247,0.98) 0%, rgba(245,240,232,0.98) 100%) !important; border-color: rgba(251,191,36,0.5) !important; }
 [data-theme="light"] #login-container h3 { color: #92400e; }
 [data-theme="light"] #login-container .login-form input { background: rgba(255,255,255,0.8) !important; border-color: rgba(0,0,0,0.12) !important; color: #1a1a1a; }
@@ -1510,9 +1516,7 @@ function pushRevoke(kind, id) {
   callWorker('/revoke', { kind, id: Number(id) }, true).catch(() => {});
 }
 function pushUpdateButton() {
-  const btn = document.getElementById('push-toggle-btn');
-  if (!btn) return;
-  btn.classList.toggle('visible', pushSupported() && Notification.permission !== 'granted');
+  renderSettingsPanel();
 }
 // Appelée par un clic (obligatoire sur iPhone) : demande l'autorisation puis enregistre l'appareil
 async function pushEnable(srcBtn) {
@@ -1562,16 +1566,6 @@ function pushPromptHtml() {
 function setupPushButton() {
   try {
     if (!pushSupported()) return;
-    let btn = document.getElementById('push-toggle-btn');
-    if (!btn) {
-      btn = document.createElement('button');
-      btn.id = 'push-toggle-btn';
-      btn.setAttribute('aria-label', 'Activer les notifications');
-      btn.title = 'Activer les notifications';
-      btn.textContent = '📲';
-      btn.addEventListener('click', () => pushEnable());
-      document.body.appendChild(btn);
-    }
     pushUpdateButton();
     // Autorisation déjà donnée : on prépare la réception quand l'app est ouverte
     if (Notification.permission === 'granted') pushGetMessaging().catch(() => {});
@@ -1856,21 +1850,14 @@ function setupSoundToggle() {
   if (!btn) {
     btn = document.createElement('button');
     btn.id = 'sound-toggle-btn';
-    btn.setAttribute('aria-label', 'Activer / désactiver le son');
-    btn.addEventListener('click', () => {
-      const current = localStorage.getItem('koul_sound_enabled');
-      const next = current === '1' ? '0' : '1';
-      localStorage.setItem('koul_sound_enabled', next);
-      updateSoundToggleIcon();
-      haptic('light');
-      if (next === '1') {
-        playSuccessTone('confirm');
-        setNotif("🔔 Son activé");
-      } else {
-        setNotif("🔕 Son désactivé");
-      }
-    });
+    btn.setAttribute('aria-label', 'Réglages');
+    btn.addEventListener('click', (e) => { e.stopPropagation(); toggleSettingsPanel(); });
     document.body.appendChild(btn);
+    const panel = document.createElement('div');
+    panel.id = 'settings-panel';
+    panel.addEventListener('click', (e) => e.stopPropagation());
+    document.body.appendChild(panel);
+    document.addEventListener('click', closeSettingsPanel);
   }
   // Valeur initiale : si pas encore défini, on démarre à 1 (activé)
   if (localStorage.getItem('koul_sound_enabled') === null) {
@@ -1883,43 +1870,93 @@ function updateSoundToggleIcon() {
   if (!btn) return;
   const enabled = localStorage.getItem('koul_sound_enabled') !== '0';
   btn.textContent = enabled ? '🔔' : '🔕';
-  btn.title = enabled ? 'Désactiver le son' : 'Activer le son';
+  btn.title = 'Réglages';
+  renderSettingsPanel();
+}
+// Construit le contenu du panneau de réglages selon l'état actuel
+function renderSettingsPanel() {
+  const panel = document.getElementById('settings-panel');
+  if (!panel) return;
+  const soundOn = localStorage.getItem('koul_sound_enabled') !== '0';
+  const dark = (document.documentElement.dataset.theme || 'dark') !== 'light';
+  const pushOk = pushSupported() && Notification.permission === 'granted';
+  let hasHist = false, hasProfile = false;
+  try { const h = JSON.parse(localStorage.getItem('koul_client_history') || '[]'); hasHist = Array.isArray(h) && h.length > 0; } catch (e) {}
+  try { const d = JSON.parse(localStorage.getItem('koul_client_profile') || 'null'); hasProfile = !!(d && (d.name || d.tel)); } catch (e) {}
+  const tog = (id, icon, label, on) => `<button class="set-row" onclick="settingsAction('${id}')"><span class="set-ico">${icon}</span><span class="set-lbl">${label}</span><span class="set-sw${on ? ' on' : ''}"></span></button>`;
+  const act = (id, icon, label) => `<button class="set-row" onclick="settingsAction('${id}')"><span class="set-ico">${icon}</span><span class="set-lbl">${label}</span><span class="set-go">›</span></button>`;
+  panel.innerHTML =
+    tog('sound', '🔔', 'Son', soundOn) +
+    tog('theme', '🌙', 'Mode sombre', dark) +
+    (pushSupported() ? tog('push', '📲', 'Notifications', pushOk) : '') +
+    (hasHist ? act('history', '📜', 'Historique des commandes') : '') +
+    (hasProfile ? act('clear', '🧑', 'Effacer mes données') : '');
+}
+function toggleSettingsPanel() {
+  const p = document.getElementById('settings-panel');
+  if (!p) return;
+  const opening = !p.classList.contains('open');
+  if (opening) renderSettingsPanel();
+  p.classList.toggle('open', opening);
+  haptic('light');
+}
+function closeSettingsPanel() {
+  const p = document.getElementById('settings-panel');
+  if (p) p.classList.remove('open');
+}
+// Actions des lignes du panneau de réglages
+function settingsAction(id) {
+  haptic('light');
+  if (id === 'sound') {
+    const next = localStorage.getItem('koul_sound_enabled') === '0' ? '1' : '0';
+    localStorage.setItem('koul_sound_enabled', next);
+    updateSoundToggleIcon();
+    if (next === '1') { playSuccessTone('confirm'); setNotif("🔔 Son activé"); }
+    else setNotif("🔕 Son désactivé");
+  } else if (id === 'theme') {
+    const next = (document.documentElement.dataset.theme || 'dark') === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+    localStorage.setItem('koul_theme', next);
+    setNotif(next === 'light' ? "☀️ Thème clair" : "🌙 Thème sombre");
+  } else if (id === 'push') {
+    // Le navigateur ne permet de retirer l'autorisation que depuis ses propres réglages
+    if (pushSupported() && Notification.permission === 'granted') {
+      setNotif("🔔 NOTIFICATIONS ACTIVES : POUR LES COUPER, UTILISEZ LES RÉGLAGES DU NAVIGATEUR");
+    } else {
+      pushEnable();
+    }
+  } else if (id === 'history') {
+    closeSettingsPanel();
+    openClientHistoryModal();
+  } else if (id === 'clear') {
+    if (!confirm("Effacer le nom et téléphone mémorisés ?")) return;
+    localStorage.removeItem('koul_client_profile');
+    const n = document.getElementById('c-name');
+    const t = document.getElementById('c-tel');
+    if (n) n.value = '';
+    if (t) t.value = '';
+    renderSettingsPanel();
+    setNotif("🧑 Données effacées");
+  }
 }
 function setupThemeToggle() {
-  let btn = document.getElementById('theme-toggle-btn');
-  if (!btn) {
-    btn = document.createElement('button');
-    btn.id = 'theme-toggle-btn';
-    btn.setAttribute('aria-label', 'Changer de thème');
-    btn.addEventListener('click', () => {
-      const current = document.documentElement.dataset.theme || 'dark';
-      const next = current === 'light' ? 'dark' : 'light';
-      applyTheme(next);
-      localStorage.setItem('koul_theme', next);
-      haptic('light');
-      setNotif(next === 'light' ? "☀️ Thème clair" : "🌙 Thème sombre");
-    });
-    document.body.appendChild(btn);
-  }
-  const saved = localStorage.getItem('koul_theme') || 'dark';
-  applyTheme(saved);
+  applyTheme(localStorage.getItem('koul_theme') || 'dark');
 }
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
-  const btn = document.getElementById('theme-toggle-btn');
-  if (btn) {
-    btn.textContent = theme === 'light' ? '🌙' : '☀️';
-    btn.title = theme === 'light' ? 'Passer en sombre' : 'Passer en clair';
-  }
+  renderSettingsPanel();
 }
 
 function logoutAndGoHome() {
-pushUnregister().then(() => auth.signOut()).then(() => {
-  goToHome();
-}).catch(err => {
-  console.error('Erreur déconnexion:', err);
-  goToHome();
-});
+  // Le désenregistrement push ne doit jamais bloquer la déconnexion (le service worker peut ne jamais répondre)
+  const timeout = new Promise(resolve => setTimeout(resolve, 2000));
+  Promise.race([pushUnregister().catch(() => {}), timeout])
+    .then(() => auth.signOut())
+    .then(() => goToHome())
+    .catch(err => {
+      console.error('Erreur déconnexion:', err);
+      goToHome();
+    });
 }
 
 // ========== NAVIGATION APRÈS CONNEXION ==========
@@ -4548,19 +4585,7 @@ function saveClientOrderHistory(order, resto) {
   } catch (e) {}
 }
 function updateClientHistoryButton() {
-  let btn = document.getElementById('client-history-btn');
-  if (!btn) {
-    btn = document.createElement('button');
-    btn.id = 'client-history-btn';
-    btn.setAttribute('aria-label', 'Historique commandes');
-    btn.innerHTML = '📜';
-    btn.addEventListener('click', openClientHistoryModal);
-    document.body.appendChild(btn);
-  }
-  let list = [];
-  try { list = JSON.parse(localStorage.getItem('koul_client_history') || '[]'); } catch(e) {}
-  if (Array.isArray(list) && list.length > 0) btn.classList.add('visible');
-  else btn.classList.remove('visible');
+  renderSettingsPanel();
 }
 function saveClientProfile() {
   try {
@@ -4592,36 +4617,7 @@ function loadClientProfile() {
   } catch (e) {}
 }
 function updateClientProfileButton() {
-  let btn = document.getElementById('client-profile-btn');
-  if (!btn) {
-    btn = document.createElement('button');
-    btn.id = 'client-profile-btn';
-    btn.setAttribute('aria-label', 'Effacer mon profil');
-    btn.title = 'Effacer le nom / tél mémorisés';
-    btn.innerHTML = '🧑';
-    btn.addEventListener('click', () => {
-      if (!confirm("Effacer le nom et téléphone mémorisés ?")) return;
-      localStorage.removeItem('koul_client_profile');
-      const n = document.getElementById('c-name');
-      const t = document.getElementById('c-tel');
-      if (n) n.value = '';
-      if (t) t.value = '';
-      updateClientProfileButton();
-      haptic('light');
-      setNotif("🧑 Profil effacé");
-    });
-    document.body.appendChild(btn);
-  }
-  let hasProfile = false;
-  try {
-    const raw = localStorage.getItem('koul_client_profile');
-    if (raw) {
-      const d = JSON.parse(raw);
-      if (d && (d.name || d.tel)) hasProfile = true;
-    }
-  } catch (e) {}
-  if (hasProfile) btn.classList.add('visible');
-  else btn.classList.remove('visible');
+  renderSettingsPanel();
 }
 function isPlatNew(plat) {
   if (!plat || plat.id == null) return false;
@@ -5144,14 +5140,9 @@ function openCartModal() {
     modal.classList.add('open');
     setTimeout(() => {
       loadClientProfile();
-      // Auto-focus : c'est ce qui déclenche l'ouverture du clavier virtuel
-      // sur certains navigateurs mobiles, où un tap direct sur l'input
-      // dans un modal scrollable ne l'ouvre pas.
+      // Curseur dans le nom uniquement s'il est vide (sinon rien n'est à saisir)
       const nameField = document.getElementById('c-name');
-      if (nameField) {
-        nameField.focus();
-        try { nameField.setSelectionRange(nameField.value.length, nameField.value.length); } catch (e) {}
-      }
+      if (nameField && !nameField.value.trim()) nameField.focus();
     }, 350);
   });
   haptic('light');
@@ -5331,6 +5322,21 @@ function renderClientPlats() {
 }
 
 function openClientPin() {
+  // Vérifications avant d'afficher le pavé : nom requis et panier non vide
+  const nameEl = document.getElementById('c-name');
+  if (!nameEl || !nameEl.value.trim()) {
+    setNotif("NOM REQUIS");
+    shakeField(nameEl);
+    haptic('error');
+    if (nameEl) nameEl.focus();
+    return;
+  }
+  if (Object.keys(cart).length === 0) {
+    setNotif("PANIER VIDE");
+    haptic('error');
+    return;
+  }
+
   // Ferme le clavier virtuel s'il est ouvert
   try {
     if (document.activeElement && document.activeElement.blur) {
